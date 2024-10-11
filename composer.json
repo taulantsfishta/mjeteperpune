@@ -1,0 +1,8 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.29",
+        "cloudmersive/cloudmersive_document_convert_api_client": "^3.0",
+        "aws/aws-sdk-php": "^3.280",
+        "google/cloud": "^0.218.0"
+    }
+}

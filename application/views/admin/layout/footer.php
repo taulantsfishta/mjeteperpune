@@ -1,2 +1,0 @@
-            <footer class="footer text-center" style="font-size:15px;"><i class="fa fa-wrench"></i>  MJETE PËR PUNË<?php // echo $footer;
-                                                                                            ?>&nbsp; <i class="fa fa-wrench"></i> </footer>

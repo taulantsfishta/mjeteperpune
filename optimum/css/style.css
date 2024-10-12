@@ -579,7 +579,9 @@ hr{
     margin-top:0
 }
 .dropdown-menu>li>a{
-    padding:9px 20px
+    padding:9px 7px;
+    font-size: 11px;
+    font-weight: bold;
 }
 .dropdown-menu>li>a:focus,.dropdown-menu>li>a:hover{
     background:#f7fafc

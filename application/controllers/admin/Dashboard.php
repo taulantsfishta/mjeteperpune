@@ -64,13 +64,12 @@ class Dashboard extends CI_Controller {
     public function get_category($id){
         $data = array();
         if(in_array($id, $this->session->userdata('view_category')) || (in_array(0, $this->session->userdata('view_category')))){
-            // if(){
-
-            // }
-            $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->get()->result_array();
+            $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->limit(20)->get()->result_array();
+            $total_row_products = $this->db->from('products')->where('category_id', $id)->count_all_results();
             $category = $this->db->select()->from('category')->where('id', $id)->get()->row_array();
             $_SESSION['title_name'] = $category['name'];
             $data['products'] = $products;
+            $data['total_row_products'] =$total_row_products;
             $data['category'] = $category;
             $data['page_title'] = $category['name'];
             $data['count'] = $this->common_model->get_user_total();
@@ -83,10 +82,29 @@ class Dashboard extends CI_Controller {
         }
     }
 
+    public function get_products_with_limit($id,$offset){
+        $data = array();
+        if(in_array($id, $this->session->userdata('view_category')) || (in_array(0, $this->session->userdata('view_category')))){
+            $category = $this->db->select()->from('category')->where('id', $id)->get()->row_array();
+            $limit = 20; // Number of products to load per request
+            $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->limit($limit,$offset)->get()->result_array();
+            $_SESSION['title_name'] = $category['name'];
+            $data['products'] = $products;
+            $data['category_id'] = $id;
+            header('Content-Type: application/json');
+            echo json_encode($data);
+        }else{
+            $data['heading'] = 'Mesazhi';
+            $data['message'] = "Nuk keni qasje ne kete faqe";
+            $this->load->view('errors/html/error_404', $data);
+        }
+    }
+
     public function search_products()
     {
         $data = array();
         $view_category = $this->session->userdata('view_category');
+        $limit = 20;
         if($_GET['query'] == ''){
             if ($view_category[0] == 0) {
                 $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->order_by('RAND()')->limit(10)->get()->result_array();
@@ -96,19 +114,24 @@ class Dashboard extends CI_Controller {
         }else{
             if ($view_category[0] == 0) {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->where('code', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
                 }else{
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
                 }
             } else {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
                 } else {
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
                 }
             }
         }
         $data['products'] = $products;
+        $data['productsAll'] = $productsAll;
         header('Content-Type: application/json');
         echo json_encode($data);
     }
@@ -116,17 +139,22 @@ class Dashboard extends CI_Controller {
     public function search_products_by_category($id)
     {
         $data = array();
+        $limit = 20;
         if ($_GET['query'] == '') {
             $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->get()->result_array();
         } else {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->where('code', $_GET['query'])->limit($limit,$_GET['offset'])->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
                 } else {
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
+
                 }
         }
         $data['products'] = $products;
         $data['category_id'] = $id;
+        $data['productsAll'] = $productsAll;
         header('Content-Type: application/json');
         echo json_encode($data);
     }

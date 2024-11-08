@@ -1,4 +1,4 @@
-        <style>
+<style>
         /* Insert the updated CSS here */
         #searchContainer {
             position: sticky;
@@ -190,7 +190,7 @@
             <?php foreach ($products as $key => $value) { ?>
                 <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" id="mainDiv">
                     <div class="card product-card" data-product-id-main="<?php echo $value['id']; ?>" style="margin-bottom: 10px;">
-                        <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="img-fluid"  />
+                        <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="lazyload img-fluid"  />
                             <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" id="product_<?php echo $value['id']; ?>">
                                 <!-- Product content -->
                             </div>
@@ -258,295 +258,370 @@
             </div>
         </div>
 
-        <script>
-            var productsList = <?php echo json_encode($products); ?>;
-            document.addEventListener("DOMContentLoaded", function() {
-                const searchInput = document.getElementById("searchInput");
-                const searchIcon = document.getElementById("searchIcon");
-                const productListing = document.getElementById("productListing");
-                window.base_url = <?php echo json_encode(base_url()); ?>;
-                const url = window.base_url;
-                
-                //go to the updated product after redirect from page edit-product
-                const urlParams = new URLSearchParams(window.location.search);
-                const updatedProductId = urlParams.get('updated_product_id');
-            
-                // var productJS = <?php echo json_encode($products); ?>;
+<script>
+    let productsList = <?php echo json_encode($products); ?>;
+    let total_row_products = <?php echo json_encode($total_row_products); ?>;
+    let selectedProducts = []; // Clear selected products
+    document.addEventListener("DOMContentLoaded", function() {
 
-                // Scroll to the updated product if the product ID is available
-                if (updatedProductId) {
-                    const updatedProductElement = document.getElementById(`product_${updatedProductId}`);
-                    if (updatedProductElement) {
-                        updatedProductElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+    history.scrollRestoration = "manual";
+        setTimeout(() => {
+        window.scrollTo(0, 0);
+    }, 10);
+
+    const searchInput = document.getElementById("searchInput");
+    const searchIcon = document.getElementById("searchIcon");
+    window.base_url = <?php echo json_encode(base_url()); ?>;
+    const url = window.base_url;
+    var priceStatus = "<?php echo $_SESSION['price_status']; ?>";
+    var role = "<?php echo $_SESSION['role']; ?>";
+    let productListing = document.getElementById("productListing");
+    let products;
+    let getSearchResult;
+
+    let isLoading = false; // Prevent multiple simultaneous requests
+    let offset = 0; // Start after the initially loaded products
+    const limit = 20; // Number of products to load per request
+
+    let isSearching = false; // Flag to track if a search is active
+
+    // Listen to the scroll event
+    $(window).scroll(function () {
+        if (!isLoading && ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) && $(window).scrollTop() >100) {
+            isLoading = true;
+            offset += limit;
+
+            if (isSearching) {
+                if(getSearchResult > offset){
+                    searchProducts(searchInput.value).finally(() => isLoading = false);
+                }else{
+                    return;
                 }
+            } else {
+                searchProducts('').finally(() => isLoading = false);
+            }
+        }
+    });
 
-                // Attach click event listener to the search icon
-                searchIcon.addEventListener("click", performSearch);
+    searchIcon.addEventListener("click", performSearch);
 
-                // Attach keydown event listener to the search input
-                searchInput.addEventListener("keydown", function(event) {
-                    if (event.key === "Enter") {
-                        performSearch();
-                    }
-                });
+    searchInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            performSearch();
+        }
+    });
 
-                function performSearch() {
-                    const searchQuery = searchInput.value;
-                    if (searchQuery.trim() === "") {
-                        window.location.href = url + `admin/dashboard/get_category/<?php echo $category['id']; ?>`;
+    function performSearch() {
+        const searchQuery = searchInput.value.trim();
+        if (searchQuery === "") {
+            isSearching = false;
+            window.location.href = url + `admin/dashboard/get_category/<?php echo $category['id']; ?>`;
+        } else {
+            isSearching = true;
+            offset = 0; // Reset offset to start from the beginning
+            isLoading = false; // Reset loading state
+            productsList.length = 0; // Clear the existing products list array
+            productListing.innerHTML = ""; // Clear the DOM product listing
+
+            // Scroll to the top of the page
+            window.scrollTo(0, 0);
+
+            // Start a new search with the query
+            searchProducts(searchQuery);
+        }
+    }
+
+    async function searchProducts(query) {   
+        if (query === '') {
+            // Load more of the default product list
+            if (offset < total_row_products) {
+                response = await makeAsyncRequest(url + `admin/dashboard/get_products_with_limit/<?php echo $category['id']; ?>/${offset}`);
+            } else {
+                return; // No more products to load
+            }
+        } else {
+            response = await makeAsyncRequest(url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${query}&offset=${offset}`);
+            getSearchResult = response.productsAll.length;
+        }
+        if (query === '') {
+            productsList.push(...response.products);
+        } else {
+            if (offset === 0) {
+                productListing.innerHTML = "";
+                productsList.length = 0;
+            }
+            productsList.push(...response.products); // Append search results
+        }
+
+        updateProductListing(response.products, response.category_id, query);
+
+        if (stateDropdown === 'print') {
+            onClickButton('print');
+        } else if (stateDropdown === 'select') {
+            onClickButton('select');
+        } else {
+            onClickButton('cancel');
+        }
+    }
+
+    function makeAsyncRequest(urlParam) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", urlParam, true); // true makes it asynchronous
+
+            xhr.onload = () => {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    if (xhr.responseText.length < 2) {
+                        window.location.href = url + `admin/dashboard/`;
                     } else {
-                        searchProducts(searchQuery);
+                        resolve(JSON.parse(xhr.responseText));
                     }
+                } else {
+                    reject(`Error: ${xhr.status} - ${xhr.statusText}`);
                 }
+            };
 
-                function searchProducts(query) {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("GET", url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${query}`, true);
+            xhr.onerror = () => reject("Network error");
 
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState === 4 && xhr.status === 200) {
-                            if(xhr.responseText.length <2){
-                                window.location.href = url + `admin/dashboard/`;
-                            }else{
-                                const response = JSON.parse(xhr.responseText);
-                                updateProductListing(response.products, response.category_id, query);
-                                productsList = response.products;
-                                if(stateDropdown == 'print'){
-                                    onClickButton('print');
-                                }else if(stateDropdown == 'select'){
-                                    onClickButton('select');
-                                }else{
-                                    onClickButton('cancel');
-                                }
-                            }
-                        }
-                    };
-                    xhr.send();
-                }
+            xhr.send();
+        });
+    }
 
-                function updateProductListing(products, category_id, query) {
-                    var priceStatus = "<?php echo $_SESSION['price_status']; ?>";
-                    var role = "<?php echo $_SESSION['role']; ?>";
-                    searchInput.value = query;
-                    const productListing = document.getElementById("productListing");
-                    productListing.innerHTML = "";
-                    if (products.length > 0) {
-                        products.forEach(product => {
-                            const productCard = `
-                                            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
-                                                <div class="card product-card" data-product-id-main=${product.id} style="margin-bottom: 10px;">
-                                                    <img id="imageresource_${product.id}" imgId=${product.id} style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" src="${url}optimum/products_images/${product.image}" class="img-fluid" />
-                                                    <div class="card-body" >
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <h5 class="mb-0">Kodi:</h5>
-                                                            <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
-                                                        </div>
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <h5 class="mb-0">Përshkrimi:</h5>
-                                                            <h5 class="text-dark mb-0" style="margin-left:10px;"><b>${product.name}</b></h5>
-                                                        </div>
-                                                        ${priceStatus == 1 ? `
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <h5 class="mb-0">Çmimi:</h5>
-                                                            <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
-                                                        </div>
-                                                        ` : ''}
-                                                        ${role == 'admin' ? `
-                                                            <a href=${url}admin/products/get_product/${product.id} style="color:white;margin-right: 0px;" id=editButton_${product.id}><button class="btn btn-block" style="background:#53d1b2;"><i class="fa fa-edit"></i> Ndrysho Produktin</button></a>
-                                                        <br>` : ''}
-                                                        ${role == 'admin' ? `
-                                                            <a href=${url}admin/products/delete_product/${category_id}/${product.id} style="color:white;margin-right: 0px;" data-toggle="modal" data-target="#confirmDeleteModal" style="background:#ff5e2dcc;" data-productid=${product.id} data-categoryid=${category_id} id=deleteButton_${product.id}><button class="btn btn-block" style="background:#ff5e2dcc;"><i class="fa fa-trash"></i> Fshije Produktin</button></a>
-                                                        <br>` : ''}
-                                                        ${role == 'admin' ? `
-                                                            <a href=${url}admin/printproduct/print_one_product/${product.id} style="color:white;margin-right: 0px;display:none;background:#7396CE;" id=printButton_${product.id}><button class="btn btn-block"><i class="fa fa-print"></i> Printo Produktin</button></a>
-                                                        ` : ''}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header border-0">
-                                                            <div class="modal-header d-flex justify-content-between align-items-center">
-                                                                <h4 class="modal-title" id="myModalLabel">${product.name}</h4>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <img src="${url}optimum/products_images/${product.image}" id="imagepreview_${product.id}" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>  
-                                        `;
-                            productListing.innerHTML += productCard;
-                        });
-                    } else {
-                        productListing.innerHTML += `<h4 class="page-title" style="color:rgba(0,0,0,.5);font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
-                    }
+    function updateProductListing(products, category_id, query) {
+        searchInput.value = query;
 
-                    productListing.innerHTML += ` <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" id="selectedProductsButtonContainer" >
-                                                    <a href="#" onclick="foo(event)"><button class="btn btn-primary" style="background:#7396CE;"><span><i class="fa fa-print" aria-hidden="true"></i> PRINTO PRODUKTET</span></button></a>
-                                                  </div>
-                                                </div>`;
-                    window.scrollTo(0, 0);
-                }
+        // Clear the message area if reloading products
+        if (query !== '' && offset === 0) {
+            productListing.innerHTML = "";
+        }
+
+        if (products.length > 0) {
+            products.forEach(product => {
+                const productCard = `
+                    <div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
+                        <div class="card product-card" data-product-id-main=${product.id} style="margin-bottom: 10px;">
+                            <img id="imageresource_${product.id}" imgId=${product.id} style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="${url}optimum/products_images/${product.image}" class="lazyload img-fluid" />
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5 class="mb-0">Kodi:</h5>
+                                    <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5 class="mb-0">Përshkrimi:</h5>
+                                    <h5 class="text-dark mb-0" style="margin-left:10px;"><b>${product.name}</b></h5>
+                                </div>
+                                ${priceStatus == 1 ? `
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5 class="mb-0">Çmimi:</h5>
+                                    <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
+                                </div>` : ''}
+                                ${role == 'admin' ? `
+                                    <a href=${url}admin/products/get_product/${product.id} style="color:white;margin-right: 0px;" id=editButton_${product.id}><button class="btn btn-block" style="background:#53d1b2;"><i class="fa fa-edit"></i> Ndrysho Produktin</button></a>
+                                    <br>` : ''}
+                                ${role == 'admin' ? `
+                                    <a href=${url}admin/products/delete_product/${category_id}/${product.id} style="color:white;margin-right: 0px;" data-toggle="modal" data-target="#confirmDeleteModal" style="background:#ff5e2dcc;" data-productid=${product.id} data-categoryid=${category_id} id=deleteButton_${product.id}><button class="btn btn-block" style="background:#ff5e2dcc;"><i class="fa fa-trash"></i> Fshije Produktin</button></a>
+                                    <br>` : ''}
+                                ${role == 'admin' ? `
+                                    <a href=${url}admin/printproduct/print_one_product/${product.id} style="color:white;margin-right: 0px;display:none;background:#7396CE;" id=printButton_${product.id}><button class="btn btn-block"><i class="fa fa-print"></i> Printo Produktin</button></a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header border-0">
+                                    <div class="modal-header d-flex justify-content-between align-items-center">
+                                        <h4 class="modal-title" id="myModalLabel">${product.name}</h4>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                </div>
+                                <div class="modal-body">
+                                    <img data-src="${url}optimum/products_images/${product.image}" id="imagepreview_${product.id}" class="lazyload img-fluid" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productListing.innerHTML += productCard;
             });
+        } else if (offset === 0 && query !== '') {
+            // Display "Produkti nuk u gjend!" message only when no results for the initial search
+            productListing.innerHTML = `<h4 class="page-title" style="color:rgba(0,0,0,.5);font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
+            window.scrollTo(0, 0);
+        }
+        
+        productListing.innerHTML += `
+            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" id="selectedProductsButtonContainer">
+                <a href="#"><button onclick="foo(event)" id="gatherSelectedProductsBtn" class="btn btn-primary" style="background:#7396CE;"><span><i class="fa fa-print" aria-hidden="true"></i> PRINTO PRODUKTET</span></button></a>
+            </div>`;
 
-            $(document).ready(function() {
-                // Listen for the modal's "Delete" button click event
-                $('#confirmDeleteModal').on('show.bs.modal', function(e) {
-                    var productID = $(e.relatedTarget).data('productid'); // Get the product ID
-                    var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
-                    var deleteButton = $(this).find('#deleteProductLink'); // Get the "Delete" button in the modal
+        document.getElementById('gatherSelectedProductsBtn').addEventListener('click', function() {
+            event.preventDefault(); // Prevent the default action of the link
+            var gatheredProductIds = selectedProducts.join(',');
+            makeRequestToBackEnd(gatheredProductIds);
+        });
+    }
+    });
 
-                    // Update the "Delete" button link with the appropriate product ID
-                    deleteButton.attr('href', '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID);
-                });
-            });
-            
-            document.getElementById("productListing").addEventListener("click", function(event) {
-                    // Check if the clicked element has the class "img-fluid"
-                    if (event.target.classList.contains("img-fluid")) {
-                        var fullid = event.target.getAttribute('imgId');
-                        $('#imageresource_' + fullid).attr('src', $('#imagepreview_' + fullid).attr('src'));
-                        $('#imagemodal_' + fullid).modal('show');
-                    }
-                });
+    $(document).ready(function() {
+        // Listen for the modal's "Delete" button click event
+        $('#confirmDeleteModal').on('show.bs.modal', function(e) {
+        var productID = $(e.relatedTarget).data('productid'); // Get the product ID
+        var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
+        var deleteButton = $(this).find('#deleteProductLink'); // Get the "Delete" button in the modal
 
-                $(".img-fluid").on("click", function() {
-                    var fullid = $(this).attr('imgId');
-                    $('#imageresource_' + fullid).attr('src', $('#imagepreview_' + fullid).attr('src')); // here asign the image to the modal when the user click the enlarge link
-                    $('#imagemodal_' + fullid).modal('show'); // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
-                });
-                
+        // Update the "Delete" button link with the appropriate product ID
+        deleteButton.attr('href', '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID);
+        });
+    });
 
-                //PRINT PRODUCTS
+    document.getElementById("productListing").addEventListener("click", function(event) {
+        // Check if the clicked element has the class "img-fluid"
+        if (event.target.classList.contains("img-fluid")) {
+            var fullid = event.target.getAttribute('imgId');
+                $('#imageresource_' + fullid).attr('src', $('#imagepreview_' + fullid).attr('src'));
+                $('#imagemodal_' + fullid).modal('show');
+            }
+    });
 
-                let stateDropdown = '';
-                let selectedProducts = [];
+    $(".img-fluid").on("click", function() {
+        var fullid = $(this).attr('imgId');
+        $('#imageresource_' + fullid).attr('src', $('#imagepreview_' + fullid).attr('src')); // here asign the image to the modal when the user click the enlarge link
+        $('#imagemodal_' + fullid).modal('show'); // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
+    });
 
-                
-                function updateButtonContainerWidth() {
-                    const overlayRow = document.querySelector(".row.el-element-overlay.m-b-40");
-                    if (overlayRow) {
-                        const overlayRowWidth = overlayRow.offsetWidth;
-                        selectedProductsButtonContainer.style.width = `${overlayRowWidth}px`;
-                    }
-                }
 
-                updateButtonContainerWidth();
+    //PRINT PRODUCTS
 
-                window.addEventListener('resize', updateButtonContainerWidth);
+    let stateDropdown = '';
+   
 
-                function onClickButton(option) {
-                    stateDropdown = option;
-                    selectedProducts = []; // Clear selected products
+    updateButtonContainerWidth();
 
-                    productsList.forEach(value => {
-                        const printButton = document.getElementById("printButton_" + value.id);
-                        const editButton = document.getElementById("editButton_" + value.id);
-                        const deleteButton = document.getElementById("deleteButton_" + value.id);
-                        const productCard = document.querySelector(`.product-card[data-product-id-main="${value.id}"]`);
+    function updateButtonContainerWidth() {
+        const overlayRow = document.querySelector("#productListing");
+        const selectedProductsButtonContainer = document.querySelector("#selectedProductsButtonContainer"); // Add this line to select the element
 
-                        if (option === 'print') {
-                            printButton.style.display = "block";
-                            editButton.style.display = "none";
-                            deleteButton.style.display = "none";
-                            
-                            productCard.removeEventListener('click', handleProductCardClick);
-                        } else if (option === 'select') {
-                            printButton.style.display = "none";
-                            editButton.style.display = "none";
-                            deleteButton.style.display = "none";
+        if (overlayRow && selectedProductsButtonContainer) {
+            const overlayRowWidth = overlayRow.offsetWidth;
+            selectedProductsButtonContainer.style.width = `${overlayRowWidth}px`;
+        }
+    }
 
-                            productCard.addEventListener('click', handleProductCardClick);
-                        } else if (option === 'cancel') {
-                            printButton.style.display = "none";
-                            editButton.style.display = "block";
-                            deleteButton.style.display = "block";
+    window.addEventListener('resize', updateButtonContainerWidth);
 
-                            productCard.removeEventListener('click', handleProductCardClick);
-                        }
+    function onClickButton(option) {
+        stateDropdown = option;
 
-                        // Clear selected styles
-                        productCard.classList.remove('selected');
-                    });
+        productsList.forEach(value => {
+            const printButton = document.getElementById("printButton_" + value.id);
+            const editButton = document.getElementById("editButton_" + value.id);
+            const deleteButton = document.getElementById("deleteButton_" + value.id);
+            const productCard = document.querySelector(`.product-card[data-product-id-main="${value.id}"]`);
+            if (option === 'print') {
 
-                    if (option !== 'select') {
-                        document.getElementById('selectedProductsButtonContainer').style.display = 'none';
-                    }
-                }
+                printButton.style.display = "block";
+                editButton.style.display = "none";
+                deleteButton.style.display = "none";
 
-                function handleProductCardClick(event) {
-                    if (stateDropdown !== 'select') return;
+                productCard.removeEventListener('click', handleProductCardClick);
+            } else if (option === 'select') {
+                printButton.style.display = "none";
+                editButton.style.display = "none";
+                deleteButton.style.display = "none";
 
-                    const productCard = event.currentTarget;
-                    const productId = parseInt(productCard.getAttribute('data-product-id-main'));
+                productCard.addEventListener('click', handleProductCardClick);
+            } else if (option === 'cancel') {
+                printButton.style.display = "none";
+                editButton.style.display = "block";
+                deleteButton.style.display = "block";
 
-                    productCard.classList.toggle('selected');
-                    if (productCard.classList.contains('selected')) {
-                        if (!selectedProducts.includes(productId)) {
-                            selectedProducts.push(productId);
-                        }
-                    } else {
-                        const index = selectedProducts.indexOf(productId);
-                        if (index > -1) {
-                            selectedProducts.splice(index, 1);
-                        }
-                    }
+                productCard.removeEventListener('click', handleProductCardClick);
+            }
 
-                    if (selectedProducts.length > 0) {
-                        document.getElementById('selectedProductsButtonContainer').style.display = 'block';
-                        updateButtonContainerWidth();
-                    } else {
-                        document.getElementById('selectedProductsButtonContainer').style.display = 'none';
-                    }
-                }
+                // Clear selected styles
+                productCard.classList.remove('selected');
+        });
+        
+        if (option !== 'select') {
+            document.getElementById('selectedProductsButtonContainer').style.display = 'none';
+        }
+    }
 
-                document.getElementById('gatherSelectedProductsBtn').addEventListener('click', function() {
-                    var gatheredProductIds = selectedProducts.join(',');
-                    event.preventDefault(); // Prevent the default action of the link
-                    var gatheredProductIds = selectedProducts.join(',');
-                    makeRequestToBackEnd(gatheredProductIds);
-                });
+    function handleProductCardClick(event) {
+        if (stateDropdown !== 'select') return;
+        const productCard = event.currentTarget;
+        const productId = parseInt(productCard.getAttribute('data-product-id-main'));
+        productCard.classList.toggle('selected');
+        if (productCard.classList.contains('selected')) {
+            if (!selectedProducts.includes(productId)) {
+                selectedProducts.push(productId);
+            }
+        } else {
+            const index = selectedProducts.indexOf(productId);
+            if (index > -1) {
+                selectedProducts.splice(index, 1);
+            }
+        }
+        
+        // Toggle the visibility of the Print button container
+        const buttonContainer = document.getElementById('selectedProductsButtonContainer');
 
-                function foo(event){
-                    var gatheredProductIds = selectedProducts.join(',');
-                    event.preventDefault(); // Prevent the default action of the link
-                    var gatheredProductIds = selectedProducts.join(',');
-                    window.location= `${window.base_url}admin/printproduct/print_selected_products?products=`+encodeURIComponent(gatheredProductIds);
-                }
+        if (selectedProducts.length > 0) {
+            buttonContainer.style.display = 'block';
+            updateButtonContainerWidth();
+        } else {
+            buttonContainer.style.display = 'none';
+        }
+    }
 
-                function makeRequestToBackEnd(products){
-                    // Convert products array to a comma-separated string if it's not already
-                    if (Array.isArray(products)) {
-                        products = products.join(',');
-                    }
+    function foo(event){ 
+        var gatheredProductIds = selectedProducts.join(',');
+        // event.preventDefault(); // Prevent the default action of the link
+        if (gatheredProductIds.length === 0) {
+            return; // Stop execution if no products are selected
+        }
+        window.location = `${window.base_url}admin/printproduct/print_selected_products?products=` + encodeURIComponent(gatheredProductIds);
+    }
 
-                    var form = document.createElement('form');
-                    form.setAttribute('method', 'get');
-                    form.setAttribute('action', `${window.base_url}admin/printproduct/print_selected_products`);
 
-                    // Create a hidden input to hold the products query parameter
-                    var hiddenField = document.createElement('input');
-                    hiddenField.setAttribute('type', 'hidden');
-                    hiddenField.setAttribute('name', 'products');
-                    hiddenField.setAttribute('value', products);
+    function makeRequestToBackEnd(products){
+        // Convert products array to a comma-separated string if it's not already
+        if (Array.isArray(products)) {
+            products = products.join(',');
+        }
 
-                    form.appendChild(hiddenField);
-                    form.style.display = 'none';
-                    document.body.appendChild(form);
+        var form = document.createElement('form');
+        form.setAttribute('method', 'get');
+        form.setAttribute('action', `${window.base_url}admin/printproduct/print_selected_products`);
 
-                    form.submit();
-                }
+        // Create a hidden input to hold the products query parameter
+        var hiddenField = document.createElement('input');
+        hiddenField.setAttribute('type', 'hidden');
+        hiddenField.setAttribute('name', 'products');
+        hiddenField.setAttribute('value', products);
 
-                // Attach event listeners initially
-                document.querySelectorAll('.product-card').forEach(card => {
-                    card.addEventListener('click', handleProductCardClick);
-                });      
-        </script>
+        form.appendChild(hiddenField);
+        form.style.display = 'none';
+        document.body.appendChild(form);
+
+        form.submit();
+        
+    }
+
+    document.getElementById('gatherSelectedProductsBtn').addEventListener('click', function() {
+        var gatheredProductIds = selectedProducts.join(',');
+        event.preventDefault(); // Prevent the default action of the link
+        var gatheredProductIds = selectedProducts.join(',');
+        makeRequestToBackEnd(gatheredProductIds);
+    });
+
+    // Attach event listeners initially
+    document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', handleProductCardClick);
+    });   
+    
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

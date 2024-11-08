@@ -15,6 +15,7 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
     <link rel="icon" type="image/png" sizes="16x16" href="<?php echo base_url(); ?>optimum/logo.png">
     <title><?php echo $_SESSION['title_name']; ?></title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" async></script>
 
     <!-- Bootstrap Core CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">    <link href="<?php echo base_url(); ?>optimum/plugins/bower_components/bootstrap-extension/css/bootstrap-extension.css" rel="stylesheet">
@@ -62,7 +63,7 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
     <link href="<?php echo base_url(); ?>optimum/plugins/bower_components/sweetalert/sweetalert.css" rel="stylesheet" type="text/css">
 
     <!-- Typehead CSS -->
-    <link href="<?php echo base_url(); ?>optimum/plugins/bower_components/typeahead.js-master/dist/typehead-min.css" rel="stylesheet">
+    <!-- <link href="<?php echo base_url(); ?>optimum/plugins/bower_components/typeahead.js-master/dist/typehead-min.css" rel="stylesheet"> -->
 
 
     <!-- Wizard CSS -->
@@ -132,6 +133,7 @@ integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNm
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" async></script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

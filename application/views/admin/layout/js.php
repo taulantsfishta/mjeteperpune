@@ -632,7 +632,7 @@
 
 <!-- Typehead Plugin JavaScript -->
 <script src="<?php echo base_url(); ?>optimum/plugins/bower_components/typeahead.js-master/dist/typeahead.bundle.min.js"></script>
-<script src="<?php echo base_url(); ?>optimum/plugins/bower_components/typeahead.js-master/dist/typeahead-init.js"></script>
+<!-- <script src="<?php echo base_url(); ?>optimum/plugins/bower_components/typeahead.js-master/dist/typeahead-init.js"></script> -->
 
 
 <script type="text/javascript">

@@ -153,7 +153,7 @@
         <?php foreach ($products as $key => $value) { ?>
             <div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
                 <div class="card" style="margin-bottom: 10px;">
-                    <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="img-fluid" />
+                    <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="lazyload img-fluid" />
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3">
                             <h5 class="mb-0">Kodi:</h5>
@@ -197,12 +197,32 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            history.scrollRestoration = "manual";
+                setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 10);
             const searchInput = document.getElementById("searchInput");
             const searchIcon = document.getElementById("searchIcon");
             const productListing = document.getElementById("productListing");
             window.base_url = <?php echo json_encode(base_url()); ?>;
             const url = window.base_url;
 
+            let isLoading = false; // Prevent multiple simultaneous requests
+            let offset = 0; // Start after the initially loaded products
+            const limit = 20; // Number of products to load per request
+            let getSearchResult;
+
+            $(window).scroll(function () {
+                if (!isLoading && ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) && $(window).scrollTop() >100) {
+                    isLoading = true;
+                    offset += limit;
+                    if(getSearchResult > offset){
+                        searchProducts(searchInput.value).finally(() => isLoading = false);
+                    }else{
+                        return;
+                    }
+                }
+            });
 
             // Attach click event listener to the search icon
             searchIcon.addEventListener("click", performSearch);
@@ -219,56 +239,81 @@
                 if (searchQuery.trim() === "") {
                     window.location.href = url + `admin/dashboard/`;
                 } else {
+                    isSearching = true;
+                    offset = 0; // Reset offset to start from the beginning
+                    isLoading = false; // Reset loading state
+                    productListing.innerHTML = ""; // Clear the DOM product listing
+
+                    // Scroll to the top of the page
+                    window.scrollTo(0, 0);
+
+                    // Start a new search with the query
                     searchProducts(searchQuery);
                 }
             }
 
-            function searchProducts(query) {
-                const xhr = new XMLHttpRequest();
-                xhr.open("GET", url + `admin/dashboard/search_products?query=${query}`, true);
+            async function searchProducts(query) {
+                response = await makeAsyncRequest(url + `admin/dashboard/search_products?query=${query}&offset=${offset}`);
+                getSearchResult = response.productsAll.length;
+                updateProductListing(response.products, query);
+            }
 
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        if(xhr.responseText.length <2){
-                            window.location.href = url + `admin/dashboard/`;
-                        }else{
-                            const response = JSON.parse(xhr.responseText);
-                            updateProductListing(response.products, query);
+            // if (offset === 0) {
+            //     productListing.innerHTML = "";
+            //     productsList.length = 0;
+            // }
+
+            function makeAsyncRequest(urlParam) {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("GET", urlParam, true); // true makes it asynchronous
+
+                    xhr.onload = () => {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            if (xhr.responseText.length < 2) {
+                                window.location.href = url + `admin/dashboard/`;
+                            } else {
+                                resolve(JSON.parse(xhr.responseText));
+                            }
+                        } else {
+                            reject(`Error: ${xhr.status} - ${xhr.statusText}`);
                         }
-                    }
-                };
+                    };
 
-                xhr.send();
+                    xhr.onerror = () => reject("Network error");
+
+                    xhr.send();
+                });
             }
 
             function updateProductListing(products, query) {
                 var priceStatus = "<?php echo $_SESSION['price_status']; ?>";
                 searchInput.value = query;
                 const productListing = document.getElementById("productListing");
-                productListing.innerHTML = "";
+                // productListing.innerHTML = "";
 
                 if (products.length > 0) {
                     products.forEach(product => {
                         const productCard = `
                                             <div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
                                                 <div class="card" style="margin-bottom: 10px;">
-                                                                                <img id="imageresource_${product.id}" imgId=${product.id} style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" src="${url}optimum/products_images/${product.image}" class="img-fluid" / >
-                                        <div class="card-body">
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <h5 class="mb-0">Kodi:</h5>
-                                                            <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
+                                                    <img id="imageresource_${product.id}" imgId=${product.id} style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="${url}optimum/products_images/${product.image}" class="lazyload img-fluid" / >
+                                                        <div class="card-body">
+                                                            <div class="d-flex justify-content-between mb-3">
+                                                                <h5 class="mb-0">Kodi:</h5>
+                                                                <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mb-3">
+                                                                <h5 class="mb-0">Përshkrimi:</h5>
+                                                                <h5 class="text-dark mb-0" style="margin-left:10px;"><b>${product.name}</b></h5>
+                                                            </div>
+                                                            ${priceStatus == 1 ? `
+                                                            <div class="d-flex justify-content-between mb-3">
+                                                                <h5 class="mb-0">Çmimi:</h5>
+                                                                <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
+                                                            </div>
+                                                            ` : ''}
                                                         </div>
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <h5 class="mb-0">Përshkrimi:</h5>
-                                                            <h5 class="text-dark mb-0" style="margin-left:10px;"><b>${product.name}</b></h5>
-                                                        </div>
-                                                        ${priceStatus == 1 ? `
-                                                        <div class="d-flex justify-content-between mb-3">
-                                                            <h5 class="mb-0">Çmimi:</h5>
-                                                            <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
-                                                        </div>
-                                                        ` : ''}
-                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -281,7 +326,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <img src="${url}optimum/products_images/${product.image}" id="imagepreview_${product.id}" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
+                                                            <img data-src="${url}optimum/products_images/${product.image}" class="lazyload img-fluid" id="imagepreview_${product.id}" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -294,7 +339,6 @@
                 }
 
                 productListing.innerHTML += `</div>`;
-                window.scrollTo(0, 0);
             }
         });
         

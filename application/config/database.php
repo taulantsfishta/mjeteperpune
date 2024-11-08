@@ -76,8 +76,8 @@ $query_builder = TRUE;
 $db['default'] = array(
 	'dsn'	=> 'mysql:host=localhost;dbname=mjettjtg_mjete_per_pune',
 	'hostname' => "localhost",
-	'username' => "mjettjtg_root",
-	'password' => "zt9c2oRgXvA1-Kce",
+	'username' => "root",
+	'password' => "",
 	'database' => "mjettjtg_mjete_per_pune",
 	'dbdriver' => 'pdo',
 	'dbprefix' => '',

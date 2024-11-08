@@ -5,22 +5,6 @@
     <div class="col-md-12">
         <div class="white-box">
             <div class="row">
-                <div class="col-md-12">
-                    <?php $msg = $this->session->flashdata('msg'); ?>
-                    <?php if ($msg != '') : ?>
-                        <div class="alert alert-success delete_msg pull" style="width: 100%"> <i class="fa fa-check-circle"></i> <?php echo $msg; ?> &nbsp;
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-                        </div>
-                        <?php unset($_SESSION['msg']); ?>
-                    <?php endif ?>
-                    <?php $error_msg = $this->session->flashdata('error_msg'); ?>
-                    <?php if ($error_msg != '') : ?>
-                        <div class="alert alert-danger delete_msg pull" style="width: 100%"> <i class="fa fa-times"></i> <?php echo $error_msg; ?> &nbsp;
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-                        </div>
-                         <?php unset($_SESSION['error_msg']); ?>
-                    <?php endif ?>
-                </div>
                 <div class="col-sm-12 col-xs-12">
                     <form method="post" action="<?php echo base_url('admin/printproduct/print_selected_products'); ?>">
                             <div class='form-group'>

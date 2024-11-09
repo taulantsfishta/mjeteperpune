@@ -130,6 +130,24 @@
         [role="search"] button:focus i {
             color: #7396CE;
         }
+            /* Spinner styling */
+        #loadingIndicator .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px; /* Space between spinner and text */
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 
 
@@ -194,6 +212,11 @@
         <?php } ?>
     </div>
 
+    <div id="loadingIndicator" style="display: none; text-align: center; padding: 10px;">
+        <div class="spinner"></div><br>
+        <span>Me shume produkte..</span>
+    </div>
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -206,23 +229,14 @@
             const productListing = document.getElementById("productListing");
             window.base_url = <?php echo json_encode(base_url()); ?>;
             const url = window.base_url;
-
+            
+            let loadingIndicator = document.getElementById("loadingIndicator");
             let isLoading = false; // Prevent multiple simultaneous requests
             let offset = 0; // Start after the initially loaded products
             const limit = 20; // Number of products to load per request
             let getSearchResult;
+            let searchInProgress = false;
 
-            $(window).scroll(function () {
-                if (!isLoading && ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) && $(window).scrollTop() >100) {
-                    isLoading = true;
-                    offset += limit;
-                    if(getSearchResult > offset){
-                        searchProducts(searchInput.value).finally(() => isLoading = false);
-                    }else{
-                        return;
-                    }
-                }
-            });
 
             // Attach click event listener to the search icon
             searchIcon.addEventListener("click", performSearch);
@@ -234,22 +248,67 @@
                 }
             });
 
+            function checkScrollLoadMore() {
+                const scrollTop = $(window).scrollTop();
+                const windowHeight = $(window).height();
+                const documentHeight = $(document).height();
+
+                if (
+                    !isLoading &&
+                    !searchInProgress &&
+                    (scrollTop + windowHeight >= documentHeight - 100)
+                ) {
+                    isLoading = true;
+                    offset += limit;
+                    if(getSearchResult > offset){
+                        showLoadingIndicator();
+                        searchProducts(searchInput.value).finally(() => hideLoadingIndicator());
+                    }
+                }
+            }
+
+            function showLoadingIndicator() {
+                loadingIndicator.style.display = "block";
+            }
+
+            function hideLoadingIndicator() {
+                loadingIndicator.style.display = "none";
+                isLoading = false; // Reset loading state
+            }
+
             function performSearch() {
                 const searchQuery = searchInput.value;
                 if (searchQuery.trim() === "") {
                     window.location.href = url + `admin/dashboard/`;
                 } else {
-                    isSearching = true;
-                    offset = 0; // Reset offset to start from the beginning
-                    isLoading = false; // Reset loading state
-                    productListing.innerHTML = ""; // Clear the DOM product listing
-
-                    // Scroll to the top of the page
+                     // Reset scroll position to top
                     window.scrollTo(0, 0);
 
-                    // Start a new search with the query
-                    searchProducts(searchQuery);
+                    // Temporarily disable scroll event listener
+                    $(window).off("scroll", checkScrollLoadMore);
+
+                    // Reset all variables and state for a fresh search
+                    resetSearchState();
+
+                    // Set searching flag and initiate search
+                    isSearching = true;
+                    searchInProgress = true;
+                    searchProducts(searchQuery).finally(() => {
+                        isSearching = false;
+                        searchInProgress = false;
+
+                        // Re-enable scroll event listener
+                        $(window).on("scroll", checkScrollLoadMore);
+                    });
+                    searchInput.focus();
+                    window.scrollTo(0, 0);
                 }
+            }
+
+            function resetSearchState() {
+                offset = 0;                    // Reset offset for fresh search
+                isLoading = false;              // Allow new requests
+                productListing.innerHTML = "";  // Clear displayed products
             }
 
             async function searchProducts(query) {
@@ -257,12 +316,7 @@
                 getSearchResult = response.productsAll.length;
                 updateProductListing(response.products, query);
             }
-
-            // if (offset === 0) {
-            //     productListing.innerHTML = "";
-            //     productsList.length = 0;
-            // }
-
+            
             function makeAsyncRequest(urlParam) {
                 return new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
@@ -335,7 +389,11 @@
                         productListing.innerHTML += productCard;
                     });
                 } else {
+                    productListing.innerHTML = ""; 
                     productListing.innerHTML += `<h4 class="page-title" style="color:rgba(0,0,0,.5);font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
+                    window.scrollTo(0, 0);
+                    searchInput.focus();
+
                 }
 
                 productListing.innerHTML += `</div>`;

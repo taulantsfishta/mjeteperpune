@@ -1,2 +1,2 @@
-./application/config/database
-./application/logs
+. /application/config/database
+. /application/logs

@@ -92,7 +92,7 @@ class Auth extends CI_Controller
                 // Redirect to dashboard on successful login (PRG pattern)
                 redirect(base_url() . 'admin/dashboard');
             } else {
-                    $this->session->set_flashdata('login_error', 'TE DHENAT NUK JANE TE SAKTA!');
+                    $this->session->set_flashdata('login_error', 'TE DHENAT NUK JANE TE SAKTA');
                     redirect(base_url('auth'));
             }
         } else {

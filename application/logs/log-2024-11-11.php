@@ -7829,3 +7829,22 @@ INFO - 2024-11-11 11:49:31 --> User Agent Class Initialized
 INFO - 2024-11-11 11:49:31 --> File loaded: /home/mjettjtg/public_html/application/views/admin/login.php
 INFO - 2024-11-11 11:49:31 --> Final output sent to browser
 DEBUG - 2024-11-11 11:49:31 --> Total execution time: 0.0087
+INFO - 2024-11-11 15:21:03 --> Config Class Initialized
+INFO - 2024-11-11 15:21:03 --> Hooks Class Initialized
+DEBUG - 2024-11-11 15:21:03 --> UTF-8 Support Enabled
+INFO - 2024-11-11 15:21:03 --> Utf8 Class Initialized
+INFO - 2024-11-11 15:21:03 --> URI Class Initialized
+INFO - 2024-11-11 15:21:03 --> Router Class Initialized
+INFO - 2024-11-11 15:21:03 --> Output Class Initialized
+INFO - 2024-11-11 15:21:03 --> Security Class Initialized
+DEBUG - 2024-11-11 15:21:03 --> Global POST, GET and COOKIE data sanitized
+INFO - 2024-11-11 15:21:03 --> Input Class Initialized
+INFO - 2024-11-11 15:21:03 --> Language Class Initialized
+INFO - 2024-11-11 15:21:03 --> Loader Class Initialized
+INFO - 2024-11-11 15:21:03 --> Helper loaded: url_helper
+INFO - 2024-11-11 15:21:03 --> Helper loaded: file_helper
+INFO - 2024-11-11 15:21:03 --> Helper loaded: custom_helper
+INFO - 2024-11-11 15:21:03 --> Helper loaded: form_helper
+INFO - 2024-11-11 15:21:03 --> Database Driver Class Initialized
+INFO - 2024-11-11 15:21:03 --> Database Driver Class Initialized
+INFO - 2024-11-11 15:21:03 --> Language file loaded: language/english/db_lang.php

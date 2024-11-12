@@ -1,3 +1,0 @@
-# Ignore CodeIgniter database and logs
-application/config/database.php
-application/logs/*

@@ -1,2 +1,3 @@
-. /application/config/database
-. /application/logs
+# Ignore CodeIgniter database and logs
+*.log
+*.database

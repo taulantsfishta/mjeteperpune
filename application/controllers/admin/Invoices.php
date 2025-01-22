@@ -215,8 +215,9 @@ class Invoices extends CI_Controller {
                 </tfoot>';
 
                 if (!empty($comment)) {
+                    $comment = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
                 $html .= '
-                                <p>Koment: </p><br><span class="comment">' . htmlspecialchars($comment) . '<hr></span>';
+                        <p>Koment: </p><br><span class="comment">' . $comment . '<hr></span>';
                 }
 
                 $html .= '

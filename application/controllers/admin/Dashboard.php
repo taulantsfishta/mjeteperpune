@@ -52,6 +52,13 @@ class Dashboard extends CI_Controller {
             $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->limit(10)->order_by('RAND()')->get()->result_array();
             $categories = $this->db->select()->from('category')->where_in('id',$view_category)->get()->result_array();
         }
+
+        if ($this->session->userdata('name') == 'Genci') {
+            foreach ($products as &$product) {
+                $product['price'] = round($product['price'] * 1.15, 1);
+            }
+        }
+
         $_SESSION['category'] = $categories;
         $_SESSION['title_name'] = 'TË GJITHA PRODUKTET';
         $data['products'] = $products;
@@ -68,6 +75,11 @@ class Dashboard extends CI_Controller {
             $total_row_products = $this->db->from('products')->where('category_id', $id)->count_all_results();
             $category = $this->db->select()->from('category')->where('id', $id)->get()->row_array();
             $_SESSION['title_name'] = $category['name'];
+            if ($this->session->userdata('name') == 'Genci') {
+                foreach ($products as &$product) {
+                    $product['price'] = round($product['price'] * 1.15, 1);
+                }
+            }
             $data['products'] = $products;
             $data['total_row_products'] =$total_row_products;
             $data['category'] = $category;
@@ -88,6 +100,11 @@ class Dashboard extends CI_Controller {
             $category = $this->db->select()->from('category')->where('id', $id)->get()->row_array();
             $limit = 20; // Number of products to load per request
             $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->limit($limit,$offset)->get()->result_array();
+            if ($this->session->userdata('name') == 'Genci') {
+                foreach ($products as &$product) {
+                    $product['price'] = round($product['price'] * 1.15, 1);
+                }
+            }
             $_SESSION['title_name'] = $category['name'];
             $data['products'] = $products;
             $data['category_id'] = $id;
@@ -130,6 +147,11 @@ class Dashboard extends CI_Controller {
                 }
             }
         }
+        if ($this->session->userdata('name') == 'Genci') {
+            foreach ($products as &$product) {
+                $product['price'] = round($product['price'] * 1.15, 1);
+            }
+        }
         $data['products'] = $products;
         $data['productsAll'] = $productsAll;
         header('Content-Type: application/json');
@@ -151,6 +173,18 @@ class Dashboard extends CI_Controller {
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
 
                 }
+        }
+
+        if ($this->session->userdata('name') == 'Genci') {
+            foreach ($products as &$product) {
+                $product['price'] = round($product['price'] * 1.15, 1);
+            }
+        }
+
+        if ($this->session->userdata('name') == 'Genci') {
+            foreach ($productsAll as &$product) {
+                $product['price'] = round($product['price'] * 1.15, 1);
+            }
         }
         $data['products'] = $products;
         $data['category_id'] = $id;

@@ -180,12 +180,6 @@ class Dashboard extends CI_Controller {
                 $product['price'] = round($product['price'] * 1.15, 1);
             }
         }
-
-        if ($this->session->userdata('name') == 'Genci') {
-            foreach ($productsAll as &$product) {
-                $product['price'] = round($product['price'] * 1.15, 1);
-            }
-        }
         $data['products'] = $products;
         $data['category_id'] = $id;
         $data['productsAll'] = $productsAll;

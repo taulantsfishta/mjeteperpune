@@ -392,12 +392,12 @@
                             <li> <a href="<?php echo base_url('admin/invoices/created') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >FATURAT E KRIJUARA</span></a></li>
                         </ul>
                     </li>
-                    <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-truck p-r-12" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">POSTA<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
+                    <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-truck p-r-12" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">POSTA<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
                         <ul class="nav nav-second-level">
                             <li> <a href="<?php echo base_url('admin/expresspostaapi/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO POROSINË NË EXPRESS POSTË</span></a></li>
                             <li> <a href="<?php echo base_url('admin/expresspostaapi/order_list') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >POROSITË E KRIJUARA NË EXPRESS POSTË</span></a></li>
                         </ul>
-                    </li>
+                    </li> -->
                     <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-file p-r-10" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">PUNËTORËT<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
                         <ul class="nav nav-second-level">
                             <li> <a href="<?php echo base_url('admin/employee/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO PUNËTORIN</span></a></li>

@@ -384,7 +384,7 @@
                 return; // No more products to load
             }
         } else {
-            response = await makeAsyncRequest(url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${query}&offset=${offset}`);
+            response = await makeAsyncRequest(url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${encodeURIComponent(query)}&offset=${offset}`);
             getSearchResult = response.productsAll.length;
         }
         if (query === '') {

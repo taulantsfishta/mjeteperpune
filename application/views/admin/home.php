@@ -312,7 +312,8 @@
             }
 
             async function searchProducts(query) {
-                response = await makeAsyncRequest(url + `admin/dashboard/search_products?query=${query}&offset=${offset}`);
+                const encodedQuery = encodeURIComponent(query);
+                response = await makeAsyncRequest(url + `admin/dashboard/search_products?query=${encodedQuery}&offset=${offset}`);
                 getSearchResult = response.productsAll.length;
                 updateProductListing(response.products, query);
             }

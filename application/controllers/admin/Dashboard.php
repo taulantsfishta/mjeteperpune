@@ -133,6 +133,12 @@ class Dashboard extends CI_Controller {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
                     $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->where('code', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
+                }elseif (strpos($_GET['query'], '%') !== false) {
+                    $query = trim($_GET['query']);
+                    $query = str_replace('%', '.*', $query); // Convert % to SQL regex wildcard
+
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->where('name REGEXP', $query)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->where('name REGEXP', $query)->group_end()->get()->result_array();
                 }else{
                     $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
@@ -141,6 +147,11 @@ class Dashboard extends CI_Controller {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
                     $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
+                }elseif (strpos($_GET['query'], '%') !== false) {
+                    $query = trim($_GET['query']);
+                    $query = str_replace('%', '.*', $query); // Convert % to SQL regex wildcard
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->where('name REGEXP', $query)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->where('name REGEXP', $query)->group_end()->get()->result_array();
                 } else {
                     $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where_in('category_id', $view_category)->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
@@ -168,10 +179,14 @@ class Dashboard extends CI_Controller {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
                     $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->where('code', $_GET['query'])->limit($limit,$_GET['offset'])->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->where('code', $_GET['query'])->group_end()->get()->result_array();
-                } else {
+                }elseif (strpos($_GET['query'], '%') !== false) {
+                    $query = trim($_GET['query']);
+                    $query = str_replace('%', '.*', $query);
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->where('name REGEXP', $query)->limit($limit,$_GET['offset'])->group_end()->get()->result_array();
+                    $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->where('name REGEXP', $query)->group_end()->get()->result_array();
+                }else {
                     $products = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('category_id', $id)->group_start()->like('name', $_GET['query'])->group_end()->get()->result_array();
-
                 }
         }
 

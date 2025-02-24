@@ -383,15 +383,27 @@
                     <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-print p-r-10"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">PRINTO<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
                         <ul class="nav nav-second-level">
                             <li> <a href="<?php echo base_url('admin/printproduct') ?>"><i class="fa fa-print p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >PRINTO PRODUKTET</span></a></li>
-                            <li> <a href="<?php echo base_url('admin/printproduct/page_dimension') ?>"><i class="fa fa-paper-plane p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >DIMENSIONET E FLETES</span></a></li>
+                            <li> <a href="<?php echo base_url('admin/printproduct/page_dimension') ?>"><i class="fa fa-paper-plane p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >DIMENSIONET E FLETËS</span></a></li>
                         </ul>
                     </li>
                     <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-file p-r-10" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">FATURAT<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
                         <ul class="nav nav-second-level">
-                            <li> <a href="<?php echo base_url('admin/invoices/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO FATUREN</span></a></li>
+                            <li> <a href="<?php echo base_url('admin/invoices/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO FATURËN</span></a></li>
                             <li> <a href="<?php echo base_url('admin/invoices/created') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >FATURAT E KRIJUARA</span></a></li>
                         </ul>
                     </li>
+                    <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-truck p-r-12" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">POSTA<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li> <a href="<?php echo base_url('admin/expresspostaapi/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO POROSINË NË EXPRESS POSTË</span></a></li>
+                            <li> <a href="<?php echo base_url('admin/expresspostaapi/order_list') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >POROSITË E KRIJUARA NË EXPRESS POSTË</span></a></li>
+                        </ul>
+                    </li>
+                    <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-file p-r-10" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">PUNËTORËT<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li> <a href="<?php echo base_url('admin/employee/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO PUNËTORIN</span></a></li>
+                            <li> <a href="<?php echo base_url('admin/employee/created') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >LISTA E PUNËTORËVE</span></a></li>
+                        </ul>
+                    </li> -->
                 <?php endif ?>
                 <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="icon-envelope p-r-10"></i> <span class="hide-menu"> Mailbox <span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">6</span></span></a>
                     <ul class="nav nav-second-level">

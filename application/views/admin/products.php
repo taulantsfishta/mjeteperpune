@@ -275,6 +275,25 @@
                 </div>
             </div>
         </div>
+        <div class="modal" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title" id="confirmUNDeleteModalLabel">Konfirmo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        A jeni i sigurt qe deshironi te riktheni kete produkt?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                        <a id="UNdeleteProductLink" href="#" class="btn btn-danger">Rikthe</a>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="loadingIndicator" style="display: none; text-align: center; padding: 10px;">
             <div class="spinner"></div><br>
             <span>Me shume produkte..</span>
@@ -460,14 +479,16 @@
                                     <h5 class="mb-0">Çmimi:</h5>
                                     <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
                                 </div>` : ''}
-                                ${role == 'admin' ? `
-                                    <a href=${url}admin/products/get_product/${product.id} style="color:white;margin-right: 0px;" id=editButton_${product.id}><button class="btn btn-block" style="background:#53d1b2;"><i class="fa fa-edit"></i> Ndrysho Produktin</button></a>
-                                    <br>` : ''}
-                                ${role == 'admin' ? `
+                                ${role == 'admin' ? `${product.is_deleted == 0 ? 
+                                    `<a href=${url}admin/products/get_product/${product.id} style="color:white;margin-right: 0px;" id=editButton_${product.id}><button class="btn btn-block" style="background:#53d1b2;"><i class="fa fa-edit"></i> Ndrysho Produktin</button></a>
+                                    <br>
                                     <a href=${url}admin/products/delete_product/${category_id}/${product.id} style="color:white;margin-right: 0px;" data-toggle="modal" data-target="#confirmDeleteModal" style="background:#ff5e2dcc;" data-productid=${product.id} data-categoryid=${category_id} id=deleteButton_${product.id}><button class="btn btn-block" style="background:#ff5e2dcc;"><i class="fa fa-trash"></i> Fshije Produktin</button></a>
-                                    <br>` : ''}
-                                ${role == 'admin' ? `
-                                    <a href=${url}admin/printproduct/print_one_product/${product.id} style="color:white;margin-right: 0px;display:none;background:#7396CE;" id=printButton_${product.id}><button class="btn btn-block"><i class="fa fa-print"></i> Printo Produktin</button></a>` : ''}
+                                    <br>
+                                    <a href=${url}admin/printproduct/print_one_product/${product.id} style="color:white;margin-right: 0px;display:none;background:#7396CE;" id=printButton_${product.id}><button class="btn btn-block"><i class="fa fa-print"></i> Printo Produktin</button></a>` 
+                                    : 
+                                    `<a href=${url}admin/products/delete_product/${category_id}/${product.id} style="color:white;margin-right: 0px;" data-toggle="modal" data-target="#confirmUNDeleteModal" style="background:#ff5e2dcc;" data-productid=${product.id} data-categoryid=${category_id} id=deleteButton_${product.id}><button class="btn btn-block" style="background:#ff5e2dcc;"><i class="fa fa-angle-left"></i> Rikthe Produktin</button></a>
+                                    <br>`} `
+                                : ''}
                             </div>
                         </div>
                     </div>
@@ -517,6 +538,18 @@
 
         // Update the "Delete" button link with the appropriate product ID
         deleteButton.attr('href', '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID);
+        });
+    });
+    
+    $(document).ready(function() {
+        // Listen for the modal's "Delete" button click event
+        $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
+        var productID = $(e.relatedTarget).data('productid'); // Get the product ID
+        var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
+        var undeleteButton = $(this).find('#UNdeleteProductLink'); // Get the "Delete" button in the modal
+
+        // Update the "Delete" button link with the appropriate product ID
+        undeleteButton.attr('href', '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID);
         });
     });
 

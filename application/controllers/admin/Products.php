@@ -147,9 +147,30 @@ class Products extends CI_Controller
     public function delete_product($category_id,$product_id)
     {
         if ($this->session->userdata('role') == 'admin') {
-            $product = $this->db->select('products.image')->from('products')->where('id', $product_id)->get()->row_array();
-            unlink('optimum/products_images/' . $product['image']);
-            $this->common_model->delete($product_id, 'products');
+            // $product = $this->db->select('products.image')->from('products')->where('id', $product_id)->get()->row_array();
+            $data = array('is_deleted' => 1);
+            $data = $this->security->xss_clean($data);
+            $this->common_model->edit_option($data, $product_id, 'products');
+            // unlink('optimum/products_images/' . $product['image']);
+            // $this->common_model->delete($product_id, 'products');
+            redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
+        } else {
+            $data = array();
+            $data['heading'] = 'Mesazhi';
+            $data['message'] = "Nuk keni qasje ne kete faqe";
+            $this->load->view('errors/html/error_404', $data);
+        }
+    }
+
+    public function un_delete_product($category_id,$product_id)
+    {
+        if ($this->session->userdata('role') == 'admin') {
+            // $product = $this->db->select('products.image')->from('products')->where('id', $product_id)->get()->row_array();
+            $data = array('is_deleted' => 0);
+            $data = $this->security->xss_clean($data);
+            $this->common_model->edit_option($data, $product_id, 'products');
+            // unlink('optimum/products_images/' . $product['image']);
+            // $this->common_model->delete($product_id, 'products');
             redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
         } else {
             $data = array();

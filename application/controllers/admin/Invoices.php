@@ -97,6 +97,9 @@ class Invoices extends CI_Controller {
                 $prices = $_POST['price'];
                 $total_product_prices = $_POST['total_product_price'];
                 $total_sum = $_POST['total_price_invoice'];
+                $prepayment = $_POST['prepayment_price_invoice'] != '' ? number_format($_POST['prepayment_price_invoice'],2, '.', '') : '0.00';
+                $final_sum_to_pay = $_POST['total_price_left_invoice'] != '' ? number_format($_POST['total_price_left_invoice'],2, '.', '') : '0.00';
+
                 $_POST['adminID'] = $this->session->userdata('id');
                 if($this->session->userdata('name') == 'Admin'){
                     $adminName = 'FK';
@@ -209,10 +212,28 @@ class Invoices extends CI_Controller {
                 <br/>
                 <tfoot>
                     <tr class="total_sum">
-                        <td colspan="5"><strong>TOTALI</strong></td>
+                        <td colspan="5">TOTALI</td>
                         <td><b> ' . htmlspecialchars($total_sum) . '</b></td>
                     </tr>
-                </tfoot>';
+                <tfoot>
+                ';
+                if($prepayment>0){
+                $html .= '
+                    <tfoot>
+                    <tr class="total_sum">
+                        <td colspan="5">PARAPAGESE</td>
+                    <td><b> ' . htmlspecialchars($prepayment) . '</b></td>
+                    </tr>
+                    </tfoot>
+                    <tfoot>
+                    <tr class="total_sum">
+                        <td colspan="5">SHUMA E MBETUR</td>
+                        <td><b> ' . htmlspecialchars($final_sum_to_pay) . '</b></td>
+                    </tr>
+                    </tfoot>';
+                }
+
+                // $html .= '</tfoot>';
 
                 if (!empty($comment)) {
                     $comment = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
@@ -251,6 +272,8 @@ class Invoices extends CI_Controller {
         $data['comment'] = $dataClientInvoice['comment'];
         $data['total_price_invoice'] = $dataClientInvoice['total_price_invoice'];
         $data['adminID'] = $dataClientInvoice['adminID'];
+        $data['prepayment_price_invoice'] = $dataClientInvoice['prepayment_price_invoice'];
+        $data['total_price_left_invoice'] = $dataClientInvoice['total_price_left_invoice'];
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
             $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key]];
@@ -262,6 +285,8 @@ class Invoices extends CI_Controller {
                 'address' => $data['address'],
                 'date' => $data['date'],
                 'total_price_invoice' => $data['total_price_invoice'],
+                'prepayment_price_invoice' => $data['prepayment_price_invoice'],
+                'total_price_left_invoice' => $data['total_price_left_invoice'],
                 'row_data' => json_encode($newRowData),
                 'comment' => $data['comment'],
                 'created_at' => current_datetime(),
@@ -280,6 +305,9 @@ class Invoices extends CI_Controller {
         $data['total_price_invoice'] = $dataClientInvoice['total_price_invoice'];
         $data['comment'] = $dataClientInvoice['comment'];
         $data['adminID'] = $dataClientInvoice['adminID'];
+        $data['prepayment_price_invoice'] = $dataClientInvoice['prepayment_price_invoice'];
+        $data['total_price_left_invoice'] = $dataClientInvoice['total_price_left_invoice'];
+
 
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
@@ -292,6 +320,8 @@ class Invoices extends CI_Controller {
                 'address' => $data['address'],
                 'date' => $data['date'],
                 'total_price_invoice' => $data['total_price_invoice'],
+                'prepayment_price_invoice' => $data['prepayment_price_invoice'],
+                'total_price_left_invoice' => $data['total_price_left_invoice'],
                 'row_data' => json_encode($newRowData),
                 'comment' => $data['comment'],
                 'created_at' => current_datetime(),

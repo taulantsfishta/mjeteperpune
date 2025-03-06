@@ -49,6 +49,28 @@ textarea:focus, input:focus{
 #total_price_invoice_name{
     border-right: none;
 }
+#prepayment_price_invoice{
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    width: 100%;
+    border-bottom: 1px solid #e4e7ea;;
+}
+
+#prepayment_price_invoice_name{
+    border-right: none;
+}
+#total_price_left_invoice{
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    width: 100%;
+    border-bottom: 1px solid #e4e7ea;;
+}
+
+#total_price_left_invoice_name{
+    border-right: none;
+}
 #search_results_container {
             width: 100%;
             height: auto;
@@ -161,6 +183,15 @@ textarea:focus, input:focus{
                                 <tr >
                                     <td colspan="5" id="total_price_invoice_name" style="text-align: left;"><strong><b>TOTALI</b></strong></td>
                                     <td><input type="text" id="total_price_invoice" name="total_price_invoice" readonly></td>
+                                <tr >   
+                                <tr>                                 
+                                    <td colspan="5" id="prepayment_price_invoice_name" style="text-align: left;"><strong><b>PARAPAGESE</b></strong></td>
+                                    <td><input type="text" id="prepayment_price_invoice" name="prepayment_price_invoice"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" id="total_price_left_invoice_name" style="text-align: left;"><strong><b>SHUMA E MBETUR</b></strong></td>
+                                    <td><input type="text" id="total_price_left_invoice" name="total_price_left_invoice" readonly></td>
+                                </tr>
                                 </tr>
                             </tfoot>
                         </table>
@@ -239,6 +270,8 @@ window.base_url = <?php echo json_encode(base_url()); ?>;
 $(document).ready(function() {
     var rowIdx = 1;
     var lastClickedRow = null;
+    var prepayment;
+    var totalSum;
 
     // Function to add a new row to the main table (#sales_table)
     function addRow() {
@@ -263,6 +296,9 @@ $(document).ready(function() {
 
     // Function to calculate total product price
     function calculateTotalPrice(row) {
+        $('#prepayment_price_invoice').val('')
+        $('#total_price_left_invoice').val('')
+
         var quantity = parseFloat(row.find('.quantity').val()) || 0;
         var price = parseFloat(row.find('.price').val()) || 0;
         var total = quantity * price;
@@ -278,13 +314,35 @@ $(document).ready(function() {
 
     // Function to update the total sum
     function updateTotalSum() {
-        var totalSum = 0;
+        $('#prepayment_price_invoice').val('')
+        $('#total_price_left_invoice').val('')
+
+        totalSum = 0;
         $('#sales_table tbody tr').each(function() {
             var total = parseFloat($(this).find('.total_product_price').val()) || 0;
             totalSum += total;
         });
         $('#total_price_invoice').val(totalSum.toFixed(2));
     }
+
+    $(document).on('input', '#prepayment_price_invoice', function() {
+        var row = $(this).closest('tr');
+        var prepaymentVal = row.find('#prepayment_price_invoice').val().trim();
+        
+        // Convert to a number only if it's not empty
+        var prepayment = prepaymentVal === "" ? 0 : parseFloat(prepaymentVal) || 0;
+
+        var totalSumNew = $('#total_price_invoice').val() - prepayment;
+
+        $('#total_price_left_invoice').val(totalSumNew.toFixed(2));
+
+        // If input is empty, keep it empty instead of showing 0
+        if (prepaymentVal === "" || $('#total_price_invoice').val() < prepayment) {
+            row.find('#prepayment_price_invoice').val("");
+            $('#total_price_left_invoice').val("");
+
+        }
+    });
 
     // Event listener for quantity and price changes
     $(document).on('input', '.quantity, .price', function() {
@@ -599,6 +657,9 @@ function loadDetailsTable(invoiceId) {
             });
 
             $("#total_price_invoice").val(res.total_price_invoice);
+            $("#prepayment_price_invoice").val(res.prepayment_price_invoice);
+            $("#total_price_left_invoice").val(res.total_price_left_invoice);
+
         },
         error: function(error) {
             console.error("Error fetching details:", error);

@@ -369,7 +369,7 @@
                         <?php } ?>
                     </ul>
                 </li>
-                <?php if ($this->session->userdata('role') == 'admin') : ?>
+                <?php if (($this->session->userdata('role') == 'admin') && ($this->session->userdata('first_name') == 'Admin' || $this->session->userdata('first_name') == 'Adminpz'))  : ?>
                     <li> <a href="javascript:void(0);" class="waves-effect"><i class="icon-user p-r-10"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">KRIJO<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">4</span></span></a>
                         <ul class="nav nav-second-level">
                             <li> <a href="<?php echo base_url('admin/user') ?>"><i class="fa fa-plus p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >PËRDORUES I RI</span></a></li>

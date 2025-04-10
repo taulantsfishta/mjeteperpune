@@ -439,7 +439,7 @@ $(document).ready(function() {
 
 
                 // Focus on the quantity input field
-                row.find('.quantity').focus();
+                row.find('.quantity').focus().select();
 
                 // Hide the search results table after selection
                 $('#search_results_table').hide();

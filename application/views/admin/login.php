@@ -167,16 +167,31 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
     <script src="<?php echo base_url(); ?>optimum/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
 
     <script>
-    $('#submitBtn').click(function() {
-        // Show loading spinner
-        $('#install_progress').show();
-        // Disable button and change its text
-        $(this).text('Logging in...').attr('disabled', 'disabled');
-        
-        // Manually submit the form
-        $('#login-form').submit();
-    });
-</script>
+        $('#submitBtn').click(function() {
+            // Show loading spinner
+            $('#install_progress').show();
+            // Disable button and change its text
+            $(this).text('Logging in...').attr('disabled', 'disabled');
+            
+            // Manually submit the form
+            $('#login-form').submit();
+        });
+
+        $(document).ready(function () {
+            // Hide alerts after a delay
+            $('.hide_msg').delay(2000).slideUp();
+
+            // Trigger login on Enter key
+            $('#login-form input').on('keydown', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault(); // Prevent form from submitting normally
+                    $('#submitBtn').click(); // Trigger your custom login logic
+                }
+            });
+        });
+    </script>
+
+    
 
 </body>
 

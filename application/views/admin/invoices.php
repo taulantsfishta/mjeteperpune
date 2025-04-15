@@ -28,8 +28,8 @@ textarea:focus, input:focus{
     background-color: #d1e7dd !important;
 }
 
-.table-col-5 { width: 5%; }
-.table-col-35 { width: 35%; }
+.table-col-7 { width: 7%; }
+.table-col-33 { width: 33%; }
 .table-col-12 { width: 12%; }
 .table-col-36 { width: 41%; }
 .table-col-20 { width: 20%; }
@@ -89,24 +89,24 @@ textarea:focus, input:focus{
         <table class="table table-bordered table-striped table-hover" data-tablesaw-mode="columntoggle" id="invoiceData" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
             <thead>
             <tr>
-                <th  class="table-col-5">ID</th>
+                <th  class="table-col-7">ID</th>
                 <th class="table-col-20">KLIENTI</th>
                 <th class="table-col-20">ADRESA</th>
                 <th class="table-col-12">TOTALI</th>
                 <th class="table-col-12">DATA E KRIJIMIT</th>
-                <th class="table-col-5">VEPRIMI</th>
+                <th class="table-col-7">VEPRIMI</th>
             </tr>
             </thead>
             <tbody id="invoicesStructureBody">
             <?php if(isset($invoicesCreated)) { ?>
                     <?php foreach ($invoicesCreated as $key => $value) { ?>
                     <tr data-id="<?php echo $value['id']; ?>">
-                        <td  class="table-col-5"><?php echo $adminName.'-'.$value['id']; ?></td>
+                        <td  class="table-col-7"><?php echo $adminName.'-'.$value['id']; ?></td>
                         <td class="table-col-20"><?php echo htmlspecialchars($value['client_name']); ?></td>
                         <td class="table-col-20"><?php echo htmlspecialchars($value['address']); ?></td>
                         <td class="table-col-12"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
                         <td class="table-col-12"><?php echo htmlspecialchars($value['created_at']); ?></td>
-                        <td class="table-col-5"><a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="<?php echo $value['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a></td>
+                        <td class="table-col-7"><a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="<?php echo $value['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a></td>
                     </tr>
                     <?php } ?>
                 <?php } ?>
@@ -168,8 +168,8 @@ textarea:focus, input:focus{
                         <table id="sales_table" class="table-bordered table">
                             <thead>
                                 <tr>
-                                    <th class="table-col-5">#</th>
-                                    <th class="table-col-35">EMRI I PRODUKTIT</th>
+                                    <th class="table-col-7">#</th>
+                                    <th class="table-col-33">EMRI I PRODUKTIT</th>
                                     <th class="table-col-12">KODI</th>
                                     <th class="table-col-12">SASIA</th>
                                     <th class="table-col-12">ÇMIMI</th>
@@ -204,7 +204,7 @@ textarea:focus, input:focus{
                             <table id="search_results_table" class="table table-bordered" style="display: none;">
                                 <thead>
                                     <tr>
-                                        <th class="table-col-5">NR <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
+                                        <th class="table-col-7">NR <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
                                         <th class="table-col-42">EMRI I PRODUKTIT <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
                                         <th class="table-col-12">KODI</th>
                                         <th class="table-col-12">SASIA</th>
@@ -227,7 +227,8 @@ textarea:focus, input:focus{
                     <div class="col-lg-2"></div>
                     <div class="col-lg-10">
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
-                        <button type="submit" class="btn" style="color:white;background:#7396CE;" ><i class="fa fa-edit"></i> PRINTO FATUREN</button>
+                        <button type="submit" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
+                        <button type="submit" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
                         <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
                     </div>              
                 </div>
@@ -279,13 +280,14 @@ $(document).ready(function() {
             rowIdx++;
             $('#product_rows').append(`
                 <tr>
-                    <td class="table-col-5">${rowIdx}</td>
-                    <td class="table-col-35"><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
+                    <td class="table-col-7">${rowIdx}</td>
+                    <td class="table-col-33"><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
                     <td class="table-col-12"><input class="code" name="code[]" readonly></td>
                     <td class="table-col-12"><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
                     <td class="table-col-12"><input type="text" class="price" name="price[]" autocomplete="off"></td>
                     <td class="table-col-12"><input class="total_product_price" name="total_product_price[]" readonly></td>
-                    <td style="display:none;"><input class="id"name="id" hidden></td>
+                    <td style="display:none;"><input class="id" name="id" hidden></td>
+                    <td style="display:none;"><input class="image" name="image[]" hidden></td>
                 </tr>
             `);
             $('#product_rows').find('.product_name').last().focus();
@@ -381,12 +383,13 @@ $(document).ready(function() {
             $.each(results, function(index, result) {
                 var searchRow = `
                     <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${window.base_url+'optimum/products_images/'+result.image} data-id=${invoiceId}>
-                        <td class="table-col-5">${index+1}</td>
+                        <td class="table-col-7">${index+1}</td>
                         <td class="table-col-36">${_.escape(result.name)}</td>
                         <td class="table-col-12">${result.code}</td>
                         <td class="table-col-12">0</td>
                         <td class="table-col-12">${result.price}</td>
                         <td style="display:none;" class="table-col-1">${invoiceId}</td>
+                        <td style="display:none;" class="table-col-1">${result.image}</td>
                     </tr>
                 `;
                 tableBody.append(searchRow);
@@ -428,6 +431,7 @@ $(document).ready(function() {
                 var quantity = selectedProduct.data('quantity');
                 var total_product_price = selectedProduct.data('total-product-price');
                 var id = selectedProduct.data('id');
+                var image = selectedProduct.data('image');
 
                 // Populate the corresponding fields in the main table row
                 row.find('.product_name').val(productName);
@@ -436,6 +440,8 @@ $(document).ready(function() {
                 row.find('.quantity').val(quantity);
                 row.find('.total_product_price').val(total_product_price);
                 row.find('.id').val(id);
+                row.find('.image').val(image);
+
 
 
                 // Focus on the quantity input field
@@ -445,7 +451,7 @@ $(document).ready(function() {
                 $('#search_results_table').hide();
             });
 
-            $("#search_results_body tr td.table-col-5").hover(
+            $("#search_results_body tr td.table-col-7").hover(
                 function() {
                     var imageUrl = $(this).closest('tr').data('image');
                     var productName = $(this).closest('tr').data('product-name');
@@ -459,7 +465,7 @@ $(document).ready(function() {
                 }
             );
             
-            $("#search_results_body tr td.table-col-5").hover(function() {
+            $("#search_results_body tr td.table-col-7").hover(function() {
                 $(this).fadeOut(100);
                 $(this).fadeIn(500);
             });
@@ -470,7 +476,7 @@ $(document).ready(function() {
     }
 
     // Event listener for adding a new row when Enter key is pressed in product_name input
-    $(document).on('keypress', '.product_name,.quantity,.price,.total_product_price', function(e) {
+    $(document).on('keypress', '.product_name,.quantity,.price,.total_product_price,.image', function(e) {
         if (e.which == 13) { // Enter key pressed
             e.preventDefault();
 
@@ -480,6 +486,7 @@ $(document).ready(function() {
             var price = lastRow.find('.price').val().trim();
             var quantity = lastRow.find('.quantity').val().trim();
             var total_product_price = lastRow.find('.total_product_price').val().trim();
+            var image = lastRow.find('.image').val().trim();
 
             if (productName !== '' && price !== '' && quantity !== '') {
                 addRow();
@@ -651,7 +658,8 @@ function loadDetailsTable(invoiceId) {
                     <td><input type="text" class="quantity" name="quantity[]" value="${product.quantity}"></td>
                     <td><input type="text" class="price" name="price[]" value="${product.price}"></td>
                     <td><input type="text" class="total_product_price" name="total_product_price[]" value="${product.total_product_price}"></td>
-                    <td style="display:none;"><input type="text" class="id"name="id" value="${invoiceId}" hidden></td>
+                    <td style="display:none;"><input type="text" class="id" name="id" value="${invoiceId}" hidden></td>
+                    <td style="display:none;"><input type="text" class="image" name="image[]" value="${product.image}" hidden></td>
                 </tr>`;
                 $("#product_rows").append(row);
             });

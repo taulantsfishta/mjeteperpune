@@ -26,6 +26,13 @@ require_once('tcpdf/tcpdf.php');
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+
+
 
 class Invoices extends CI_Controller {
 
@@ -95,6 +102,7 @@ class Invoices extends CI_Controller {
                 $codes = $_POST['code'];
                 $quantities = $_POST['quantity'];
                 $prices = $_POST['price'];
+                $images = $_POST['image'];
                 $total_product_prices = $_POST['total_product_price'];
                 $total_sum = $_POST['total_price_invoice'];
                 $prepayment = $_POST['prepayment_price_invoice'] != '' ? number_format($_POST['prepayment_price_invoice'],2, '.', '') : '0.00';
@@ -106,7 +114,6 @@ class Invoices extends CI_Controller {
                 }else if($this->session->userdata('name') == 'Adminpz'){
                     $adminName = 'TR';
                 }
-                
                 // Create new PDF document
                 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
                 $drawing = new Drawing();
@@ -150,107 +157,232 @@ class Invoices extends CI_Controller {
                     $clientInvoice = $this->saveClientInvoice($_POST);
                 }
 
-                // Set some content to display
-                $html = '
-                <h1>FATURA: '.$adminName.'-'.$clientInvoice['id'].'</h1>
-                <p><strong>KLIENTI:</strong> ' . strtoupper(($client_name)) . '</p>
-                <p><strong>ADRESA:</strong> ' . strtoupper(($address)) . '</p>
-                <p><strong>DATA:</strong> ' . htmlspecialchars($date) . '</p>
-                ';
-        
-                $html .= '
-                        <style>
-                            table {
-                                width: 100%;
-                            }
-                            th, td {
-                                border: 1px solid black;
-                                line-height: 30px;                   
-                            th {
-                                background-color: #f2f2f2;
-                            }
-
-                            .comment{
-                                
-                            }
-                            .total_sum{
-                                font-size:14px;
-                            }
-                        </style>
-                <table >
-                    <thead>
-                        <tr style="height:100%;">
-                            <th style="width:5%;"> #</th>
-                            <th style="width:10%;"> KODI</th>
-                            <th style="width:50%;"> EMRI I PRODUKTIT</th>
-                            <th style="width:10%;"> SASIA</th>
-                            <th style="width:10%;"> ÇMIMI</th>
-                            <th style="width:15%;"> CMIMI TOTAL I PRODUKTIT</th>
-                        </tr>
-                    </thead>
-                    <tbody style="border-right:none;">
-                ';
-
-                // Add table rows with data
-                $rowCount = count($product_names);
-                for ($i = 0; $i < $rowCount; $i++) {
-                    $html .= '
-                    <tr style="height:100%;">
-                        <td style="width:5%;">' . ($i + 1) . '.</td>
-                        <td style="width:10%;"> ' . ($codes[$i]) . '</td>
-                        <td style="width:50%;"> ' . ($product_names[$i]) . '</td>
-                        <td style="width:10%;"> ' . ($quantities[$i]) . '</td>
-                        <td style="width:10%;"> ' . ($prices[$i]) . '</td>
-                        <td style="width:15%;"> ' . ($total_product_prices[$i]) . '</td>
-                    </tr>
+                if($_POST['submit_type'] == 'printo_faturen'){
+                        // Set some content to display
+                    $html = '
+                    <h1>FATURA: '.$adminName.'-'.$clientInvoice['id'].'</h1>
+                    <p><strong>KLIENTI:</strong> ' . strtoupper(($client_name)) . '</p>
+                    <p><strong>ADRESA:</strong> ' . strtoupper(($address)) . '</p>
+                    <p><strong>DATA:</strong> ' . htmlspecialchars($date) . '</p>
                     ';
-                }
-        
-                // Close the table and add total sum row
-                $html .= '
-                </tbody>
-                <br/>
-                <tfoot>
-                    <tr class="total_sum">
-                        <td colspan="5">TOTALI</td>
-                        <td><b> ' . htmlspecialchars($total_sum) . '</b></td>
-                    </tr>
-                <tfoot>
-                ';
-                if($prepayment>0){
-                $html .= '
+            
+                    $html .= '
+                            <style>
+                                table {
+                                    width: 100%;
+                                }
+                                th, td {
+                                    border: 1px solid black;
+                                    line-height: 30px;                   
+                                th {
+                                    background-color: #f2f2f2;
+                                }
+
+                                .comment{
+                                    
+                                }
+                                .total_sum{
+                                    font-size:14px;
+                                }
+                            </style>
+                    <table >
+                        <thead>
+                            <tr style="height:100%;">
+                                <th style="width:5%;"> #</th>
+                                <th style="width:10%;"> KODI</th>
+                                <th style="width:50%;"> EMRI I PRODUKTIT</th>
+                                <th style="width:10%;"> SASIA</th>
+                                <th style="width:10%;"> ÇMIMI</th>
+                                <th style="width:15%;"> CMIMI TOTAL I PRODUKTIT</th>
+                            </tr>
+                        </thead>
+                        <tbody style="border-right:none;">
+                    ';
+
+                    // Add table rows with data
+                    $rowCount = count($product_names);
+                    for ($i = 0; $i < $rowCount; $i++) {
+                        $html .= '
+                        <tr style="height:100%;">
+                            <td style="width:5%;">' . ($i + 1) . '.</td>
+                            <td style="width:10%;"> ' . ($codes[$i]) . '</td>
+                            <td style="width:50%;"> ' . ($product_names[$i]) . '</td>
+                            <td style="width:10%;"> ' . ($quantities[$i]) . '</td>
+                            <td style="width:10%;"> ' . ($prices[$i]) . '</td>
+                            <td style="width:15%;"> ' . ($total_product_prices[$i]) . '</td>
+                        </tr>
+                        ';
+                    }
+            
+                    // Close the table and add total sum row
+                    $html .= '
+                    </tbody>
+                    <br/>
                     <tfoot>
-                    <tr class="total_sum">
-                        <td colspan="5">PARAPAGESE</td>
-                    <td><b> ' . htmlspecialchars($prepayment) . '</b></td>
-                    </tr>
-                    </tfoot>
+                        <tr class="total_sum">
+                            <td colspan="5">TOTALI</td>
+                            <td><b> ' . htmlspecialchars($total_sum) . '</b></td>
+                        </tr>
                     <tfoot>
-                    <tr class="total_sum">
-                        <td colspan="5">SHUMA E MBETUR</td>
-                        <td><b> ' . htmlspecialchars($final_sum_to_pay) . '</b></td>
-                    </tr>
-                    </tfoot>';
+                    ';
+                    if($prepayment>0){
+                    $html .= '
+                        <tfoot>
+                        <tr class="total_sum">
+                            <td colspan="5">PARAPAGESE</td>
+                        <td><b> ' . htmlspecialchars($prepayment) . '</b></td>
+                        </tr>
+                        </tfoot>
+                        <tfoot>
+                        <tr class="total_sum">
+                            <td colspan="5">SHUMA E MBETUR</td>
+                            <td><b> ' . htmlspecialchars($final_sum_to_pay) . '</b></td>
+                        </tr>
+                        </tfoot>';
+                    }
+
+                    // $html .= '</tfoot>';
+
+                    if (!empty($comment)) {
+                        $comment = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
+                    $html .= '
+                            <p>Koment: </p><br><span class="comment">' . $comment . '<hr></span>';
+                    }
+
+                    $html .= '
+                                </table>';
+
+                    // Output the HTML content
+                    $pdf->writeHTML($html, true, false, true, false, '');
+            
+                    // Close and output PDF document
+                    $pdf->Output('FATURA_'.$clientInvoice['id'].'.pdf', 'I');
+                    
+                    exit;
+                }else{
+                    $image = 
+                    $spreadsheet = new Spreadsheet();
+                    $sheet = $spreadsheet->getActiveSheet();
+
+                    // === HEADER INFO ===
+                    $sheet->setCellValue('A1', 'FATURA:');
+                    $sheet->setCellValue('B1', $adminName . '-' . $clientInvoice['id']);
+                    $sheet->setCellValue('A2', 'KLIENTI:');
+                    $sheet->setCellValue('B2', $client_name);
+                    $sheet->setCellValue('A3', 'ADRESA:');
+                    $sheet->setCellValue('B3', $address);
+                    $sheet->setCellValue('A4', 'DATA:');
+                    $sheet->setCellValue('B4', $date);
+
+                    // Bold header labels
+                    $sheet->getStyle('A1:A4')->getFont()->setBold(true);
+
+                    // === TABLE HEADER ===
+                    $headerRow = 6;
+                    $sheet->fromArray(
+                        ['#', 'KODI', 'EMRI I PRODUKTIT', 'SASIA', 'ÇMIMI', 'CMIMI TOTAL I PRODUKTIT'],
+                        null,
+                        "A{$headerRow}"
+                    );
+
+                    // Bold header row
+                    $sheet->getStyle("A{$headerRow}:F{$headerRow}")->getFont()->setBold(true);
+
+                    // === PRODUCT ROWS ===
+                    $startRow = $headerRow + 1;
+                    $total_sum = 0;
+
+                    for ($i = 0; $i < count($product_names); $i++) {
+                        $row = $startRow + $i;
+                        $sheet->setCellValue("A$row", $i + 1);
+                        $sheet->setCellValue("B$row", $codes[$i]);
+                        $sheet->setCellValue("C$row", $product_names[$i]);
+                        $sheet->setCellValue("D$row", $quantities[$i]);
+                        $sheet->setCellValue("E$row", $prices[$i]);
+                        $this->imageUrl($startRow,$images[$i],$i,$sheet,$row);
+                        $sheet->setCellValue("F$row", number_format($total_product_prices[$i], 2));
+                        $total_sum += floatval($total_product_prices[$i]);
+                    }
+
+                    
+                    // === TOTAL ROW ===
+                    $totalRow = $startRow + count($product_names);
+                    $sheet->mergeCells("A{$totalRow}:E{$totalRow}");
+                    $sheet->setCellValue("A{$totalRow}", 'TOTALI');
+                    $sheet->setCellValue("F{$totalRow}", number_format($total_sum, 2));
+                    $sheet->getStyle("A{$totalRow}:F{$totalRow}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                        'font' => ['bold' => true],
+                    ]);
+
+                    // === PREPAYMENT & FINAL SUM ROWS ===
+                    $nextRow = $totalRow + 1;
+
+                    if ($prepayment > 0) {
+                        // Prepayment row
+                        $sheet->mergeCells("A{$nextRow}:E{$nextRow}");
+                        $sheet->setCellValue("A{$nextRow}", 'PARAPAGESE');
+                        $sheet->setCellValue("F{$nextRow}", number_format($prepayment, 2));
+                        $sheet->getStyle("A{$nextRow}:F{$nextRow}")->applyFromArray([
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                            'font' => ['bold' => true],
+                        ]);
+
+                        $nextRow++;
+
+                        // Final sum to pay row
+                        $sheet->mergeCells("A{$nextRow}:E{$nextRow}");
+                        $sheet->setCellValue("A{$nextRow}", 'SHUMA E MBETUR');
+                        $sheet->setCellValue("F{$nextRow}", number_format($final_sum_to_pay, 2));
+                        $sheet->getStyle("A{$nextRow}:F{$nextRow}")->applyFromArray([
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                            'font' => ['bold' => true],
+                        ]);
+
+                        $nextRow++;
+                    }
+
+                    // === COMMENT ROW (optional) ===
+                    if (!empty($comment)) {
+                        $cleanComment = htmlspecialchars_decode(strip_tags($comment));
+                        $sheet->mergeCells("A{$nextRow}:F" . ($nextRow + 1));
+                        $sheet->setCellValue("A{$nextRow}", "KOMENT: {$cleanComment}");
+                        $sheet->getStyle("A{$nextRow}:F" . ($nextRow + 1))->applyFromArray([
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_TOP, 'wrapText' => true],
+                            'font' => ['italic' => true],
+                        ]);
+                        $nextRow += 2;
+                    }
+
+                    // === TABLE BORDERS FOR PRODUCT ROWS ===
+                    $lastProductRow = $totalRow - 1;
+                    $sheet->getStyle("A{$headerRow}:F{$lastProductRow}")->applyFromArray([
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN],
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER
+                        ],
+                    ]);
+
+                    // Autosize columns
+                    foreach (range('A', 'F') as $col) {
+                        $sheet->getColumnDimension($col)->setAutoSize(true);
+                    }
+
+                    // === OUTPUT TO BROWSER ===
+                    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    header('Content-Disposition: attachment;filename="fatura.xlsx"');
+                    header('Cache-Control: max-age=0');
+
+                    $writer = new Xlsx($spreadsheet);
+                    $writer->save('php://output');
+                    exit;
                 }
-
-                // $html .= '</tfoot>';
-
-                if (!empty($comment)) {
-                    $comment = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
-                $html .= '
-                        <p>Koment: </p><br><span class="comment">' . $comment . '<hr></span>';
-                }
-
-                $html .= '
-                            </table>';
-
-                // Output the HTML content
-                $pdf->writeHTML($html, true, false, true, false, '');
-        
-                // Close and output PDF document
-                $pdf->Output('FATURA_'.$clientInvoice['id'].'.pdf', 'I');
-                
-                exit;
             } else {
                 // Handle missing POST data or other validation issues
                 echo 'Error: Missing or invalid POST data.';
@@ -263,6 +395,39 @@ class Invoices extends CI_Controller {
         }
     }
 
+
+    public function imageUrl($startRow,$image,$i,$sheet,$row){
+        $imageUrl = stripslashes($image);
+        $row = $startRow + $i;
+        if (strpos($imageUrl, 'localhost') !== false) {
+            // Local server: convert to file path
+            $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $imageUrl);
+        } else {
+            // Production: download temporarily
+            $tempDir = sys_get_temp_dir(); // e.g. /tmp
+            $filename = basename(parse_url($imageUrl, PHP_URL_PATH));
+            $localPath = $tempDir . '/' . uniqid() . '_' . $filename;
+        
+            // Download image (only if not already downloaded or cached)
+            file_put_contents($localPath, file_get_contents($imageUrl));
+        }
+        if (file_exists($localPath)) {
+            $drawing = new Drawing();
+            $drawing->setName('Product Image');
+            $drawing->setDescription('Product Image');
+            $drawing->setPath($localPath);
+            $drawing->setHeight(25);
+            $drawing->setCoordinates("G{$row}");
+            $drawing->setOffsetX(10);
+            $drawing->setWorksheet($sheet);
+        
+            $sheet->getRowDimension($row)->setRowHeight(30);
+        } else {
+            $sheet->setCellValue("G{$row}", 'Image not found');
+        }
+    }
+
+
     private function saveClientInvoice($dataClientInvoice=[]){
         $data = [];
         $newRowData = [];
@@ -274,9 +439,10 @@ class Invoices extends CI_Controller {
         $data['adminID'] = $dataClientInvoice['adminID'];
         $data['prepayment_price_invoice'] = $dataClientInvoice['prepayment_price_invoice'];
         $data['total_price_left_invoice'] = $dataClientInvoice['total_price_left_invoice'];
+        
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
-            $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key]];
+            $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image'=>$dataClientInvoice['image'][$key]];
         }
 
         $insertData = [
@@ -308,10 +474,8 @@ class Invoices extends CI_Controller {
         $data['prepayment_price_invoice'] = $dataClientInvoice['prepayment_price_invoice'];
         $data['total_price_left_invoice'] = $dataClientInvoice['total_price_left_invoice'];
 
-
-
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
-            $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key]];
+            $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image' => $dataClientInvoice['image'][$key]];
         }
 
         $updateData = [
@@ -383,6 +547,19 @@ class Invoices extends CI_Controller {
             $data['message'] = "Nuk keni qasje ne kete faqe";
             $this->load->view('errors/html/error_404', $data);
         }
+    }
+
+    public function appendImageProduct(){
+        $invoices = $this->db->select('*')->from('invoices')->get()->result_array();
+        foreach ($invoices as $key => $value) {
+            $row_data = json_decode($value['row_data'],1);
+                foreach ($row_data as $key => $value_1) {
+                    $productImage = $this->db->select('image')->from('products')->where('code',$value_1['code'])->get()->row_array();
+
+                    $row_data_1 []= ['product_name' => $value_1['product_name'],'code' => $value_1['code'],'quantity' => $value_1['quantity'],'price' => $value_1['price'],'total_product_price' => $value_1['total_product_price'],'image'=>base_url().'optimum/products_images/'.$productImage['image']];
+                }
+                $this->common_model->edit_option(['row_data'=>json_encode($row_data_1)], $value['id'], 'invoices');
+            }
     }
 
 }

@@ -18,8 +18,8 @@
             background-color: #d1e7dd !important;
         }
 
-        .table-col-5 { width: 5%; }
-        .table-col-35 { width: 35%; }
+        .table-col-7 { width: 5%; }
+        .table-col-33 { width: 35%; }
         .table-col-12 { width: 12%; }
         .table-col-36 { width: 41%; }
         
@@ -104,12 +104,13 @@
                             </thead>
                             <tbody id="product_rows">
                                 <tr>
-                                    <td class="table-col-5">1</td>
-                                    <td class="table-col-35"><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
+                                    <td class="table-col-7">1</td>
+                                    <td class="table-col-33"><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
                                     <td class="table-col-12"><input class="code" name="code[]" readonly></td>
                                     <td class="table-col-12"><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
                                     <td class="table-col-12"><input type="text" class="price" name="price[]" autocomplete="off"></td>
                                     <td class="table-col-12"><input class="total_product_price" name="total_product_price[]" readonly></td>
+                                    <td hidden><input type="text" class="image" name="image[]" hidden></td>
                                 </tr>
                             </tbody>
                             <tfoot>
@@ -159,7 +160,8 @@
                     <div class="col-lg-2"></div>
                     <div class="col-lg-10">
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
-                        <button type="submit" class="btn" style="color:white;background:#7396CE;" ><i class="fa fa-edit"></i> PRINTO FATUREN</button>
+                        <button type="submit" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
+                        <button type="submit" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
                         <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
                     </div>              
                 </div>
@@ -210,12 +212,13 @@ $(document).ready(function() {
             rowIdx++;
             $('#product_rows').append(`
                 <tr>
-                    <td class="table-col-5">${rowIdx}</td>
-                    <td class="table-col-35"><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
+                    <td class="table-col-7">${rowIdx}</td>
+                    <td class="table-col-33"><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
                     <td class="table-col-12"><input class="code" name="code[]" readonly></td>
                     <td class="table-col-12"><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
                     <td class="table-col-12"><input type="text" class="price" name="price[]" autocomplete="off"></td>
                     <td class="table-col-12"><input class="total_product_price" name="total_product_price[]" readonly></td>
+                    <td hidden><input type="text" class="image" name="image[]" hidden></td>
                 </tr>
             `);
             $('#product_rows').find('.product_name').last().focus();
@@ -314,11 +317,12 @@ $(document).ready(function() {
             $.each(results, function(index, result) {
                 var searchRow = `
                     <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${window.base_url+'optimum/products_images/'+result.image}>
-                        <td class="table-col-5">${index+1}</td>
-                        <td class="table-col-36">${_.escape(result.name)}</td>
+                        <td class="table-col-7">${index+1}</td>
+                        <td class="table-col-34">${_.escape(result.name)}</td>
                         <td class="table-col-12">${result.code}</td>
                         <td class="table-col-12">0</td>
                         <td class="table-col-12">${result.price}</td>
+                        <td class="table-col-12">${result.image}</td>
                     </tr>
                 `;
                 tableBody.append(searchRow);
@@ -360,6 +364,7 @@ $(document).ready(function() {
                 var quantity = selectedProduct.data('quantity');
                 var total_product_price = selectedProduct.data('total-product-price');
                 var total_price_invoice = selectedProduct.data('total-price-invoice');
+                var image = selectedProduct.data('image');
 
                 // Populate the corresponding fields in the main table row
                 row.find('.product_name').val(productName);
@@ -368,6 +373,7 @@ $(document).ready(function() {
                 row.find('.quantity').val(quantity);
                 row.find('.total_product_price').val(total_product_price);
                 row.find('.total_price_invoice').val(total_price_invoice);
+                row.find('.image').val(image);
 
                 // Focus on the quantity input field
                 row.find('.quantity').focus().select();
@@ -417,6 +423,8 @@ $(document).ready(function() {
             var price = lastRow.find('.price').val().trim();
             var quantity = lastRow.find('.quantity').val().trim();
             var total_product_price = lastRow.find('.total_product_price').val().trim();
+            var image = lastRow.find('.image').val().trim();
+
             if (productName !== '' && price !== '' && quantity !== '') {
                 addRow();
             } else {

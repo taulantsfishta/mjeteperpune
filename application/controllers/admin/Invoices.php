@@ -299,7 +299,9 @@ class Invoices extends CI_Controller {
                         $sheet->setCellValue("C$row", $product_names[$i]);
                         $sheet->setCellValue("D$row", $quantities[$i]);
                         $sheet->setCellValue("E$row", $prices[$i]);
-                        $this->imageUrl($startRow,$images[$i],$i,$sheet,$row);
+                        if($images[$i] !== ''){
+                            $this->imageUrl($startRow,$images[$i],$i,$sheet,$row);
+                        }
                         $sheet->setCellValue("F$row", number_format($total_product_prices[$i], 2));
                         $total_sum += floatval($total_product_prices[$i]);
                     }
@@ -381,6 +383,7 @@ class Invoices extends CI_Controller {
 
                     $writer = new Xlsx($spreadsheet);
                     $writer->save('php://output');
+
                     exit;
                 }
             } else {
@@ -398,27 +401,29 @@ class Invoices extends CI_Controller {
 
     public function imageUrl($startRow,$image,$i,$sheet,$row){
         $imageUrl = stripslashes($image);
+        $imageUrl_1 = base_url().'optimum/products_images/'.$imageUrl;
         $row = $startRow + $i;
-        if (strpos($imageUrl, 'localhost') !== false) {
+        if (strpos($imageUrl_1, 'localhost') !== false) {
             // Local server: convert to file path
-            $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $imageUrl);
+            $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $imageUrl_1);
         } else {
+
             // Production: download temporarily
             $tempDir = sys_get_temp_dir(); // e.g. /tmp
-            $filename = basename(parse_url($imageUrl, PHP_URL_PATH));
+            $filename = basename(parse_url($imageUrl_1, PHP_URL_PATH));
             $localPath = $tempDir . '/' . uniqid() . '_' . $filename;
-        
+
             // Download image (only if not already downloaded or cached)
-            file_put_contents($localPath, file_get_contents($imageUrl));
+            file_put_contents($localPath, file_get_contents($imageUrl_1));
         }
         if (file_exists($localPath)) {
             $drawing = new Drawing();
             $drawing->setName('Product Image');
             $drawing->setDescription('Product Image');
             $drawing->setPath($localPath);
-            $drawing->setHeight(25);
+            $drawing->setHeight(35);
             $drawing->setCoordinates("G{$row}");
-            $drawing->setOffsetX(10);
+            $drawing->setOffsetX(20);
             $drawing->setWorksheet($sheet);
         
             $sheet->getRowDimension($row)->setRowHeight(30);
@@ -553,10 +558,11 @@ class Invoices extends CI_Controller {
         $invoices = $this->db->select('*')->from('invoices')->get()->result_array();
         foreach ($invoices as $key => $value) {
             $row_data = json_decode($value['row_data'],1);
+            $row_data_1 = []; 
+
                 foreach ($row_data as $key => $value_1) {
                     $productImage = $this->db->select('image')->from('products')->where('code',$value_1['code'])->get()->row_array();
-
-                    $row_data_1 []= ['product_name' => $value_1['product_name'],'code' => $value_1['code'],'quantity' => $value_1['quantity'],'price' => $value_1['price'],'total_product_price' => $value_1['total_product_price'],'image'=>base_url().'optimum/products_images/'.$productImage['image']];
+                    $row_data_1 []= ['product_name' => $value_1['product_name'],'code' => $value_1['code'],'quantity' => $value_1['quantity'],'price' => $value_1['price'],'total_product_price' => $value_1['total_product_price'],'image'=>isset($productImage['image']) ? $productImage['image'] : ''];
                 }
                 $this->common_model->edit_option(['row_data'=>json_encode($row_data_1)], $value['id'], 'invoices');
             }

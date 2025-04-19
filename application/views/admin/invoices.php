@@ -144,7 +144,7 @@ textarea:focus, input:focus{
         </div>
         <div class="white-box" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
             <!-- Form to display the detailed invoice data -->
-            <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" enctype="multipart/form-data">
+            <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-lg-2"></div>
                     <div class="col-lg-3">
@@ -228,7 +228,7 @@ textarea:focus, input:focus{
                     <div class="col-lg-10">
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
                         <button type="submit" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
-                        <button type="submit" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
+                        <button type="submit" id="downloadBtn" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
                         <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
                     </div>              
                 </div>
@@ -382,14 +382,14 @@ $(document).ready(function() {
         if (results.length > 0) {
             $.each(results, function(index, result) {
                 var searchRow = `
-                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${window.base_url+'optimum/products_images/'+result.image} data-id=${invoiceId}>
+                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${(result.image)} data-id=${invoiceId}>
                         <td class="table-col-7">${index+1}</td>
                         <td class="table-col-36">${_.escape(result.name)}</td>
                         <td class="table-col-12">${result.code}</td>
                         <td class="table-col-12">0</td>
                         <td class="table-col-12">${result.price}</td>
                         <td style="display:none;" class="table-col-1">${invoiceId}</td>
-                        <td style="display:none;" class="table-col-1">${result.image}</td>
+                        <td style="display:none;" class="table-col-1">${(result.image)}}</td>
                     </tr>
                 `;
                 tableBody.append(searchRow);
@@ -547,6 +547,9 @@ $(document).ready(function() {
         var allFilled = true;
         $('#sales_table tbody tr').each(function() {
             $(this).find('input').each(function() {
+                if ($(this).is('[type="hidden"]') || $(this).hasClass('image') || $(this).attr('name') === 'image') {
+                    return; // continue to next input
+                }
                 if ($(this).val() === '') {
                     allFilled = false;
                     return false; // Exit the each loop
@@ -659,7 +662,7 @@ function loadDetailsTable(invoiceId) {
                     <td><input type="text" class="price" name="price[]" value="${product.price}"></td>
                     <td><input type="text" class="total_product_price" name="total_product_price[]" value="${product.total_product_price}"></td>
                     <td style="display:none;"><input type="text" class="id" name="id" value="${invoiceId}" hidden></td>
-                    <td style="display:none;"><input type="text" class="image" name="image[]" value="${product.image}" hidden></td>
+                    <td style="display:none;"><input type="text" class="image" name="image[]" value="${(product.image)}" hidden></td>
                 </tr>`;
                 $("#product_rows").append(row);
             });
@@ -686,4 +689,13 @@ $(document).ready(function() {
     deleteButton.attr('href', '<?php echo base_url("admin/invoices/delete_invoice/"); ?>' + invoiceID);
     });
 });
+
+</script>
+<script>
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+        // Start redirect timer on current page
+        setTimeout(function () {
+            window.location.reload();
+        }, 3000); // Adjust time if needed
+    });
 </script>

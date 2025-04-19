@@ -70,7 +70,7 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="white-box" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
-            <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" enctype="multipart/form-data">
+            <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-lg-2"></div>
                     <div class="col-lg-3">
@@ -161,7 +161,7 @@
                     <div class="col-lg-10">
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
                         <button type="submit" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
-                        <button type="submit" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
+                        <button type="submit" id="downloadBtn"  class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
                         <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
                     </div>              
                 </div>
@@ -316,7 +316,7 @@ $(document).ready(function() {
             tableHead.show(); // Show the thead
             $.each(results, function(index, result) {
                 var searchRow = `
-                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${window.base_url+'optimum/products_images/'+result.image}>
+                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${result.image}>
                         <td class="table-col-7">${index+1}</td>
                         <td class="table-col-34">${_.escape(result.name)}</td>
                         <td class="table-col-12">${result.code}</td>
@@ -542,9 +542,18 @@ $(document).ready(function() {
     }
 
 });
+
 </script>
 
 
+<script>
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+        // Start redirect timer on current page
+        setTimeout(function () {
+            window.location.reload();
+        }, 3000); // Adjust time if needed
+    });
+</script>
 
 
 

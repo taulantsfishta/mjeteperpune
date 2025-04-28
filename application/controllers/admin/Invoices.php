@@ -188,9 +188,9 @@ class Invoices extends CI_Controller {
                     <table >
                         <thead>
                             <tr style="height:100%;">
-                                <th style="width:5%;"> #</th>
+                                <th style="width:8%;"> #</th>
                                 <th style="width:10%;"> KODI</th>
-                                <th style="width:50%;"> EMRI I PRODUKTIT</th>
+                                <th style="width:47%;"> EMRI I PRODUKTIT</th>
                                 <th style="width:10%;"> SASIA</th>
                                 <th style="width:10%;"> ÇMIMI</th>
                                 <th style="width:15%;"> CMIMI TOTAL I PRODUKTIT</th>
@@ -204,9 +204,9 @@ class Invoices extends CI_Controller {
                     for ($i = 0; $i < $rowCount; $i++) {
                         $html .= '
                         <tr style="height:100%;">
-                            <td style="width:5%;">' . ($i + 1) . '.</td>
+                            <td style="width:8%;">' . ($i + 1) . '.</td>
                             <td style="width:10%;"> ' . ($codes[$i]) . '</td>
-                            <td style="width:50%;"> ' . ($product_names[$i]) . '</td>
+                            <td style="width:47%;"> ' . ($product_names[$i]) . '</td>
                             <td style="width:10%;"> ' . ($quantities[$i]) . '</td>
                             <td style="width:10%;"> ' . ($prices[$i]) . '</td>
                             <td style="width:15%;"> ' . ($total_product_prices[$i]) . '</td>
@@ -258,9 +258,8 @@ class Invoices extends CI_Controller {
                     // Close and output PDF document
                     $pdf->Output('FATURA_'.$clientInvoice['id'].'.pdf', 'I');
                     
-                    exit;
+                    redirect(base_url(). 'admin/invoices/created');
                 }else{
-                    $image = 
                     $spreadsheet = new Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
 
@@ -372,9 +371,14 @@ class Invoices extends CI_Controller {
                     ]);
 
                     // Autosize columns
-                    foreach (range('A', 'F') as $col) {
+                    foreach (['B', 'D', 'E', ] as $col) {
                         $sheet->getColumnDimension($col)->setAutoSize(true);
                     }
+                    $sheet->getColumnDimension('A')->setWidth(5); // Adjust width as needed 
+                    $sheet->getColumnDimension('C')->setWidth(30); // Adjust width as needed 
+                    $sheet->getColumnDimension('F')->setWidth(12); // Adjust width as needed 
+                    $sheet->getStyle('F')->getAlignment()->setWrapText(true); // Add this
+
 
                     // === OUTPUT TO BROWSER ===
                     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

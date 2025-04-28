@@ -160,7 +160,7 @@
                     <div class="col-lg-2"></div>
                     <div class="col-lg-10">
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
-                        <button type="submit" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
+                        <button type="submit" id="printBtn" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
                         <button type="submit" id="downloadBtn"  class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
                         <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
                     </div>              
@@ -322,7 +322,7 @@ $(document).ready(function() {
                         <td class="table-col-12">${result.code}</td>
                         <td class="table-col-12">0</td>
                         <td class="table-col-12">${result.price}</td>
-                        <td class="table-col-12">${result.image}</td>
+                        <td class="table-col-12" hidden>${result.image}</td>
                     </tr>
                 `;
                 tableBody.append(searchRow);
@@ -552,6 +552,13 @@ $(document).ready(function() {
         setTimeout(function () {
             window.location.reload();
         }, 3000); // Adjust time if needed
+    });
+
+    document.getElementById('printBtn').addEventListener('click', function () {
+        // Start redirect timer on current page
+        setTimeout(function () {
+            window.location.reload();
+        }, 2000); // Adjust time if needed
     });
 </script>
 

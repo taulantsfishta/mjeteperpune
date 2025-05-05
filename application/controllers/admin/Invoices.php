@@ -405,20 +405,19 @@ class Invoices extends CI_Controller {
 
     public function imageUrl($startRow,$image,$i,$sheet,$row){
         $imageUrl = stripslashes($image);
-        $imageUrl_1 = base_url().'optimum/products_images/'.$imageUrl;
         $row = $startRow + $i;
-        if (strpos($imageUrl_1, 'localhost') !== false) {
+        if (strpos($imageUrl, 'localhost') !== false) {
             // Local server: convert to file path
-            $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $imageUrl_1);
+            $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $imageUrl);
         } else {
 
             // Production: download temporarily
             $tempDir = sys_get_temp_dir(); // e.g. /tmp
-            $filename = basename(parse_url($imageUrl_1, PHP_URL_PATH));
+            $filename = basename(parse_url($imageUrl, PHP_URL_PATH));
             $localPath = $tempDir . '/' . uniqid() . '_' . $filename;
 
             // Download image (only if not already downloaded or cached)
-            file_put_contents($localPath, file_get_contents($imageUrl_1));
+            file_put_contents($localPath, file_get_contents($imageUrl));
         }
         if (file_exists($localPath)) {
             $drawing = new Drawing();

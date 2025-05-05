@@ -18,7 +18,7 @@
             background-color: #d1e7dd !important;
         }
 
-        .table-col-7 { width: 5%; }
+        .table-col-7 { width: 7%; }
         .table-col-33 { width: 35%; }
         .table-col-12 { width: 12%; }
         .table-col-36 { width: 41%; }
@@ -218,7 +218,7 @@ $(document).ready(function() {
                     <td class="table-col-12"><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
                     <td class="table-col-12"><input type="text" class="price" name="price[]" autocomplete="off"></td>
                     <td class="table-col-12"><input class="total_product_price" name="total_product_price[]" readonly></td>
-                    <td hidden><input type="text" class="image" name="image[]" hidden></td>
+                    <td style="display:none;"><input class="image" name="image[]" hidden></td>
                 </tr>
             `);
             $('#product_rows').find('.product_name').last().focus();
@@ -301,6 +301,7 @@ $(document).ready(function() {
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
+                console.log(response.products)
                 displaySearchResults(response.products, row);
             }
         };
@@ -316,13 +317,13 @@ $(document).ready(function() {
             tableHead.show(); // Show the thead
             $.each(results, function(index, result) {
                 var searchRow = `
-                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${result.image}>
+                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${window.base_url+'/optimum/products_images/'+result.image}>
                         <td class="table-col-7">${index+1}</td>
                         <td class="table-col-34">${_.escape(result.name)}</td>
                         <td class="table-col-12">${result.code}</td>
                         <td class="table-col-12">0</td>
                         <td class="table-col-12">${result.price}</td>
-                        <td class="table-col-12" hidden>${result.image}</td>
+                        <td style="display:none;" class="table-col-12" hidden>${window.base_url+'/optimum/products_images/'+result.image}</td>
                     </tr>
                 `;
                 tableBody.append(searchRow);
@@ -382,7 +383,7 @@ $(document).ready(function() {
                 $('#search_results_table').hide();
             });
 
-            $("#search_results_body tr td.table-col-5").hover(
+            $("#search_results_body tr td.table-col-7").hover(
                 function() {
                     var imageUrl = $(this).closest('tr').data('image');
                     var productName = $(this).closest('tr').data('product-name');
@@ -396,7 +397,7 @@ $(document).ready(function() {
                 }
             );
             
-            $("#search_results_body tr td.table-col-5").hover(function() {
+            $("#search_results_body tr td.table-col-7").hover(function() {
                 $(this).fadeOut(100);
                 $(this).fadeIn(500);
             });

@@ -603,7 +603,6 @@ $('#search_results_table th').click(function() {
             }
             return 0;
         });
-        console.log('123');
 
         $.each(rows, function(index, row) {
             table.children('tbody').append(row);

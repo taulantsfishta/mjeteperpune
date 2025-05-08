@@ -417,7 +417,7 @@ class Invoices extends CI_Controller {
             $localPath = $tempDir . '/' . uniqid() . '_' . $filename;
 
             // Download image (only if not already downloaded or cached)
-            file_put_contents($localPath, file_get_contents($imageUrl));
+            file_put_contents($localPath, file_get_contents($filename));
         }
         if (file_exists($localPath)) {
             $drawing = new Drawing();

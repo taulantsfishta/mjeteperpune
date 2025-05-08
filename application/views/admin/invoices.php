@@ -662,7 +662,7 @@ function loadDetailsTable(invoiceId) {
                     <td><input type="text" class="price" name="price[]" value="${product.price}"></td>
                     <td><input type="text" class="total_product_price" name="total_product_price[]" value="${product.total_product_price}"></td>
                     <td style="display:none;"><input type="text" class="id" name="id" value="${invoiceId}" hidden></td>
-                    <td style="display:none;"><input type="text" class="image" name="image[]" value="${(product.image)}" hidden></td>
+                    <td style="display:none;"><input type="text" class="image" name="image[]" value="${window.base_url+'/optimum/products_images/'+product.image}" hidden></td>
                 </tr>`;
                 $("#product_rows").append(row);
             });

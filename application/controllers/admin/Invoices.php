@@ -299,6 +299,7 @@ class Invoices extends CI_Controller {
                         $sheet->setCellValue("D$row", $quantities[$i]);
                         $sheet->setCellValue("E$row", $prices[$i]);
                         if($images[$i] !== ''){
+
                             $this->imageUrl($startRow,$images[$i],$i,$sheet,$row);
                         }
                         $sheet->setCellValue("F$row", number_format($total_product_prices[$i], 2));
@@ -403,24 +404,47 @@ class Invoices extends CI_Controller {
     }
 
 
-    public function imageUrl($startRow,$image,$i,$sheet,$row){
-        $imageUrl = stripslashes($image);
+    public function imageUrl($startRow, $image, $i, $sheet, $row) {
+        $image = stripslashes($image);
         $row = $startRow + $i;
-        if (strpos($imageUrl, 'localhost') !== false) {
+        
+        if (strpos($image, 'localhost') !== false) {
             // Local server: convert to file path
-            $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $imageUrl);
-        } else {
+            $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $image);
+            
+            if (file_exists($localPath)) {
+                $drawing = new Drawing();
+                $drawing->setName('Product Image');
+                $drawing->setDescription('Product Image');
+                $drawing->setPath($localPath);
+                $drawing->setHeight(35);
+                $drawing->setCoordinates("G{$row}");
+                $drawing->setOffsetX(20);
+                $drawing->setWorksheet($sheet);
+            
+                $sheet->getRowDimension($row)->setRowHeight(30);
+            } else {
+                $sheet->setCellValue("G{$row}", 'Image not found');
+            }
+        }else{
 
-            // Production: download temporarily
-            $tempDir = sys_get_temp_dir(); // e.g. /tmp
-            $filename = basename(parse_url($imageUrl, PHP_URL_PATH));
-            $localPath = $tempDir . '/' . uniqid() . '_' . $filename;
-
-            // Download image (only if not already downloaded or cached)
-            file_put_contents($localPath, file_get_contents($filename));
-        }
-        if (file_exists($localPath)) {
-            $drawing = new Drawing();
+        $baseImageUrl =  stripslashes(base_url().'optimum/products_images/');
+        $image = str_replace($baseImageUrl,"", $image);
+        // Construct the full URL for production
+        $fullImageUrl = $baseImageUrl . $image;
+    
+    
+        // Download image temporarily
+        $tempDir = sys_get_temp_dir();
+        $filename = uniqid() . '_' . $image;
+        $localPath = $tempDir . '/' . $filename;
+    
+        // Try to fetch the image
+        $imageContents = @file_get_contents($fullImageUrl);
+        if ($imageContents !== false) {
+            file_put_contents($localPath, $imageContents);
+    
+            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
             $drawing->setName('Product Image');
             $drawing->setDescription('Product Image');
             $drawing->setPath($localPath);
@@ -428,12 +452,36 @@ class Invoices extends CI_Controller {
             $drawing->setCoordinates("G{$row}");
             $drawing->setOffsetX(20);
             $drawing->setWorksheet($sheet);
-        
             $sheet->getRowDimension($row)->setRowHeight(30);
         } else {
+            // Handle missing image
             $sheet->setCellValue("G{$row}", 'Image not found');
+            log_message('error', 'Image download failed: ' . $fullImageUrl);
         }
+        
+        
+    } 
+
+
+    if ($imageContents !== false) {
+        file_put_contents($localPath, $imageContents);
+
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Product Image');
+        $drawing->setDescription('Product Image');
+        $drawing->setPath($localPath);
+        $drawing->setHeight(35);
+        $drawing->setCoordinates("G{$row}");
+        $drawing->setOffsetX(20);
+        $drawing->setWorksheet($sheet);
+        $sheet->getRowDimension($row)->setRowHeight(30);
+    } else {
+        // Handle missing image
+        $sheet->setCellValue("G{$row}", 'Image not found');
+        log_message('error', 'Image download failed: ' . $fullImageUrl);
     }
+}
+
 
 
     private function saveClientInvoice($dataClientInvoice=[]){

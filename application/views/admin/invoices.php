@@ -433,6 +433,7 @@ $(document).ready(function() {
                 var id = selectedProduct.data('id');
                 var image = selectedProduct.data('image');
 
+                image = image.split("/").pop();
                 // Populate the corresponding fields in the main table row
                 row.find('.product_name').val(productName);
                 row.find('.code').val(code);

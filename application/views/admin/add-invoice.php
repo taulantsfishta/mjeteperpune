@@ -323,7 +323,7 @@ $(document).ready(function() {
                         <td class="table-col-12">${result.code}</td>
                         <td class="table-col-12">0</td>
                         <td class="table-col-12">${result.price}</td>
-                        <td style="display:none;" class="table-col-12" hidden>${window.base_url+'/optimum/products_images/'+result.image}</td>
+                        <td style="display:none;" class="table-col-12" hidden>${result.image}</td>
                     </tr>
                 `;
                 tableBody.append(searchRow);

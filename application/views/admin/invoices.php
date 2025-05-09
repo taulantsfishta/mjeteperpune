@@ -382,7 +382,7 @@ $(document).ready(function() {
         if (results.length > 0) {
             $.each(results, function(index, result) {
                 var searchRow = `
-                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${window.base_url+'/optimum/products_images/'+result.image} data-id=${invoiceId}>
+                    <tr tabindex="0" data-product-name="${_.escape(result.name)}" data-code="${result.code}" data-quantity="0" data-price="${result.price}" data-total-product-price="0" data-total-price-invoice="0" data-image=${result.image} data-id=${invoiceId}>
                         <td class="table-col-7">${index+1}</td>
                         <td class="table-col-36">${_.escape(result.name)}</td>
                         <td class="table-col-12">${result.code}</td>

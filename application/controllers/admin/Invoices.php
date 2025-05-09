@@ -150,7 +150,7 @@ class Invoices extends CI_Controller {
         
                 // Add a page
                 $pdf->AddPage();
-                
+                log_message('error','IMAGE'.json_encode($_POST));
                 if(isset($_POST['id'])){
                     $clientInvoice = $this->updateClientInvoice($_POST);
                 }else{

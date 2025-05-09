@@ -481,7 +481,6 @@ class Invoices extends CI_Controller {
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
             $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image'=>$dataClientInvoice['image'][$key]];
         }
-        log_message('error','2');
 
         $insertData = [
                 'user_id' => $data['adminID'],

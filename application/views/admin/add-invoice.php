@@ -367,7 +367,6 @@ $(document).ready(function() {
                 var total_price_invoice = selectedProduct.data('total-price-invoice');
                 var image = selectedProduct.data('image');
                 image = image.split("/").pop();
-                console.log('1');
                 // Populate the corresponding fields in the main table row
                 row.find('.product_name').val(productName);
                 row.find('.code').val(code);

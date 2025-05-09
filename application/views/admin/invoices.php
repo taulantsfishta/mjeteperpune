@@ -273,7 +273,7 @@ $(document).ready(function() {
     var lastClickedRow = null;
     var prepayment;
     var totalSum;
-
+    console.log('1');
     // Function to add a new row to the main table (#sales_table)
     function addRow() {
         if ($('.product_name').last().val() !== '') {

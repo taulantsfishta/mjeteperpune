@@ -461,25 +461,6 @@ class Invoices extends CI_Controller {
         
         
     } 
-
-
-    if ($imageContents !== false) {
-        file_put_contents($localPath, $imageContents);
-
-        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-        $drawing->setName('Product Image');
-        $drawing->setDescription('Product Image');
-        $drawing->setPath($localPath);
-        $drawing->setHeight(35);
-        $drawing->setCoordinates("G{$row}");
-        $drawing->setOffsetX(20);
-        $drawing->setWorksheet($sheet);
-        $sheet->getRowDimension($row)->setRowHeight(30);
-    } else {
-        // Handle missing image
-        $sheet->setCellValue("G{$row}", 'Image not found');
-        log_message('error', 'Image download failed: ' . $fullImageUrl);
-    }
 }
 
 

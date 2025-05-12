@@ -45,7 +45,6 @@ class Invoices extends CI_Controller {
     }
 	 
      public function index(){
-        log_message('error','1111');
         if ($this->session->userdata('role') == 'admin') {
             $data = array();
             $_SESSION['title_name'] = 'KRIJO FATUREN';

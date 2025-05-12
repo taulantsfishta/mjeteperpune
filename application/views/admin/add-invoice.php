@@ -375,7 +375,7 @@ $(document).ready(function() {
                 row.find('.total_product_price').val(total_product_price);
                 row.find('.total_price_invoice').val(total_price_invoice);
                 row.find('.image').val(image);
-
+                console.log('1');
                 // Focus on the quantity input field
                 row.find('.quantity').focus().select();
 

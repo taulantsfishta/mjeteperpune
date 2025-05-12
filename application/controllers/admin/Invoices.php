@@ -1,4 +1,3 @@
-
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
 
 
@@ -600,4 +599,5 @@ class Invoices extends CI_Controller {
                 $this->common_model->edit_option(['row_data'=>json_encode($row_data_1)], $value['id'], 'invoices');
             }
     }
+
 }

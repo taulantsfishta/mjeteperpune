@@ -1,0 +1,1 @@
+[12-May-2025 09:21:50 UTC] PHP Fatal error:  Invoices cannot use PhpOffice\PhpSpreadsheet\Worksheet\Drawing - it is not a trait in /home/mjettjtg/public_html/application/controllers/admin/Invoices.php on line 38

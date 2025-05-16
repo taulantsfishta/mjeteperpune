@@ -67,7 +67,7 @@ class Categories extends CI_Controller
                 $lastIdOfCategory = $this->db->select('id')->from('category')->order_by('id', 'desc')->limit(1)->get()->row_array();
                 $data = array(
                     'id' => $lastIdOfCategory['id']+1,
-                    'name' => $_POST['name'],
+                    'name' => strtoupper($_POST['name']),
                     'created_at' => current_datetime()
                 );
                 $data = $this->security->xss_clean($data);
@@ -95,7 +95,7 @@ class Categories extends CI_Controller
     public function edit_category($category_id){
         if ($this->session->userdata('role') == 'admin') {
             if (isset($_POST['name'])) {
-                $data = array('name' => $_POST['name']);
+                $data = array('name' => strtoupper($_POST['name']));
                 $data = $this->security->xss_clean($data);
                 $this->common_model->edit_option($data, $_POST['id'], 'category');
                 $this->session->set_flashdata('msg', 'Kategoria eshte ndryshuar me sukses');

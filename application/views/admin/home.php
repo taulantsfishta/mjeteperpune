@@ -148,10 +148,22 @@
                 transform: rotate(360deg);
             }
         }
+
+        body.modal-open .background-blur:not(.modal):not(.modal *) {
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+
+        .modal {
+            z-index: 1055; /* default is 1050, this just ensures it's above */
+            position: fixed; /* ensure it's outside blur flow */
+        }
+
     </style>
-
-
-    <div role="search" id="searchContainer">
+    
+    <div role="search" class="background-blur" id="searchContainer">
         <label for="s1">Search for:</label>
         <input type="text" id="searchInput" placeholder="Kerko...">
         <button aria-label="Do search" id="searchIcon">
@@ -160,14 +172,14 @@
     </div>
 
     <!-- Preview of captured image -->
-    <img id="previewImage" class="mt-3 img-thumbnail" style="display: none;">
+    <img id="previewImage" class="background-blur" class="mt-3 img-thumbnail" style="display: none;">
 
 
-    <div class="col-md-12">
+    <div class="col-md-12 background-blur">
         <hr>
     </div>
     <!-- /.usercard -->
-    <div class="row el-element-overlay m-b-40" id="productListing">
+    <div class="row el-element-overlay m-b-40 background-blur" id="productListing">
         <?php foreach ($products as $key => $value) { ?>
             <div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
                 <div class="card" style="margin-bottom: 10px;">
@@ -194,28 +206,31 @@
                     </div>
                 </div>
             </div>
-            <div class="modal" id="imagemodal_<?php echo $key; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header border-0">
-                            <div class="modal-header d-flex justify-content-between align-items-center">
-                                <h4 class="modal-title" id="myModalLabel"><?php echo $value['name']; ?></h4>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                        </div>
-                        <div class="modal-body">
-                            <img src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" id="imagepreview_<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
         <?php } ?>
     </div>
 
-    <div id="loadingIndicator" style="display: none; text-align: center; padding: 10px;">
+    <div id="loadingIndicator" class="background-blur" style="display: none; text-align: center; padding: 10px;">
         <div class="spinner"></div><br>
         <span>Me shume produkte..</span>
     </div>
+
+    <?php foreach ($products as $key => $value) { ?>
+        <div class="modal" id="imagemodal_<?php echo $key; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header border-0">
+                                    <div class="modal-header d-flex justify-content-between align-items-center">
+                                        <h4 class="modal-title" id="myModalLabel"><?php echo $value['name']; ?></h4>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" id="imagepreview_<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
+                                </div>
+                            </div>
+                        </div>
+        </div>
+    <?php } ?>
 
 
     <script>
@@ -388,6 +403,7 @@
                                             </div>
                                         `;
                         productListing.innerHTML += productCard;
+                        moveModalsOutside();
                     });
                 } else {
                     productListing.innerHTML = ""; 
@@ -400,6 +416,12 @@
                 productListing.innerHTML += `</div>`;
             }
         });
+
+        function moveModalsOutside() {
+            $('#productListing .modal').each(function () {
+                $('body').append(this); // move modal to body
+            });
+        }
         
         document.getElementById("productListing").addEventListener("click", function(event) {
             // Check if the clicked element has the class "img-fluid"

@@ -161,10 +161,22 @@
                 transform: rotate(360deg);
             }
         }
+
+        body.modal-open .background-blur:not(.modal):not(.modal *) {
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+
+        .modal {
+            z-index: 1055; /* default is 1050, this just ensures it's above */
+            position: fixed; /* ensure it's outside blur flow */
+        }
         </style>
 
         <?php if ($this->session->userdata('role') == 'admin') : ?>
-            <div class="container">
+            <div class="container background-blur">
                 <div class="row">
                     <div class="col-lg-5"></div>
                     <div class="col-lg-3">
@@ -191,7 +203,7 @@
             </div>
         <?php endif ?>
 
-        <div role="search" id="searchContainer">
+        <div role="search" id="searchContainer" class="background-blur">
             <label for="s1">Search for:</label>
             <input type="text" id="searchInput" placeholder="Kerko...">
             <button aria-label="Do search" id="searchIcon">
@@ -199,12 +211,12 @@
             </button>
         </div>
 
-        <div class="col-md-12">
+        <div class="col-md-12 background-blur">
             <hr>
         </div>
 
         <!-- /.usercard -->
-        <div class="row el-element-overlay m-b-40" id="productListing">
+        <div class="row el-element-overlay m-b-40 background-blur" id="productListing">
             <?php foreach ($products as $key => $value) { ?>
                 <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" id="mainDiv">
                     <div class="card product-card" data-product-id-main="<?php echo $value['id']; ?>" style="margin-bottom: 10px;">
@@ -237,26 +249,28 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal" id="imagemodal_<?php echo $key; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header d-flex justify-content-between align-items-center">
-                                    <h4 class="modal-title" id="myModalLabel"><?php echo htmlspecialchars($value['name']); ?></h4>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <img src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" id="imagepreview_<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                                </div>
-                            </div>
-                        </div>
-                </div>
             <?php } ?>
             <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" id="selectedProductsButtonContainer" >
                 <button id="gatherSelectedProductsBtn" class="btn" style="background:#7396CE;"><span><i class="fa fa-print" aria-hidden="true"></i> PRINTO PRODUKTET</span></button>
             </div>
         </div>
+        <?php foreach ($products as $key => $value) { ?>
+            <div class="modal" id="imagemodal_<?php echo $key; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header d-flex justify-content-between align-items-center">
+                        <h4 class="modal-title" id="myModalLabel"><?php echo htmlspecialchars($value['name']); ?></h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        <img src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" id="imagepreview_<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php } ?>
 
-        <div class="modal" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header border-0">
@@ -275,7 +289,7 @@
                 </div>
             </div>
         </div>
-        <div class="modal" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
+        <div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header border-0">
@@ -509,6 +523,7 @@
                     </div>
                 `;
                 productListing.innerHTML += productCard;
+                moveModalsOutside();
             });
         } else if (query !== '') {
             productListing.innerHTML = `<h4 class="page-title" style="color:rgba(0,0,0,.5);font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
@@ -525,6 +540,12 @@
             event.preventDefault(); // Prevent the default action of the link
             var gatheredProductIds = selectedProducts.join(',');
             makeRequestToBackEnd(gatheredProductIds);
+        });
+    }
+    
+    function moveModalsOutside() {
+        $('#productListing .modal').each(function () {
+            $('body').append(this); // move modal to body
         });
     }
     });

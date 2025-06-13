@@ -63,15 +63,16 @@ class Invoices extends CI_Controller {
                         ->from('products')
                         ->group_start()
                         ->where('code', $searchTerm)
+                        ->where('is_deleted',0)
                         ->group_end()
                         ->get()
                         ->result_array();
                 } else {
                     if (strpos($searchTerm, '%') !== false) {
-                        $removeChar = str_replace('%','',$searchTerm);
-                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->group_start()->like('name', $removeChar)->group_end()->get()->result_array();
+                        $removeChar = str_replace('%','.*',$searchTerm);
+                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->group_start()->where('name REGEXP', $removeChar)->where('is_deleted',0)->group_end()->get()->result_array();
                     } else {
-                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->like('name', $searchTerm,'after')->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->like('name', $searchTerm,'after')->where('is_deleted',0)->get()->result_array();
                     }
                 }
                 $data['products'] = $products;

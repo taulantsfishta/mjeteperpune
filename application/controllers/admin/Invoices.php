@@ -151,7 +151,7 @@ class Invoices extends CI_Controller {
         
                 // Add a page
                 $pdf->AddPage();
-                log_message('error','IMAGE'.json_encode($_POST));
+
                 if(isset($_POST['id'])){
                     $clientInvoice = $this->updateClientInvoice($_POST);
                 }else{
@@ -260,7 +260,8 @@ class Invoices extends CI_Controller {
                     $pdf->Output('FATURA_'.$clientInvoice['id'].'.pdf', 'I');
                     
                     redirect(base_url(). 'admin/invoices/created');
-                }else{
+
+                }else if($_POST['submit_type'] == 'printo_faturen_excel'){
                     $spreadsheet = new Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
 
@@ -391,6 +392,9 @@ class Invoices extends CI_Controller {
                     $writer->save('php://output');
 
                     exit;
+                }else if($_POST['submit_type'] == 'ruaj_faturen'){
+                    $clientData = $this->db->select('*')->from('invoices')->where('id',$clientInvoice['id'])->order_by('id', 'desc')->limit(1)->get()->row_array();
+                    exit(json_encode($clientData));
                 }
             } else {
                 // Handle missing POST data or other validation issues
@@ -457,7 +461,6 @@ class Invoices extends CI_Controller {
         } else {
             // Handle missing image
             $sheet->setCellValue("G{$row}", 'Image not found');
-            log_message('error', 'Image download failed: ' . $fullImageUrl);
         }
         
         
@@ -561,6 +564,21 @@ class Invoices extends CI_Controller {
                 $_SESSION['title_name'] = 'FATURA';
                 $data['page_title'] = 'FATURA';
                 $invoiceData = $this->db->select('*')->from('invoices')->where('id', $_GET['id'])->get()->row_array();  
+                echo json_encode($invoiceData);  
+                return;
+        } else {
+            $data = array();
+            $data['heading'] = 'Mesazhi';
+            $data['message'] = "Nuk keni qasje ne kete faqe";
+            $this->load->view('errors/html/error_404', $data);
+        }
+    }
+
+
+    public function get_invoices(){
+        if ($this->session->userdata('role') == 'admin') {
+                $data = array();
+                $invoiceData = $this->db->select('*')->from('invoices')->where('user_id',$this->session->userdata('id'))->order_by('created_at', 'desc')->get()->result_array();
                 echo json_encode($invoiceData);  
                 return;
         } else {

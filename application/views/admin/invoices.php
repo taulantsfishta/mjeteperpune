@@ -227,6 +227,7 @@ textarea:focus, input:focus{
                     <div class="col-lg-2"></div>
                     <div class="col-lg-10">
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
+                        <button type="submit" id="saveBtn"  class="btn" name="submit_type" style="color:white;background:#ff5733;width:170px;" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
                         <button type="submit" id="printBtn" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
                         <button type="submit" id="downloadBtn" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
                         <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
@@ -433,7 +434,6 @@ $(document).ready(function() {
                 var image = selectedProduct.data('image');
 
                 image = image.split("/").pop();
-                console.log(image,'imageee')
                 // Populate the corresponding fields in the main table row
                 row.find('.product_name').val(productName);
                 row.find('.code').val(code);
@@ -623,17 +623,77 @@ $(document).ready(function(){
   });
 
   $("#backButton").click(function() {
-        $("#invoiceTableData").hide();
-        $("#invoicesStructure").show();
+    $.ajax({
+        url: window.base_url + 'admin/invoices/get_invoices', // Replace with your actual PHP script URL
+        method: 'GET',
+        data: { id: invoiceId },
+        success: function(response) {
+            var res = JSON.parse(response);
+            let html = `<div class="row" id='invoicesStructure'>
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="col-lg-3"></div>
+                                <div class="col-lg-6"><input class="form-control" id="myInput" type="text" placeholder="Kerko..."></div>
+                                <div class="col-lg-3"></div>
+                            </div>
+                            <br>
+                            <table class="table table-bordered table-striped table-hover" data-tablesaw-mode="columntoggle" id="invoiceData" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
+                                <thead>
+                                <tr>
+                                    <th  class="table-col-7">ID</th>
+                                    <th class="table-col-20">KLIENTI</th>
+                                    <th class="table-col-20">ADRESA</th>
+                                    <th class="table-col-12">TOTALI</th>
+                                    <th class="table-col-12">DATA E KRIJIMIT</th>
+                                    <th class="table-col-7">VEPRIMI</th>
+                                </tr>
+                                </thead>
+                            <tbody id="invoicesStructureBody">`;
+                            res.forEach(function(value, index) {
+                            html += `
+                                        <tr data-id="${value.id}">
+                                        <td  class="table-col-7"><?php echo $adminName ?> - ${value.id}</td>
+                                        <td class="table-col-20">${escapeHtml(value.client_name)}</td>
+                                        <td class="table-col-20">${escapeHtml(value.address)}</td>
+                                        <td class="table-col-12">${escapeHtml(value.total_price_invoice)}</td>
+                                        <td class="table-col-12">${escapeHtml(value.created_at)}</td>
+                                        <td>
+                                            <a href="${window.base_url}admin/invoices/delete_inovice/${value.id}" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="${value.id}">
+                                                <button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button>
+                                            </a>
+                                        </td>
+                                        </tr>`
+                            });
+                            html += `</tbody>
+                                    </table>
+                                </div>
+                            </div>`;
+            $("#invoicesStructure").html(html);
+            $("#invoiceTableData").hide();
+            $("#invoicesStructure").show();
+        },
+        error: function(error) {
+            console.error("Error fetching details:", error);
+        }
+    });
+
+    function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
   });
 
   // Event listener for clicking on a row to load invoice details
-  $("#invoiceData").on("click", "tr", function(e) {
-    if (e.target.tagName === 'TD' || e.target.tagName === 'TR') { // Ensure click is on row or cell, not child elements like buttons
-      invoiceId = $(this).data("id");
-      loadDetailsTable(invoiceId);
-    }
-  });
+    $(document).on("click", "#invoiceData tbody tr", function(e) {
+        if (e.target.tagName === 'TD' || e.target.tagName === 'TR') {
+            invoiceId = $(this).data("id");
+            loadDetailsTable(invoiceId);
+        }
+    });
 });
 
 function loadDetailsTable(invoiceId) {
@@ -705,5 +765,33 @@ $(document).ready(function() {
         setTimeout(function () {
             window.location.reload();
         }, 2000); // Adjust time if needed
+    });
+    $('#saveBtn').on('click', function(e) {
+        e.preventDefault();
+        const formData = $('#sales_form').serialize() + '&submit_type=ruaj_faturen';
+        // Check if the last row's product_name, price, and quantity are not empty
+        var lastRow = $('#product_rows tr').last();
+        var productName = lastRow.find('.product_name').val().trim();
+        var price = lastRow.find('.price').val().trim();
+        var quantity = lastRow.find('.quantity').val().trim();
+        var total_product_price = lastRow.find('.total_product_price').val().trim();
+        var input = document.createElement("input");
+        if (productName !== '' && price !== '' && quantity !== '') {
+            $.ajax({
+                type: 'POST',
+                url: $('#sales_form').attr('action'),
+                data: formData,
+                success: function(response) {
+                    var res = JSON.parse(response);
+                    $('#successModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving:', error);
+                    $('#errorModal').modal('show');
+                }
+            });
+        } else {
+            $('#noRowAdded').modal('show'); // Show the modal if fields are empty
+        }
     });
 </script>

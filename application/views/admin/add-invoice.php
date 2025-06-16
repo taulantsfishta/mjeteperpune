@@ -75,11 +75,11 @@
                     <div class="col-lg-2"></div>
                     <div class="col-lg-3">
                         <label for="client_name">Emri I Klientit:</label>
-                        <input type="text" id="client_name" name="client_name" autocomplete="off" required><br><br>
+                        <input type="text" id="client_name" name="client_name" autocomplete="off" value="QYTETAR" required><br><br>
                     </div>
                     <div class="col-lg-3">
                         <label for="address">Adresa:</label>
-                        <input type="text" id="address" name="address" autocomplete="off" required><br><br>
+                        <input type="text" id="address" name="address" value="KOSOVE" autocomplete="off" required><br><br>
                     </div>
                     
                     <div class="col-lg-3">
@@ -160,6 +160,7 @@
                     <div class="col-lg-2"></div>
                     <div class="col-lg-10">
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
+                        <button type="submit" id="saveBtn"  class="btn" name="submit_type" style="color:white;background:#ff5733;width:170px;" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
                         <button type="submit" id="printBtn" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
                         <button type="submit" id="downloadBtn"  class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
                         <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
@@ -301,7 +302,6 @@ $(document).ready(function() {
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
-                console.log(response.products)
                 displaySearchResults(response.products, row);
             }
         };
@@ -375,7 +375,6 @@ $(document).ready(function() {
                 row.find('.total_product_price').val(total_product_price);
                 row.find('.total_price_invoice').val(total_price_invoice);
                 row.find('.image').val(image);
-                console.log('1');
                 // Focus on the quantity input field
                 row.find('.quantity').focus().select();
 
@@ -561,6 +560,45 @@ $(document).ready(function() {
             window.location.reload();
         }, 2000); // Adjust time if needed
     });
+
+$('#saveBtn').on('click', function(e) {
+    e.preventDefault();
+    const formData = $('#sales_form').serialize() + '&submit_type=ruaj_faturen';
+     // Check if the last row's product_name, price, and quantity are not empty
+    var lastRow = $('#product_rows tr').last();
+    var productName = lastRow.find('.product_name').val().trim();
+    var price = lastRow.find('.price').val().trim();
+    var quantity = lastRow.find('.quantity').val().trim();
+    var total_product_price = lastRow.find('.total_product_price').val().trim();
+    var input = document.createElement("input");
+    if (productName !== '' && price !== '' && quantity !== '') {
+        $.ajax({
+            type: 'POST',
+            url: $('#sales_form').attr('action'),
+            data: formData,
+            success: function(response) {
+                var res = JSON.parse(response);
+                input.type = "hidden";
+                input.name = "id";       // ✅ REQUIRED for form submission
+                input.value = res.id;       // Value to submit
+                input.id = "id";
+
+                // Append the input to the form
+                document.getElementById("sales_form").appendChild(input);
+
+                $('#successModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error('Error saving:', error);
+                $('#errorModal').modal('show');
+            }
+        });
+    } else {
+        $('#noRowAdded').modal('show'); // Show the modal if fields are empty
+    }
+});
+
+
 </script>
 
 

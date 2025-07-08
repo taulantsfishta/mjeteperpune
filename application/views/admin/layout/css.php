@@ -108,6 +108,7 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
 
     <!-- Footable CSS -->
     <link href="<?php echo base_url(); ?>optimum/plugins/bower_components/footable/css/footable.core.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 
 

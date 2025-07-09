@@ -150,7 +150,6 @@
                         </div>    
                     </div>
                 </div>
-                </div>
                 <div class="row">
                     <div class="col-lg-8">
                         <div id="search_results_container">
@@ -221,21 +220,20 @@
 
 
 <script>
-
     window.base_url = <?php echo json_encode(base_url()); ?>;   
     $(document).ready(function() {
-
+        var rowIdx = 1;
+        var lastClickedRow = null;
+        var prepayment;
+        var totalSum;
+        
         $(document).on('blur', '.product_name, .quantity, .price', function() {
             const row = $(this).closest('tr');
             validateRowFields(row);
         });
 
         $('.product_name').first().focus(); //fokusohet tek emri i produktit
-        
-        var rowIdx = 1;
-        var lastClickedRow = null;
-        var prepayment;
-        var totalSum;
+
         // Function to add a new row to the main table (#sales_table)
         function addRow() {
             if ($('.product_name').last().val() !== '') {
@@ -437,7 +435,6 @@
                     row.find('.total_product_price').val(total_product_price);
                     row.find('.total_price_invoice').val(total_price_invoice);
                     row.find('.image').val(image);
-                    // Focus on the quantity input field
                     row.find('.quantity').focus().select();
 
                     // Hide the search results table after selection
@@ -489,30 +486,6 @@
                 }
             }
         });
-
-        function getValidationErrorsForRow(row, rowIndex) {
-            const errors = [];
-            const name = row.find('.product_name').val().trim();
-            const quantity = row.find('.quantity').val().trim();
-            const price = row.find('.price').val().trim();
-
-            const quantityNum = parseFloat(quantity);
-            const priceNum = parseFloat(price);
-
-            if (name === '') {
-                errors.push(`Rreshti ${rowIndex}: Emri i produktit është bosh.`);
-            }
-
-            if (quantity === '' || isNaN(quantityNum) || quantityNum <= 0) {
-                errors.push(`Rreshti ${rowIndex}: Sasia duhet të jetë numër më i madh se 0.`);
-            }
-
-            if (price === '' || isNaN(priceNum) || priceNum < 0) {
-                errors.push(`Rreshti ${rowIndex}: Çmimi duhet të jetë ≥ 0 dhe numër i vlefshëm.`);
-            }
-
-            return errors;
-        }
 
         // Function to update row numbers
         function updateRowNumbers() {
@@ -634,9 +607,33 @@
               const isNameValid = name !== '';
 
               return isQuantityValid && isPriceValid && isNameValid;
-          }
+        }
+        
+        function getValidationErrorsForRow(row, rowIndex) {
+            const errors = [];
+            const name = row.find('.product_name').val().trim();
+            const quantity = row.find('.quantity').val().trim();
+            const price = row.find('.price').val().trim();
 
-                // Funksion që bën validimin vizual të inputeve në rresht
+            const quantityNum = parseFloat(quantity);
+            const priceNum = parseFloat(price);
+
+            if (name === '') {
+                errors.push(`Rreshti ${rowIndex}: Emri i produktit është bosh.`);
+            }
+
+            if (quantity === '' || isNaN(quantityNum) || quantityNum <= 0) {
+                errors.push(`Rreshti ${rowIndex}: Sasia duhet të jetë numër më i madh se 0.`);
+            }
+
+            if (price === '' || isNaN(priceNum) || priceNum < 0) {
+                errors.push(`Rreshti ${rowIndex}: Çmimi duhet të jetë ≥ 0 dhe numër i vlefshëm.`);
+            }
+
+            return errors;
+        }
+
+        // Funksion që bën validimin vizual të inputeve në rresht
         function validateRowFields(row) {
             const name = row.find('.product_name');
             const quantity = row.find('.quantity');
@@ -802,6 +799,21 @@
          }
 
          $('#saveBtn').on('click', function (e) {
+            const rows = $('#sales_table tbody tr');
+            if (rows.length > 1) {
+                rows.each(function () {
+                    const row = $(this);
+                    const name = row.find('.product_name').val().trim();
+                    const quantity = row.find('.quantity').val().trim();
+                    const price = row.find('.price').val().trim();
+
+                    const isEmpty = name === '' && quantity === '' && price === '';
+                    if (isEmpty) {
+                        row.remove();
+                    }
+                });
+            }
+            
              e.preventDefault();
              validateAndSubmitForm('ruaj_faturen', true); 
          });
@@ -866,7 +878,6 @@
                 $('#sales_form')[0].submit();
             });
         });
-
 
     });
 

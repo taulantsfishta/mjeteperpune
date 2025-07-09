@@ -1,12 +1,10 @@
-
-
 <style>
         body {
             zoom: 90%;
         }
 
         #mainDiv{
-            zoom: 85%
+            zoom: 83%
         }
         .no-border {
             border: none !important;

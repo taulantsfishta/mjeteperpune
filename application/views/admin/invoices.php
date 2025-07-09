@@ -5,7 +5,7 @@
 }
 
 #invoiceTableData{
-    zoom: 85%;
+    zoom: 83%;
 }
 
 tbody, td, tfoot, th, thead, tr {

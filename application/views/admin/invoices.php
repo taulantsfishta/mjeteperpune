@@ -4,6 +4,10 @@
    zoom: 90%;
 }
 
+#invoiceTableData{
+    zoom: 85%;
+}
+
 tbody, td, tfoot, th, thead, tr {
     border-color: inherit;
     border-style: solid;
@@ -759,6 +763,13 @@ $(document).ready(function(){
             $("#invoicesStructure").html(html);
             $("#invoiceTableData").hide();
             $("#invoicesStructure").show();
+                // 🔁 ADD THIS BELOW
+            $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#invoicesStructureBody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+            });
         },
         error: function(error) {
             console.error("Error fetching details:", error);

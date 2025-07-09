@@ -4,6 +4,10 @@
         body {
             zoom: 90%;
         }
+
+        #mainDiv{
+            zoom: 85%
+        }
         .no-border {
             border: none !important;
         }
@@ -98,7 +102,7 @@
             background-color: #ffcfcf !important; /* sfond për input-et */
         }
 </style>
-<div class="row">
+<div class="row" id='mainDiv'>
     <div class="col-lg-12">
         <div class="white-box" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
             <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">

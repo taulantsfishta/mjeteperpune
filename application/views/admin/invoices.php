@@ -116,6 +116,19 @@ textarea:focus, input:focus{
     border: 1px solid rgb(238, 100, 100) !important;
     background-color:rgb(245, 236, 236);
 }
+
+.price-zero-row {
+    background-color:  #ffcfcf !important;/* ngjyrë e verdhë e lehtë, për paralajmërim */
+}
+
+.price-zero-row td {
+    background-color: #ffcfcf !important; /* ngjyrë rozë paralajmëruese për input cells */
+}
+
+.price-zero-row input {
+    background-color: #ffcfcf !important; /* sfond për input-et */
+}
+
 </style>
 <div class="row" id='invoicesStructure'>
     <div class="col-lg-12">
@@ -354,6 +367,11 @@ $(document).ready(function() {
 
         row.find('.total_product_price').val(total.toFixed(2)); // Update total product price
         updateTotalSum(); // Update total sum
+        if (price === 0) {
+            row.addClass('price-zero-row');
+        } else {
+                row.removeClass('price-zero-row');
+        }
     }
 
     // Function to update the total sum
@@ -526,6 +544,11 @@ $(document).ready(function() {
                 $('#search_results_container').removeClass('results-expanded');
 
                 row.find('.product_name,.quantity, .price').removeClass('input-error');
+                if (parseFloat(price) === 0) {
+                    row.addClass('price-zero-row');
+                } else {
+                    row.removeClass('price-zero-row');
+                }
             });
 
             $("#search_results_body tr td.table-col-7").hover(
@@ -780,7 +803,9 @@ function loadDetailsTable(invoiceId) {
             $("#product_rows").empty();
             var row_data = JSON.parse(res.row_data);
             row_data.forEach(function(product, index) {
-                var row = `<tr>
+                var price = parseFloat(product.price) || 0;
+                var highlightClass = price === 0 ? 'price-zero-row' : '';
+                var row = `<tr class="${highlightClass}">
                     <td>${index + 1}</td>
                     <td><input type="text" class="product_name" name="product_name[]" value="${_.escape(product.product_name)}"></td>
                     <td><input type="text" class="code" name="code[]" value="${product.code}"></td>

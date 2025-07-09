@@ -86,7 +86,17 @@
             background-color:rgb(245, 236, 236);
         }
 
+        .price-zero-row {
+            background-color:  #ffcfcf !important;/* ngjyrë e verdhë e lehtë, për paralajmërim */
+        }
 
+        .price-zero-row td {
+            background-color: #ffcfcf !important; /* ngjyrë rozë paralajmëruese për input cells */
+        }
+
+        .price-zero-row input {
+            background-color: #ffcfcf !important; /* sfond për input-et */
+        }
 </style>
 <div class="row">
     <div class="col-lg-12">
@@ -271,6 +281,12 @@
 
             row.find('.total_product_price').val(total.toFixed(2)); // Update total product price
             updateTotalSum(); // Update total sum
+
+            if (price === 0) {
+                row.addClass('price-zero-row');
+            } else {
+                row.removeClass('price-zero-row');
+            }
         }
 
         // Function to update the total sum
@@ -443,6 +459,11 @@
                     $('#search_results_container').removeClass('results-expanded');
 
                     row.find('.product_name,.quantity, .price').removeClass('input-error');
+                    if (parseFloat(price) === 0) {
+                        row.addClass('price-zero-row');
+                    } else {
+                        row.removeClass('price-zero-row');
+                    }
 
                 });
 

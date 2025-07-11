@@ -207,7 +207,7 @@ class Invoices extends CI_Controller {
                         <tr style="height:100%;">
                             <td style="width:8%;">' . ($i + 1) . '.</td>
                             <td style="width:10%;"> ' . ($codes[$i]) . '</td>
-                            <td style="width:47%;"> ' . ($product_names[$i]) . '</td>
+                            <td style="width:47%;"> ' . strtoupper($product_names[$i]) . '</td>
                             <td style="width:10%;"> ' . ($quantities[$i]) . '</td>
                             <td style="width:10%;"> ' . ($prices[$i]) . '</td>
                             <td style="width:15%;"> ' . ($total_product_prices[$i]) . '</td>
@@ -297,7 +297,7 @@ class Invoices extends CI_Controller {
                         $row = $startRow + $i;
                         $sheet->setCellValue("A$row", $i + 1);
                         $sheet->setCellValue("B$row", $codes[$i]);
-                        $sheet->setCellValue("C$row", $product_names[$i]);
+                        $sheet->setCellValue("C$row", strtoupper($product_names[$i]));
                         $sheet->setCellValue("D$row", $quantities[$i]);
                         $sheet->setCellValue("E$row", $prices[$i]);
                         if($images[$i] !== ''){
@@ -483,7 +483,7 @@ class Invoices extends CI_Controller {
         
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
-            $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image'=>$dataClientInvoice['image'][$key]];
+            $newRowData[] = ['product_name' => strtoupper($value),'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image'=>$dataClientInvoice['image'][$key]];
         }
 
         $insertData = [
@@ -516,7 +516,7 @@ class Invoices extends CI_Controller {
         $data['total_price_left_invoice'] = $dataClientInvoice['total_price_left_invoice'];
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
-            $newRowData[] = ['product_name' => $value,'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image' => $dataClientInvoice['image'][$key]];
+            $newRowData[] = ['product_name' => strtoupper($value),'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image' => $dataClientInvoice['image'][$key]];
         }
 
         $updateData = [

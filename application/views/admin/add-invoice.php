@@ -1,7 +1,7 @@
 <style>
-        body {
+        /* body {
             zoom: 90%;
-        }
+        } */
 
         #mainDiv{
             zoom: 83%

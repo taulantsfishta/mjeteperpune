@@ -1,8 +1,8 @@
 <style>
  
- body {
+ /* body {
    zoom: 90%;
-}
+} */
 
 #invoiceTableData{
     zoom: 83%;

@@ -70,9 +70,9 @@ class Invoices extends CI_Controller {
                 } else {
                     if (strpos($searchTerm, '%') !== false) {
                         $removeChar = str_replace('%','.*',$searchTerm);
-                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->group_start()->where('name REGEXP', $removeChar)->where('is_deleted',0)->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->group_start()->where('name REGEXP', $removeChar)->where('is_deleted',0)->order_by('category_id','ASC')->group_end()->get()->result_array();
                     } else {
-                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->like('name', $searchTerm,'after')->where('is_deleted',0)->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->like('name', $searchTerm,'after')->where('is_deleted',0)->order_by('category_id','ASC')->get()->result_array();
                     }
                 }
                 $data['products'] = $products;
@@ -230,7 +230,7 @@ class Invoices extends CI_Controller {
                     $html .= '
                         <tfoot>
                         <tr class="total_sum">
-                            <td colspan="5">PARAPAGESE</td>
+                            <td colspan="5">PARAPAGESË</td>
                         <td><b> ' . htmlspecialchars($prepayment) . '</b></td>
                         </tr>
                         </tfoot>
@@ -326,7 +326,7 @@ class Invoices extends CI_Controller {
                     if ($prepayment > 0) {
                         // Prepayment row
                         $sheet->mergeCells("A{$nextRow}:E{$nextRow}");
-                        $sheet->setCellValue("A{$nextRow}", 'PARAPAGESE');
+                        $sheet->setCellValue("A{$nextRow}", 'PARAPAGESË');
                         $sheet->setCellValue("F{$nextRow}", number_format($prepayment, 2));
                         $sheet->getStyle("A{$nextRow}:F{$nextRow}")->applyFromArray([
                             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],

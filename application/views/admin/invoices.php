@@ -23,6 +23,7 @@ tbody, td, tfoot, th, thead, tr {
 .table-col-12 { width: 12%; }
 .table-col-36 { width: 41%; }
 .table-col-20 { width: 20%; }
+.table-col-10 { width: 10%; }
 
 
 .no-border {
@@ -146,10 +147,12 @@ textarea:focus, input:focus{
             <thead>
             <tr>
                 <th  class="table-col-7">ID</th>
-                <th class="table-col-20">KLIENTI</th>
-                <th class="table-col-20">ADRESA</th>
-                <th class="table-col-12">TOTALI</th>
-                <th class="table-col-12">DATA E KRIJIMIT</th>
+                <th class="table-col-10">KLIENTI</th>
+                <th class="table-col-10">ADRESA</th>
+                <th class="table-col-10">TOTALI</th>
+                <th class="table-col-10">PARAPAGESË</th>
+                <th class="table-col-10">SHUMA E MBETUR</th>
+                <th class="table-col-10">DATA E KRIJIMIT</th>
                 <th class="table-col-7">VEPRIMI</th>
             </tr>
             </thead>
@@ -158,10 +161,12 @@ textarea:focus, input:focus{
                     <?php foreach ($invoicesCreated as $key => $value) { ?>
                     <tr data-id="<?php echo $value['id']; ?>">
                         <td  class="table-col-7"><?php echo $adminName.'-'.$value['id']; ?></td>
-                        <td class="table-col-20"><?php echo htmlspecialchars($value['client_name']); ?></td>
-                        <td class="table-col-20"><?php echo htmlspecialchars($value['address']); ?></td>
-                        <td class="table-col-12"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
-                        <td class="table-col-12"><?php echo htmlspecialchars($value['created_at']); ?></td>
+                        <td class="table-col-10"><?php echo htmlspecialchars($value['client_name']); ?></td>
+                        <td class="table-col-10"><?php echo htmlspecialchars($value['address']); ?></td>
+                        <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
+                        <td class="table-col-10"><?php echo htmlspecialchars($value['prepayment_price_invoice']); ?></td>
+                        <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_left_invoice']); ?></td>
+                        <td class="table-col-10"><?php echo htmlspecialchars($value['created_at']); ?></td>
                         <td class="table-col-7"><a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="<?php echo $value['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a></td>
                     </tr>
                     <?php } ?>
@@ -195,9 +200,10 @@ textarea:focus, input:focus{
     <div class="col-lg-12">
         <div class="row">
             <div class="col-lg-3 text-left">
-                <button type="button" class="btn btn-info" style="color:white;background:#7396CE;"  id="backButton"><i class="fa fa-arrow-left"></i> Kthehu</button>
+                <button type="button" class="btn btn-info" style="color:white;background:#7396CE;"  id="backButton"><i class="fa fa-arrow-left"></i> KTHEHU</button>
             </div>
         </div>
+        <br>
         <div class="white-box" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
             <!-- Form to display the detailed invoice data -->
             <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
@@ -242,7 +248,7 @@ textarea:focus, input:focus{
                             <input type="text" id="total_price_invoice" name="total_price_invoice" readonly>
                         </div>
                         <div class="totals-line">
-                            <label><strong>PARAPAGESE</strong></label>
+                            <label><strong>PARAPAGESË</strong></label>
                             <input type="text" id="prepayment_price_invoice" name="prepayment_price_invoice">
                         </div>
                         <div class="totals-line">
@@ -351,46 +357,96 @@ $(document).ready(function() {
             `);
             $('#product_rows').find('.product_name').last().focus();
             updateRowNumbers(); // Update row numbers
-            updateTotalSum(); // Update total sum
+            updateTotalSum(true); // Update total sum
+            // Rifresko shumën e mbetur nëse parapagesa ekziston
+            const prepaymentVal = $('#prepayment_price_invoice').val().trim();
+            const prepayment = prepaymentVal === "" ? 0 : parseFloat(prepaymentVal);
+
+            if (!isNaN(prepayment) && prepayment > 0) {
+                if (prepayment > totalSum) {
+                    $('#prepayment_price_invoice').val('');
+                    $('#total_price_left_invoice').val('');
+                } else {
+                    const remaining = totalSum - prepayment;
+                    $('#total_price_left_invoice').val(remaining.toFixed(2));
+                }
+            }
         }
     }
 
     // Function to calculate total product price
-    function calculateTotalPrice(row) {
-        $('#prepayment_price_invoice').val('')
-        $('#total_price_left_invoice').val('')
+        function calculateTotalPrice(row) {
+            var quantity = parseFloat(row.find('.quantity').val()) || 0;
+            var price = parseFloat(row.find('.price').val()) || 0;
+            var total = quantity * price;
 
-        var quantity = parseFloat(row.find('.quantity').val()) || 0;
-        var price = parseFloat(row.find('.price').val()) || 0;
-        var total = quantity * price;
+            // If quantity or price is zero, ensure total is zero
+            if (quantity === 0 || price === 0) {
+                total = 0;
+            }
 
-        // If quantity or price is zero, ensure total is zero
-        if (quantity === 0 || price === 0) {
-            total = 0;
-        }
+            row.find('.total_product_price').val(total.toFixed(2)); // Update total product price
+            let totalSum = updateTotalSum(true); // mos e fshi parapagesën
 
-        row.find('.total_product_price').val(total.toFixed(2)); // Update total product price
-        updateTotalSum(); // Update total sum
-        if (price === 0) {
-            row.addClass('price-zero-row');
-        } else {
+            // Rifresko shumën e mbetur nëse parapagesa ekziston
+            const prepaymentVal = $('#prepayment_price_invoice').val().trim();
+            const prepayment = prepaymentVal === "" ? 0 : parseFloat(prepaymentVal);
+
+            if (!isNaN(prepayment) && prepayment > 0) {
+                if (prepayment > totalSum) {
+                    $('#prepayment_price_invoice').val('');
+                    $('#total_price_left_invoice').val('');
+                } else {
+                    const remaining = totalSum - prepayment;
+                    $('#total_price_left_invoice').val(remaining.toFixed(2));
+                }
+            }
+
+            if (price === 0 || price < 0) {
+                row.addClass('price-zero-row');
+            } else {
                 row.removeClass('price-zero-row');
+            }
         }
-    }
+
 
     // Function to update the total sum
-    function updateTotalSum() {
-        $('#prepayment_price_invoice').val('')
-        $('#total_price_left_invoice').val('')
+
+    function updateTotalSum(skipReset = false) {
+        if (!skipReset) {
+            $('#prepayment_price_invoice').val('');
+            $('#total_price_left_invoice').val('');
+        }
 
         totalSum = 0;
-        $('#sales_table tbody tr').each(function() {
-            var total = parseFloat($(this).find('.total_product_price').val()) || 0;
+            $('#sales_table tbody tr').each(function () {
+            const total = parseFloat($(this).find('.total_product_price').val()) || 0;
             totalSum += total;
         });
-        $('#total_price_invoice').val(totalSum.toFixed(2));
-        return totalSum;
 
+        $('#total_price_invoice').val(totalSum.toFixed(2));
+
+        if (skipReset) {
+            const prepaymentVal = $('#prepayment_price_invoice').val().trim();
+            const prepayment = prepaymentVal === "" ? 0 : parseFloat(prepaymentVal);
+
+        // Nëse parapagesa është bosh ose jo numër i vlefshëm
+            if (isNaN(prepayment) || prepaymentVal === "") {
+                $('#total_price_left_invoice').val('');
+            }
+            // Nëse parapagesa > totali → fshij parapagesën dhe shumën e mbetur
+            else if (prepayment > totalSum) {
+                $('#prepayment_price_invoice').val('');
+                $('#total_price_left_invoice').val('');
+            }
+            // Përndryshe → rifresko shumën e mbetur
+            else {
+                const remaining = totalSum - prepayment;
+                $('#total_price_left_invoice').val(remaining.toFixed(2));
+            }
+        }
+
+        return totalSum;
     }
 
     // Event listener for quantity and price changes
@@ -548,7 +604,7 @@ $(document).ready(function() {
                 $('#search_results_container').removeClass('results-expanded');
 
                 row.find('.product_name,.quantity, .price').removeClass('input-error');
-                if (parseFloat(price) === 0) {
+                if (parseFloat(price) === 0 || price < 0) {
                     row.addClass('price-zero-row');
                 } else {
                     row.removeClass('price-zero-row');
@@ -630,7 +686,7 @@ $(document).ready(function() {
                 lastClickedRow = null;
                 $('#delete_row').hide();
                 updateRowNumbers(); // Update row numbers
-                updateTotalSum(); // Update total sum
+                updateTotalSum(true); // Update total sum
             }
         } else {
             if (lastClickedRow) {
@@ -733,10 +789,12 @@ $(document).ready(function(){
                                 <thead>
                                 <tr>
                                     <th  class="table-col-7">ID</th>
-                                    <th class="table-col-20">KLIENTI</th>
-                                    <th class="table-col-20">ADRESA</th>
-                                    <th class="table-col-12">TOTALI</th>
-                                    <th class="table-col-12">DATA E KRIJIMIT</th>
+                                    <th class="table-col-10">KLIENTI</th>
+                                    <th class="table-col-10">ADRESA</th>
+                                    <th class="table-col-10">TOTALI</th>
+                                    <th class="table-col-10">PARAPAGESË</th>
+                                    <th class="table-col-10">SHUMA E MBETUR</th>
+                                    <th class="table-col-10">DATA E KRIJIMIT</th>
                                     <th class="table-col-7">VEPRIMI</th>
                                 </tr>
                                 </thead>
@@ -745,9 +803,11 @@ $(document).ready(function(){
                             html += `
                                         <tr data-id="${value.id}">
                                         <td  class="table-col-7"><?php echo $adminName ?> - ${value.id}</td>
-                                        <td class="table-col-20">${escapeHtml(value.client_name)}</td>
-                                        <td class="table-col-20">${escapeHtml(value.address)}</td>
-                                        <td class="table-col-12">${escapeHtml(value.total_price_invoice)}</td>
+                                        <td class="table-col-10">${escapeHtml(value.client_name)}</td>
+                                        <td class="table-col-10">${escapeHtml(value.address)}</td>
+                                        <td class="table-col-10">${escapeHtml(value.total_price_invoice)}</td>
+                                        <td class="table-col-10">${escapeHtml(value.prepayment_price_invoice)}</td>
+                                        <td class="table-col-10">${escapeHtml(value.total_price_left_invoice)}</td>
                                         <td class="table-col-12">${escapeHtml(value.created_at)}</td>
                                         <td>
                                             <a href="${window.base_url}admin/invoices/delete_inovice/${value.id}" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="${value.id}">
@@ -815,7 +875,7 @@ function loadDetailsTable(invoiceId) {
             var row_data = JSON.parse(res.row_data);
             row_data.forEach(function(product, index) {
                 var price = parseFloat(product.price) || 0;
-                var highlightClass = price === 0 ? 'price-zero-row' : '';
+                var highlightClass = price === 0 || price < 0 ? 'price-zero-row' : '';
                 var row = `<tr class="${highlightClass}">
                     <td>${index + 1}</td>
                     <td><input type="text" class="product_name" name="product_name[]" value="${_.escape(product.product_name)}"></td>
@@ -861,7 +921,7 @@ $(document).ready(function() {
               const priceNum = parseFloat(price);
 
               const isQuantityValid = quantity !== '' && !isNaN(quantityNum) && quantityNum > 0;
-              const isPriceValid = price !== '' && !isNaN(priceNum) && priceNum >= 0;
+              const isPriceValid = price !== '' && !isNaN(priceNum);
               const isNameValid = name !== '';
 
               return isQuantityValid && isPriceValid && isNameValid;
@@ -884,8 +944,8 @@ $(document).ready(function() {
                 errors.push(`Rreshti ${rowIndex}: Sasia duhet të jetë numër më i madh se 0.`);
             }
 
-            if (price === '' || isNaN(priceNum) || priceNum < 0) {
-                errors.push(`Rreshti ${rowIndex}: Çmimi duhet të jetë ≥ 0 dhe numër i vlefshëm.`);
+            if (price === '' || isNaN(priceNum)) {
+                errors.push(`Rreshti ${rowIndex}: Çmimi duhet të jete i mbushur dhe numër i vlefshëm.`);
             }
 
             return errors;
@@ -918,7 +978,7 @@ $(document).ready(function() {
             }
 
             // Çmimi
-            if (priceVal === '' || isNaN(priceNum) || priceNum < 0) {
+            if (priceVal === '' || isNaN(priceNum)) {
                 price.addClass('input-error');
             } else {
                 price.removeClass('input-error');
@@ -980,8 +1040,8 @@ $(document).ready(function() {
                      row.find('.quantity').removeClass('input-error');
                  }
 
-                 if (price === '' || isNaN(priceNum) || priceNum < 0) {
-                     errorMessages.push(`Rreshti ${index + 1}: Çmimi duhet të jetë ≥ 0.`);
+                 if (price === '' || isNaN(priceNum)) {
+                     errorMessages.push(`Rreshti ${index + 1}: Çmimi duhet të jete i mbushur dhe numër i vlefshëm.`);
                      row.find('.price').addClass('input-error');
                      isFormValid = false;
                  } else {

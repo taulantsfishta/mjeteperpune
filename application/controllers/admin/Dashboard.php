@@ -70,26 +70,32 @@ class Dashboard extends CI_Controller {
 
     public function get_category($id){
         $data = array();
-        if(in_array($id, $this->session->userdata('view_category')) || (in_array(0, $this->session->userdata('view_category')))){
-            $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->where('is_deleted',0)->limit(20)->get()->result_array();
-            $total_row_products = $this->db->from('products')->where('category_id', $id)->count_all_results();
-            $category = $this->db->select()->from('category')->where('id', $id)->get()->row_array();
-            $_SESSION['title_name'] = $category['name'];
-            if ($this->session->userdata('name') == 'Genci') {
-                foreach ($products as &$product) {
-                    $product['price'] = round($product['price'] * 1.15, 1);
+        $category = $this->db->select()->from('category')->where('id', $id)->get()->row_array();
+        if($category !=null || $category !=''){
+            if(in_array($id, $this->session->userdata('view_category')) || (in_array(0, $this->session->userdata('view_category')))){
+                $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->where('is_deleted',0)->limit(20)->get()->result_array();
+                $total_row_products = $this->db->from('products')->where('category_id', $id)->count_all_results();
+                $_SESSION['title_name'] = $category['name'];
+                if ($this->session->userdata('name') == 'Genci') {
+                    foreach ($products as &$product) {
+                        $product['price'] = round($product['price'] * 1.15, 1);
+                    }
                 }
+                $data['products'] = $products;
+                $data['total_row_products'] =$total_row_products;
+                $data['category'] = $category;
+                $data['page_title'] = $category['name'];
+                $data['count'] = $this->common_model->get_user_total();
+                $data['main_content'] = $this->load->view('admin/products', $data, TRUE);
+                $this->load->view('admin/index', $data);
+            }else{
+                $data['heading'] = 'Mesazhi';
+                $data['message'] = "Nuk keni qasje ne kete faqe";
+                $this->load->view('errors/html/error_404', $data);
             }
-            $data['products'] = $products;
-            $data['total_row_products'] =$total_row_products;
-            $data['category'] = $category;
-            $data['page_title'] = $category['name'];
-            $data['count'] = $this->common_model->get_user_total();
-            $data['main_content'] = $this->load->view('admin/products', $data, TRUE);
-            $this->load->view('admin/index', $data);
         }else{
             $data['heading'] = 'Mesazhi';
-            $data['message'] = "Nuk keni qasje ne kete faqe";
+            $data['message'] = "Nuk egziston kjo kategori";
             $this->load->view('errors/html/error_404', $data);
         }
     }

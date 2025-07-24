@@ -7,58 +7,98 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <title>404 Page Not Found</title>
 <style type="text/css">
 
-::selection { background-color: #E13300; color: white; }
-::-moz-selection { background-color: #E13300; color: white; }
+/* Selection Styles */
+::selection { background-color: #ff6f61; color: #fff; }
+::-moz-selection { background-color: #ff6f61; color: #fff; }
 
+/* Reset some default styles */
 body {
-	background-color: #fff;
-	margin: 40px;
-	font: 13px/20px normal Helvetica, Arial, sans-serif;
-	color: #4F5155;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
 }
 
-a {
-	color: #003399;
-	background-color: transparent;
-	font-weight: normal;
-}
-
-h1 {
-	color: #444;
-	background-color: transparent;
-	border-bottom: 1px solid #D0D0D0;
-	font-size: 19px;
-	font-weight: normal;
-	margin: 0 0 14px 0;
-	padding: 14px 15px 10px 15px;
-}
-
-code {
-	font-family: Consolas, Monaco, Courier New, Courier, monospace;
-	font-size: 12px;
-	background-color: #f9f9f9;
-	border: 1px solid #D0D0D0;
-	color: #002166;
-	display: block;
-	margin: 14px 0 14px 0;
-	padding: 12px 10px 12px 10px;
-}
-
+/* Container Styling */
 #container {
-	margin: 10px;
-	border: 1px solid #D0D0D0;
-	box-shadow: 0 0 8px #D0D0D0;
+    max-width: 800px;
+    margin: 80px auto;
+    padding: 40px 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
 }
 
-p {
-	margin: 12px 15px 12px 15px;
+#container:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* Heading Styles */
+h1 {
+    font-size: 2em;
+    color: #444;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ececec;
+    padding-bottom: 10px;
+}
+
+h1 span {
+    font-weight: normal;
+}
+
+/* Message Styles */
+.message {
+    font-size: 1.1em;
+    color: #666;
+}
+
+/* Link Styles */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* Code block styles */
+code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #f8f8f8;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 10px 15px;
+    display: block;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #d14;
+}
+
+/* Responsive Typography */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px;
+    }
+    #container {
+        padding: 20px 15px;
+        margin: 40px auto;
+    }
+    h1 {
+        font-size: 1.5em;
+    }
 }
 </style>
+
 </head>
 <body>
-	<div id="container">
-		<h1><?php echo $heading; ?></h1>
-		<?php echo $message; ?>
-	</div>
+    <div id="container">
+        <h1><?php echo $heading; ?></h1>
+        <p class="message"><?php echo $message; ?></p>
+		<p><a href=<?php echo base_url().'admin/dashboard'; ?>>KTHEHU</a></p>
+    </div>
 </body>
 </html>

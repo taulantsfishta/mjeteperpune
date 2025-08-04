@@ -161,6 +161,28 @@
             position: fixed; /* ensure it's outside blur flow */
         }
 
+
+        #productListing {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: -15px; /* match Bootstrap column padding */
+            margin-right: -15px;
+        }
+
+        #productListing > .col-md-12.col-lg-4 {
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-bottom: 15px;
+        }
+
+
+        .card {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
     </style>
     
     <div role="search" class="background-blur" id="searchContainer">
@@ -365,7 +387,7 @@
                 if (products.length > 0) {
                     products.forEach(product => {
                         const productCard = `
-                                            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
+                                            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="margin-bottom: 18px; padding-right: 10px;">
                                                 <div class="card" style="margin-bottom: 10px;">
                                                     <img id="imageresource_${product.id}" imgId=${product.id} style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="${url}optimum/products_images/${product.image}" class="lazyload img-fluid" / >
                                                         <div class="card-body">

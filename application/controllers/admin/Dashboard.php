@@ -137,50 +137,50 @@ class Dashboard extends CI_Controller {
         }else{
             if ($view_category[0] == 0) {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('code', $_GET['query'])->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('code', $_GET['query'])->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('code', $_GET['query'])->where('is_deleted',0)->group_end()->get()->result_array();
                 }elseif (strpos($_GET['query'], '%') !== false) {
                     $query = trim($_GET['query']);
                     $query = str_replace('%', '.*', $query); // Convert % to SQL regex wildcard
 
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('name REGEXP', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('name REGEXP', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('name REGEXP', $query)->where('is_deleted',0)->group_end()->get()->result_array();
                 }elseif (strpos($_GET['query'], '$') !== false) {
                     $query = trim($_GET['query']);
                     $query = str_replace('$', '', $query); // Convert % to SQL regex wildcard
 
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('price', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('price', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('price', $query)->where('is_deleted',0)->group_end()->get()->result_array();
                 }else{
                     if(strpos($_GET['query'], "DELETE") !== false){
-                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',1)->order_by('category_id','ASC')->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',1)->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                         $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',1)->group_end()->get()->result_array();
                     }else{
-                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                         $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->group_end()->get()->result_array();
                     }
                 }
             } else {
                 if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('code', $_GET['query'])->where('is_deleted',0)->group_end()->get()->result_array();
                 }elseif (strpos($_GET['query'], '%') !== false) {
                     $query = trim($_GET['query']);
                     $query = str_replace('%', '.*', $query); // Convert % to SQL regex wildcard
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('name REGEXP', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('name REGEXP', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('name REGEXP', $query)->where('is_deleted',0)->group_end()->get()->result_array();
                 }elseif (strpos($_GET['query'], '$') !== false) {
                     $query = trim($_GET['query']);
                     $query = str_replace('$', '', $query); // Convert % to SQL regex wildcard
 
-                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('price', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                    $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('price', $query)->where('is_deleted',0)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('price', $query)->where('is_deleted',0)->group_end()->get()->result_array();
                 } else {
                     if(strpos($_GET['query'], "DELETE") !== false){
-                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',1)->order_by('category_id','ASC')->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',1)->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                         $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',1)->group_end()->get()->result_array();
                     }else{
-                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                         $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->group_end()->get()->result_array();
                     }
                 }

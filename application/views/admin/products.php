@@ -519,53 +519,83 @@
 
         if (products.length > 0) {
             products.forEach(product => {
-                const productCard = `
-                    <div class="col-md-12 col-lg-4 mb-lg-0" id="mainDiv" style='padding-left:5px;padding-right: 5px;padding-bottom: 15px;'>
-                        <div class="card product-card d-flex flex-column h-100" data-product-id-main=${product.id} style="margin-bottom: 10px;">
-                            <img id="imageresource_${product.id}" imgId=${product.id} style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="${url}optimum/products_images/${product.image}" class="lazyload img-fluid" />
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <h5 class="mb-0">Kodi:</h5>
-                                    <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
-                                </div>
-                                <div class="d-flex justify-content-between mb-3">
-                                    <h5 class="mb-0">Përshkrimi:</h5>
-                                    <h5 class="text-dark mb-0" style="margin-left:10px;"><b>${product.name}</b></h5>
-                                </div>
-                                ${priceStatus == 1 ? `
-                                <div class="d-flex justify-content-between mb-3">
-                                    <h5 class="mb-0">Çmimi:</h5>
-                                    <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
-                                </div>` : ''}
-                                ${role == 'admin' ? `${product.is_deleted == 0 ? 
-                                    `<a href=${url}admin/products/get_product/${product.id} style="color:white;margin-right: 0px;" id=editButton_${product.id}><button class="btn btn-block" style="background:#53d1b2;"><i class="fa fa-edit"></i> Ndrysho Produktin</button></a>
-                                    <br>
-                                    <a href=${url}admin/products/delete_product/${category_id}/${product.id} style="color:white;margin-right: 0px;" data-toggle="modal" data-target="#confirmDeleteModal" style="background:#ff5e2dcc;" data-productid=${product.id} data-categoryid=${category_id} id=deleteButton_${product.id}><button class="btn btn-block" style="background:#ff5e2dcc;"><i class="fa fa-trash"></i> Fshije Produktin</button></a>
-                                    <br>
-                                    <a href=${url}admin/printproduct/print_one_product/${product.id} style="color:white;margin-right: 0px;display:none;background:#7396CE;" id=printButton_${product.id}><button class="btn btn-block"><i class="fa fa-print"></i> Printo Produktin</button></a>` 
-                                    : 
-                                    `<a href=${url}admin/products/delete_product/${category_id}/${product.id} style="color:white;margin-right: 0px;" data-toggle="modal" data-target="#confirmUNDeleteModal" style="background:#ff5e2dcc;" data-productid=${product.id} data-categoryid=${category_id} id=deleteButton_${product.id}><button class="btn btn-block" style="background:#ff5e2dcc;"><i class="fa fa-angle-left"></i> Rikthe Produktin</button></a>
-                                    <br>`} `
-                                : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header border-0">
-                                    <div class="modal-header d-flex justify-content-between align-items-center">
-                                        <h4 class="modal-title" id="myModalLabel">${product.name}</h4>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               const productCard = `
+                                    <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+                                        <div class="card product-card d-flex flex-column h-100" data-product-id-main="${product.id}">
+                                            <img 
+                                                id="imageresource_${product.id}"
+                                                imgId="${product.id}"
+                                                class="lazyload img-fluid mx-auto mt-3"
+                                                style="width:90px; height:70px; object-fit: contain;"
+                                                data-src="${url}optimum/products_images/${product.image}" 
+                                            />
+                                            <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+                                                <div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <h5 class="mb-0">Kodi:</h5>
+                                                        <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <h5 class="mb-0">Përshkrimi:</h5>
+                                                        <h5 class="text-dark mb-0 text-end" style="margin-left: 10px; font-size: 14px; line-height:1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
+                                                            <b>${product.name}</b>
+                                                        </h5>
+                                                    </div>
+                                                    ${priceStatus == 1 ? `
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <h5 class="mb-0">Çmimi:</h5>
+                                                        <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
+                                                    </div>` : ''}
+                                                </div>
+
+                                                ${role === 'admin' ? `
+                                                <div class="mt-2">
+                                                    ${product.is_deleted == 0 ? `
+                                                        <a href="${url}admin/products/get_product/${product.id}">
+                                                            <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_${product.id}">
+                                                                <i class="fa fa-edit"></i> Ndrysho Produktin
+                                                            </button>
+                                                        </a>
+                                                        <a href="${url}admin/products/delete_product/${category_id}/${product.id}" 
+                                                            data-toggle="modal" data-target="#confirmDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
+                                                            <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
+                                                                <i class="fa fa-trash"></i> Fshije Produktin
+                                                            </button>
+                                                        </a>
+                                                        <a href="${url}admin/printproduct/print_one_product/${product.id}" 
+                                                            style="display:none;" id="printButton_${product.id}">
+                                                            <button class="btn btn-block mt-2" style="background:#7396CE; font-size: 14px;">
+                                                                <i class="fa fa-print"></i> Printo Produktin
+                                                            </button>
+                                                        </a>`
+                                                        :
+                                                        `<a href="${url}admin/products/delete_product/${category_id}/${product.id}" 
+                                                            data-toggle="modal" data-target="#confirmUNDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
+                                                            <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
+                                                                <i class="fa fa-angle-left"></i> Rikthe Produktin
+                                                            </button>
+                                                        </a>`
+                                                    }
+                                                </div>` : ''}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="modal-body">
-                                    <img data-src="${url}optimum/products_images/${product.image}" id="imagepreview_${product.id}" class="lazyload img-fluid" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+
+                                    <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header d-flex justify-content-between align-items-center">
+                                                    <h4 class="modal-title" id="myModalLabel">${product.name}</h4>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <img data-src="${url}optimum/products_images/${product.image}" id="imagepreview_${product.id}" class="lazyload img-fluid" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+
                 productListing.innerHTML += productCard;
                 moveModalsOutside();
             });

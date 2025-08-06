@@ -257,7 +257,7 @@ class Invoices extends CI_Controller {
                     $pdf->writeHTML($html, true, false, true, false, '');
             
                     // Close and output PDF document
-                    $pdf->Output('FATURA_'.$clientInvoice['id'].'.pdf', 'I');
+                    $pdf->Output($client_name.'-'.'FATURA-'.$clientInvoice['id'].'.pdf', 'I');
                     
                     redirect(base_url(). 'admin/invoices/created');
 
@@ -385,7 +385,7 @@ class Invoices extends CI_Controller {
 
                     // === OUTPUT TO BROWSER ===
                     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    header('Content-Disposition: attachment;filename="fatura.xlsx"');
+                    header('Content-Disposition: attachment;filename="'.$client_name.'-'.'FATURA-'.$clientInvoice['id'].'.xlsx"');
                     header('Cache-Control: max-age=0');
 
                     $writer = new Xlsx($spreadsheet);

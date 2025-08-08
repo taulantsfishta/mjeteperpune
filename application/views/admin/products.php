@@ -188,6 +188,16 @@
             flex-grow: 1;
         }
 
+        .product-description{
+            margin-left:10px;
+            font-size:14px;
+            line-height:1.3;
+            display:block;           /* jo -webkit-box */
+            overflow:visible;        /* jo hidden */
+            white-space:normal;      /* lejo rreshta të shumtë */
+        }
+
+
         </style>
 
         <?php if ($this->session->userdata('role') == 'admin') : ?>
@@ -253,7 +263,7 @@
 
                                 <div class="d-flex justify-content-between mb-2">
                                     <h5 class="mb-0">Përshkrimi:</h5>
-                                    <h5 class="text-dark mb-0 text-end" style="margin-left: 10px; font-size: 14px; line-height:1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
+                                    <h5 class="text-dark mb-0 text-end product-description">
                                         <b><?php echo htmlspecialchars($value['name']); ?></b>
                                     </h5>
                                 </div>
@@ -537,7 +547,7 @@
                                                     </div>
                                                     <div class="d-flex justify-content-between mb-2">
                                                         <h5 class="mb-0">Përshkrimi:</h5>
-                                                        <h5 class="text-dark mb-0 text-end" style="margin-left: 10px; font-size: 14px; line-height:1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
+                                                        <h5 class="text-dark mb-0 text-end product-description">
                                                             <b>${product.name}</b>
                                                         </h5>
                                                     </div>

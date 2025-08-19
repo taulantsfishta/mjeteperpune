@@ -27,19 +27,35 @@
 
                 <form method="post" action="<?php echo base_url('admin/user/update/' . $user->id) ?>" class="form-horizontal">
                     <div class="form-group">
-                        <label class="col-md-12" for="example-text">First Name</label>
-                        <div class="col-sm-12">
+                        <label class="col-md-4" for="example-text">First Name</label>
+                        <div class="col-sm-4">
                             <input type="text" name="first_name" class="form-control" value="<?php echo $user->first_name; ?>" data-validation-required-message="Kerkohet emri i perdoruesit" disabled>
                         </div>
                     </div>
 
 
-                    <div class="form-group">
-                        <label class="col-md-12" for="example-text">Fjalekalimi</label>
-                        <div class="col-sm-12">
-                            <input type="password" value="<?php echo $user->password; ?>" name="password" class="form-control" data-validation-required-message="Kerkohet fjalekalimi" required>
-                        </div>
-                    </div>
+<div class="form-group">
+  <label class="col-md-4" for="passwordInput">Fjalekalimi</label>
+  <div class="col-sm-4">
+    <div class="input-group">
+      <input
+        type="password"
+        value="<?php echo $user->password; ?>"
+        name="password"
+        id="passwordInput"
+        class="form-control"
+        data-validation-required-message="Kerkohet fjalekalimi"
+        required
+      >
+      <span class="input-group-addon" id="togglePassword" style="cursor:pointer;">
+        <i class="fa fa-eye" aria-hidden="true"></i>
+      </span>
+    </div>
+  </div>
+</div>
+
+
+
 
                     Perdorues i ri <input <?php if ($user->role == "user") {
                                                 echo "checked";
@@ -112,6 +128,25 @@
         });
     });
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var toggle = document.getElementById("togglePassword");
+  var input  = document.getElementById("passwordInput");
+  toggle.addEventListener("click", function () {
+    var isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+    var icon = this.querySelector("i");
+    icon.classList.toggle("fa-eye", !isPassword);
+    icon.classList.toggle("fa-eye-slash", isPassword);
+    this.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+    this.setAttribute("title", isPassword ? "Hide password" : "Show password");
+  });
+});
+</script>
+
+
+
 
 
 <!-- End Page Content -->

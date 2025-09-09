@@ -132,7 +132,7 @@ class Products extends CI_Controller
                 }
                 $data = $this->security->xss_clean($data);
                 $this->common_model->edit_option($data, $_POST['id'], 'products');
-                redirect(base_url() . 'admin/dashboard/get_category/' . $product['category_id'].'?updated_product_id='.$_POST['id']);
+                redirect(base_url(). 'admin/products/get_product/' . $_POST['id']);
             } else {
                 redirect(base_url(). 'admin/dashboard');
             }

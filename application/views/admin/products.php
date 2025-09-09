@@ -278,19 +278,19 @@
 
                             <?php if ($this->session->userdata('role') == 'admin') : ?>
                                 <div class="mt-2">
-                                    <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>">
+                                    <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>"  target="_blank">
                                         <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_<?php echo $value['id']; ?>">
                                             <i class="fa fa-edit"></i> Ndrysho Produktin
                                         </button>
                                     </a>
                                     <a href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>" 
-                                        data-toggle="modal" data-target="#confirmDeleteModal" data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $category['id']; ?>">
+                                        data-toggle="modal" data-target="#confirmDeleteModal" data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $category['id']; ?>" >
                                         <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_<?php echo $value['id']; ?>">
                                             <i class="fa fa-trash"></i> Fshije Produktin
                                         </button>
                                     </a>
                                     <a href="<?php echo base_url('admin/printproduct/print_one_product/'. $value['id']); ?>" 
-                                        style="display:none;" id="printButton_<?php echo $value['id']; ?>">
+                                        style="display:none;" id="printButton_<?php echo $value['id']; ?>"  target="_blank">
                                         <button class="btn btn-block mt-2" style="background:#7396CE; font-size: 14px;">
                                             <i class="fa fa-print"></i> Printo Produktin
                                         </button>
@@ -561,7 +561,7 @@
                                                 ${role === 'admin' ? `
                                                 <div class="mt-2">
                                                     ${product.is_deleted == 0 ? `
-                                                        <a href="${url}admin/products/get_product/${product.id}">
+                                                        <a href="${url}admin/products/get_product/${product.id}"  target="_blank">
                                                             <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_${product.id}">
                                                                 <i class="fa fa-edit"></i> Ndrysho Produktin
                                                             </button>
@@ -573,7 +573,7 @@
                                                             </button>
                                                         </a>
                                                         <a href="${url}admin/printproduct/print_one_product/${product.id}" 
-                                                            style="display:none;" id="printButton_${product.id}">
+                                                            style="display:none;" id="printButton_${product.id}" target="_blank">
                                                             <button class="btn btn-block mt-2" style="background:#7396CE; font-size: 14px;">
                                                                 <i class="fa fa-print"></i> Printo Produktin
                                                             </button>

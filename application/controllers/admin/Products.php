@@ -144,7 +144,7 @@ class Products extends CI_Controller
         }
     }
 
-    public function delete_product($category_id,$product_id)
+    public function delete_product($category_id,$product_id,$is_main_page = false)
     {
         if ($this->session->userdata('role') == 'admin') {
             // $product = $this->db->select('products.image')->from('products')->where('id', $product_id)->get()->row_array();
@@ -153,7 +153,11 @@ class Products extends CI_Controller
             $this->common_model->edit_option($data, $product_id, 'products');
             // unlink('optimum/products_images/' . $product['image']);
             // $this->common_model->delete($product_id, 'products');
-            redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
+            if($is_main_page){
+                redirect(base_url(). 'admin/dashboard');
+            }else{
+                redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
+            }
         } else {
             $data = array();
             $data['heading'] = 'Mesazhi';
@@ -162,7 +166,7 @@ class Products extends CI_Controller
         }
     }
 
-    public function un_delete_product($category_id,$product_id)
+    public function un_delete_product($category_id,$product_id,$is_main_page = false)
     {
         if ($this->session->userdata('role') == 'admin') {
             // $product = $this->db->select('products.image')->from('products')->where('id', $product_id)->get()->row_array();
@@ -171,7 +175,11 @@ class Products extends CI_Controller
             $this->common_model->edit_option($data, $product_id, 'products');
             // unlink('optimum/products_images/' . $product['image']);
             // $this->common_model->delete($product_id, 'products');
-            redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
+            if($is_main_page){
+                redirect(base_url(). 'admin/dashboard');
+            }else{
+                redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
+            }
         } else {
             $data = array();
             $data['heading'] = 'Mesazhi';

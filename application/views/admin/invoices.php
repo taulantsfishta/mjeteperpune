@@ -1,3 +1,8 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
  
  /* body {
@@ -134,7 +139,213 @@ textarea:focus, input:focus{
     background-color: #ffcfcf !important; /* sfond për input-et */
 }
 
+        /* ===== MOBILE-ONLY FIXES ===== */
+        @media (max-width: 576px) {
+          /* kill the desktop zoom hacks on phones */
+          #invoiceTableData { zoom: 100% !important; }
+          .white-box { padding: 10px; font-size: 14px; }
+
+          /* form fields: full-width, readable */
+          label { font-size: 14px; }
+          input[type="text"],
+          input[type="date"],
+          textarea { font-size: 16px; } /* avoids iOS zoom-on-focus */
+
+          /* Table: keep structure, allow horizontal scroll */
+          #sales_table,
+          #search_results_table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+          }
+          #sales_table thead th,
+          #search_results_table thead th {
+            font-size: 13px;
+          }
+          #sales_table td,
+          #sales_table th,
+          #search_results_table td,
+          #search_results_table th {
+            padding: 6px 8px !important;
+          }
+
+          /* Make inputs inside table comfortable to tap */
+          .product_name,
+          .quantity,
+          .price,
+          .code,
+          .total_product_price {
+            min-width: 120px;        /* prevents squish */
+            height: 36px;            /* bigger tap target */
+            font-size: 16px;
+          }
+          /* Keep the first column small */
+          #sales_table td:first-child,
+          #search_results_table td:first-child { min-width: 40px; }
+
+          /* Search results area: shorter on phones */
+          #search_results_container { max-height: 390px; }
+          .results-expanded { max-height: 480px; font-size: 15px; }
+
+          /* Totals box: stack nicely and fill width */
+          .totals-section-box { margin-top: 12px; }
+          .totals-section-box .totals-line {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin-bottom: 10px;
+          }
+          #total_price_invoice,
+          #prepayment_price_invoice,
+          #total_price_left_invoice {
+            width: 100%;
+            height: 40px;
+            font-size: 16px;
+          }
+
+          /* Action buttons: stack, full width */
+          #saveBtn, #printBtn, #downloadBtn, #delete_row {
+            display: block;
+            width: 100%;
+            margin: 8px 0 0 0;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 16px;
+          }
+
+          /* Modals: fit screen width */
+          .modal-dialog {
+            margin: 10px;
+            max-width: 100%;
+            width: auto;
+          }
+          #productImage {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 60vh;
+          }
+
+          /* Warning/selection colors still visible on mobile */
+          .selected-row { background-color: #d1e7dd !important; }
+          .price-zero-row { background-color: #ffcfcf !important; }
+          .price-zero-row td, .price-zero-row input { background-color: #ffcfcf !important; }
+        }
+                /* Force equal row for client_name, address, date */
+        .form-row-equal {
+        display: flex;
+        align-items: center;       /* vertically align label + input */
+        gap: 10px;                 /* spacing between fields */
+        }
+
+        .form-row-equal .form-group {
+        flex: 1;                   /* each field takes equal width */
+        display: flex;
+        flex-direction: column;    /* stack label on top of input */
+        }
+
+        .form-row-equal label {
+        margin-bottom: 4px;
+        font-weight: bold;
+        font-size: 14px;
+        }
+
+        .form-row-equal input {
+        height: 40px;              /* comainDivnsistent height */
+        font-size: 15px;
+        padding: 6px 10px;
+        }
+
+        @media (max-width: 576px) {
+            .form-row-equal {
+                flex-direction: column;
+            }
+        }
+        /* Equal, full-width action buttons (incl. delete) */
+        .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        }
+
+        .action-buttons .btn {
+        display: block;
+        width: 100% !important;        /* overrides the inline 170px on RUAJ */
+        padding: 12px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 16px;
+        }
+
+        .action-buttons .btn i { margin-right: 6px; }
+        
+        /* ====== INVOICES: MOBILE FRIENDLY ====== */
+        @media (max-width: 576px) {
+        /* input i kërkimit: lexueshëm dhe pa zoom iOS */
+        #invoicesStructure .form-control#myInput {
+            font-size: 16px;
+            height: 42px;
+        }
+
+        /* wrapper që lejon scroll horizontal “butter-smooth” */
+        .table-responsive-mobile {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* jep një minimum gjerësi tabelës që të mos shtypet kolonat */
+        #invoiceData {
+            min-width: 820px; /* rrit/ul sipas kolonave që ke */
+        }
+
+        /* header sticky që të mos humbasësh titujt gjatë scroll-it */
+        #invoiceData thead th {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 2;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        /* pak më kompakte dhe të prekshme qelizat */
+        #invoiceData td, #invoiceData th {
+            padding: 8px 10px !important;
+        }
+
+        /* për të shmangur “squish” në kolonat tekstuale */
+        #invoiceData td:nth-child(2),
+        #invoiceData td:nth-child(3) {
+            min-width: 160px;
+        }
+
+        /* butoni i fshirjes: target më i madh për gishtin */
+        #invoiceData .btn.btn-xs,
+        #invoiceData .btn.btn-danger.btn-circle.btn-xs {
+            padding: 10px 12px;
+            font-size: 16px;
+            border-radius: 12px;
+            line-height: 1.1;
+        }
+
+        /* modali të futet në ekran */
+        #confirmDeleteModal .modal-dialog {
+            margin: 10px;
+            max-width: 100%;
+            width: auto;
+        }
+        }
+
+
+
+
 </style>
+</head>
+
+<body>
 <div class="row" id='invoicesStructure'>
     <div class="col-lg-12">
         <div class="row">
@@ -143,36 +354,38 @@ textarea:focus, input:focus{
             <div class="col-lg-3"></div>
         </div>
         <br>
-        <table class="table table-bordered table-striped table-hover" data-tablesaw-mode="columntoggle" id="invoiceData" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
-            <thead>
-            <tr>
-                <th  class="table-col-7">ID</th>
-                <th class="table-col-10">KLIENTI</th>
-                <th class="table-col-10">ADRESA</th>
-                <th class="table-col-10">TOTALI</th>
-                <th class="table-col-10">PARAPAGESË</th>
-                <th class="table-col-10">SHUMA E MBETUR</th>
-                <th class="table-col-10">DATA E KRIJIMIT</th>
-                <th class="table-col-7">VEPRIMI</th>
-            </tr>
-            </thead>
-            <tbody id="invoicesStructureBody">
-            <?php if(isset($invoicesCreated)) { ?>
-                    <?php foreach ($invoicesCreated as $key => $value) { ?>
-                    <tr data-id="<?php echo $value['id']; ?>">
-                        <td  class="table-col-7"><?php echo $adminName.'-'.$value['id']; ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['client_name']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['address']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['prepayment_price_invoice']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_left_invoice']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['created_at']); ?></td>
-                        <td class="table-col-7"><a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="<?php echo $value['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a></td>
-                    </tr>
+        <div class="table-responsive-mobile">
+            <table class="table table-bordered table-striped table-hover" data-tablesaw-mode="columntoggle" id="invoiceData" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
+                <thead>
+                <tr>
+                    <th  class="table-col-7">ID</th>
+                    <th class="table-col-10">KLIENTI</th>
+                    <th class="table-col-10">ADRESA</th>
+                    <th class="table-col-10">TOTALI</th>
+                    <th class="table-col-10">PARAPAGESË</th>
+                    <th class="table-col-10">SHUMA E MBETUR</th>
+                    <th class="table-col-10">DATA E KRIJIMIT</th>
+                    <th class="table-col-7">VEPRIMI</th>
+                </tr>
+                </thead>
+                <tbody id="invoicesStructureBody">
+                    <?php if(isset($invoicesCreated)) { ?>
+                            <?php foreach ($invoicesCreated as $key => $value) { ?>
+                            <tr data-id="<?php echo $value['id']; ?>">
+                                <td  class="table-col-7"><?php echo $adminName.'-'.$value['id']; ?></td>
+                                <td class="table-col-10"><?php echo htmlspecialchars($value['client_name']); ?></td>
+                                <td class="table-col-10"><?php echo htmlspecialchars($value['address']); ?></td>
+                                <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
+                                <td class="table-col-10"><?php echo htmlspecialchars($value['prepayment_price_invoice']); ?></td>
+                                <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_left_invoice']); ?></td>
+                                <td class="table-col-10"><?php echo htmlspecialchars($value['created_at']); ?></td>
+                                <td class="table-col-7"><a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="<?php echo $value['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a></td>
+                            </tr>
+                            <?php } ?>
                     <?php } ?>
-                <?php } ?>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -207,18 +420,16 @@ textarea:focus, input:focus{
         <div class="white-box" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
             <!-- Form to display the detailed invoice data -->
             <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
-                <div class="row">
-                    <div class="col-lg-2"></div>
-                    <div class="col-lg-3">
+                <div class="row form-row-equal">
+                    <div class="form-group">
                         <label for="client_name">Emri I Klientit:</label>
                         <input type="text" id="client_name" name="client_name" autocomplete="off" required><br><br>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="form-group">
                         <label for="address">Adresa:</label>
                         <input type="text" id="address" name="address" autocomplete="off" required><br><br>
                     </div>
-                    
-                    <div class="col-lg-3">
+                    <div class="form-group">
                         <label for="date">Data:</label>
                         <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required>
                     </div>
@@ -242,19 +453,21 @@ textarea:focus, input:focus{
                             </tbody>
                         </table>
                     </div>
-                    <div class="totals-section-box col-lg-4">
-                        <div class="totals-line">
+                    <div class="col-lg-4">
+                        <div id="totalsBox" class="totals-section-box">
+                            <div class="totals-line">
                             <label><strong>TOTALI</strong></label>
                             <input type="text" id="total_price_invoice" name="total_price_invoice" readonly>
-                        </div>
-                        <div class="totals-line">
+                            </div>
+                            <div class="totals-line">
                             <label><strong>PARAPAGESË</strong></label>
                             <input type="text" id="prepayment_price_invoice" name="prepayment_price_invoice">
-                        </div>
-                        <div class="totals-line">
+                            </div>
+                            <div class="totals-line">
                             <label><strong>SHUMA E MBETUR</strong></label>
                             <input type="text" id="total_price_left_invoice" name="total_price_left_invoice" readonly>
-                        </div>    
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -276,20 +489,35 @@ textarea:focus, input:focus{
                         </div>
                     </div>
                 </div>
+                <div id="totalsPlaceholder"></div>
                 <br><br>
                 <div class="row">
                     <div class="col-lg-8"><textarea name="comment" id="comment" style="width:100%;height:90px;" placeholder="Koment"></textarea></div>
                 </div>
                 <br>
                 <div class="row">    
-                    <div class="col-lg-10">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
-                        <button type="submit" id="saveBtn"  class="btn" name="submit_type" style="color:white;background:#ff5733;width:170px;" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
-                        <button type="submit" id="printBtn" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
-                        <button type="submit" id="downloadBtn" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
-                        <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
-                    </div>              
-                </div>
+                    <div class="col-lg-10 action-buttons">
+                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                                value="<?= $this->security->get_csrf_hash(); ?>" />
+                        <button type="submit" id="saveBtn" class="btn" name="submit_type"
+                                style="color:white;background:#ff5733;" value="ruaj_faturen">
+                            <i class="fa fa-save"></i> RUAJ
+                        </button>
+                        <button type="submit" id="printBtn" class="btn" name="submit_type"
+                                style="color:white;background:#7396CE;" value="printo_faturen">
+                            <i class="fa fa-edit"></i> PRINTO FATUREN
+                        </button>
+                        <button type="submit" id="downloadBtn" class="btn" name="submit_type"
+                                style="color:white;background:green;" value="printo_faturen_excel">
+                            <i class="fa fa-edit"></i> PRINTO EXCEL
+                        </button>
+                        <!-- hidden by default; same width when shown -->
+                        <button type="button" class="btn" id="delete_row"
+                                style="display:none;background:#ff5e2dcc;color:white;">
+                            <i class="fa fa-trash"></i> FSHIJ RRESHTAT
+                        </button>
+                    </div>
+               </div>
             </form>
         </div>
     </div>
@@ -327,11 +555,23 @@ textarea:focus, input:focus{
 
 <script>
 window.base_url = <?php echo json_encode(base_url()); ?>;
+window.blockResultsAutoClose = false;
 $(document).ready(function() {
     var rowIdx = 1;
     var lastClickedRow = null;
     var prepayment;
     var totalSum;
+
+    let searchDebounceTimer = null;
+    let currentXhr = null;
+    let lastQueryIssued = "";
+
+    $('#imageModal')
+    .on('show.bs.modal', function () { window.blockResultsAutoClose = true; })
+    .on('hidden.bs.modal', function () {
+    setTimeout(() => { window.blockResultsAutoClose = false; }, 50);
+    });
+        
     
     $(document).on('blur', '.product_name, .quantity, .price', function() {
         const row = $(this).closest('tr');
@@ -480,31 +720,56 @@ $(document).ready(function() {
     // Event listener for dynamically fetching product details based on product_name input
 
     $(document).on('input', '.product_name', function() {
-        var productName = $(this).val().trim();
-        var encodedProductName = encodeURIComponent(productName);
-        var row = $(this).closest('tr');
-        row.find('.product_name,.quantity, .price').removeClass('input-error');
+        const $row = $(this).closest('tr');
+        const raw = $(this).val();
+        const q = raw.trim();
 
-        if (productName === '') {
-            // Nëse inputi është bosh → rikthe gjendjen normale
+        // basic UI handling
+        $row.find('.product_name,.quantity,.price').removeClass('input-error');
+        if (!q) {
             $('#search_results_table').hide();
             $('#search_results_container').removeClass('results-expanded');
             return;
         } else {
-            // Sapo ka filluar kërkimi → fshi totalin, zmadho containerin
             $('#search_results_container').addClass('results-expanded');
         }
 
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", window.base_url + 'admin/invoices/?product_name=' + encodedProductName, true);
-
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                displaySearchResults(response.products, row);
+        // debounce: wait a bit after typing stops
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+            // cancel any in-flight request
+            if (currentXhr && currentXhr.readyState !== 4) {
+            currentXhr.abort();
+            currentXhr = null;
             }
-        };
-        xhr.send();
+
+            const encoded = encodeURIComponent(q);
+            lastQueryIssued = q;
+
+            currentXhr = new XMLHttpRequest();
+            currentXhr.open("GET", window.base_url + 'admin/invoices/?product_name=' + encoded, true);
+
+            currentXhr.onreadystatechange = function() {
+            if (currentXhr.readyState === 4) {
+                if (currentXhr.status === 200) {
+                // ignore stale responses (user kept typing)
+                if ($row.find('.product_name').val().trim() !== lastQueryIssued) return;
+
+                try {
+                    const resp = JSON.parse(currentXhr.responseText);
+                    displaySearchResults(resp.products || [], $row);
+                } catch (e) {
+                    console.error('Bad JSON from server', e);
+                }
+                } else if (currentXhr.status !== 0) {
+                // status 0 is from abort(); ignore it
+                console.error('Search XHR error', currentXhr.status);
+                }
+            }
+            };
+
+            currentXhr.send();
+        }, 250); // 250ms is a good balance
     });
 
     function displaySearchResults(results, row) {
@@ -634,6 +899,8 @@ $(document).ready(function() {
             $('#search_results_table').hide();
         }
     }
+
+    
 
     // Event listener for adding a new row when Enter key is pressed in product_name input
     $(document).on('keypress', '.product_name,.quantity,.price,.total_product_price', function(e) {
@@ -1197,6 +1464,253 @@ $(document).ready(function() {
             });
         });
 
+            (function () {
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 576px)').matches;
+    if (!isMobile) return;
+
+    // Kill any desktop hover handlers on these cells
+    $(document).off('mouseenter mouseleave', '#search_results_body td.table-col-7');
+
+    let suppressClick = false;      // avoid double trigger (touchstart + click)
+    let lastImageUrl = null;
+    let scrollStartY = null;
+
+    function openPreview($tr) {
+        const imageUrl = $tr.data('image');
+        const name = $tr.data('product-name');
+        if (!imageUrl) return;
+
+        // If already showing this image, don't flicker
+        if ($('#imageModal').hasClass('show') && imageUrl === lastImageUrl) return;
+
+        $('#productName').text(name);
+        $('#productImage').attr('src', imageUrl);
+        lastImageUrl = imageUrl;
+
+        if (!$('#imageModal').hasClass('show')) {
+        $('#imageModal').modal('show');
+        }
+    }
+
+    // Tap to open (touch first, then click fallback)
+    $(document).on('touchstart', '#search_results_body td.table-col-7', function (e) {
+        suppressClick = true; setTimeout(() => suppressClick = false, 350);
+        e.stopPropagation();
+        openPreview($(this).closest('tr'));
+    });
+
+    $(document).on('click', '#search_results_body td.table-col-7', function (e) {
+        if (suppressClick) return; // ignore the click that follows touch
+        e.stopPropagation();
+        openPreview($(this).closest('tr'));
+    });
+
+    // Hide preview when user scrolls the results list (prevents “stuck” modal)
+    $('#search_results_container')
+        .off('touchstart.searchscroll touchmove.searchscroll touchend.searchscroll')
+        .on('touchstart.searchscroll', function (ev) {
+        const t = ev.originalEvent.touches && ev.originalEvent.touches[0];
+        scrollStartY = t ? t.clientY : null;
+        })
+        .on('touchmove.searchscroll', function (ev) {
+        const t = ev.originalEvent.touches && ev.originalEvent.touches[0];
+        if (scrollStartY != null && t && Math.abs(t.clientY - scrollStartY) > 10) {
+            $('#imageModal').modal('hide');
+        }
+        })
+        .on('touchend.searchscroll', function () {
+        scrollStartY = null;
+        });
+
+    // Close when tapping outside the modal or NR cell
+    $(document).on('touchstart', function (e) {
+        const $t = $(e.target);
+        if (
+        $t.closest('#imageModal .modal-content').length === 0 &&
+        $t.closest('#search_results_body td.table-col-7').length === 0
+        ) {
+        $('#imageModal').modal('hide');
+        }
+    });
+
+    // Lock body scroll while modal is open (iOS)
+    $('#imageModal')
+        .on('shown.bs.modal', function () { $('body').css('overflow', 'hidden'); })
+        .on('hidden.bs.modal', function () { $('body').css('overflow', ''); });
+    })();
+
+            // Remove any previous hover handlers you had on these cells
+        $(document).off('mouseenter mouseleave', '#search_results_body td.table-col-7');
+
+        // Smooth hide timer to avoid flicker when moving between rows
+        let imgHideTimer = null;
+
+        // Show/refresh preview on hover
+        $(document).on('mouseenter', '#search_results_body td.table-col-7', function () {
+        clearTimeout(imgHideTimer);
+
+        const $tr = $(this).closest('tr');
+        const imageUrl = $tr.data('image');           // already stored in your row
+        const productName = $tr.data('product-name');
+
+        $('#productName').text(productName);
+        $('#productImage').attr('src', imageUrl);
+
+        // If modal already open, just update; otherwise open it
+        const isVisible = $('#imageModal').hasClass('show');
+        if (!isVisible) {
+            $('#imageModal').modal('show');
+        }
+        });
+
+        // Hide preview shortly after leaving the index cell
+        $(document).on('mouseleave', '#search_results_body td.table-col-7', function () {
+        imgHideTimer = setTimeout(function () {
+            $('#imageModal').modal('hide');
+        }, 120);
+        });
+
+        
+        /* ========= MOBILE-ONLY JS (keeps desktop untouched) ========= */
+        (function() {
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 576px)').matches;
+        if (!isMobile) return;
+
+        // Numeric keyboard for qty/price
+        $(document).on('focus', '.quantity, .price', function() {
+            $(this).attr({ inputmode: 'decimal', pattern: '[0-9]*[.,]?[0-9]*', step: 'any' });
+        });
+
+        // Replace hover with tap for image preview on index cell
+        $(document).off('mouseenter mouseleave', '#search_results_body tr td.table-col-7');
+        $(document).off('hover', '#search_results_body tr td.table-col-7');
+        // $(document).on('click', '#search_results_body tr td.table-col-7', function(e) {
+        //     e.stopPropagation();
+        //     var imageUrl = $(this).closest('tr').data('image');
+        //     var productName = $(this).closest('tr').data('product-name');
+        //     $('#productName').text(productName);
+        //     $('#productImage').attr('src', imageUrl);
+        //     $('#imageModal').modal('show');
+        // });
+
+        // ❌ REMOVE the auto-hide-on-scroll behavior entirely.
+        // If you previously added it, make sure it’s gone:
+        // (No window.addEventListener('scroll', ...) anymore)
+
+        // Close results when tapping outside (but NOT while tapping inside input or table)
+        $(document)
+        .off('click touchstart._closeResults')
+        .on('click touchstart._closeResults', function(e) {
+            if (blockResultsAutoClose) return; // <-- don't close while image modal is open
+
+            const $t = $(e.target);
+            const insideResults = $t.closest('#search_results_container').length > 0;
+            const insideInput   = $t.closest('.product_name').length > 0;
+
+            if (!insideResults && !insideInput) {
+            $('#search_results_container').removeClass('results-expanded');
+            $('#search_results_table').hide();
+
+            // (only the bottom block had this part — keep it here if this is that block)
+            if (!$('#sales_table').closest('.row').find('#totalsBox').length) {
+                $('.col-lg-4').append($('#totalsBox'));
+            }
+            }
+        });
+
+
+        // Enter: if last row valid → add row; otherwise move focus forward
+        $(document).off('keypress', '.product_name,.quantity,.price,.total_product_price');
+        $(document).on('keypress', '.product_name,.quantity,.price,.total_product_price', function(e) {
+            if (e.which === 13) {
+            e.preventDefault();
+            const row = $(this).closest('tr');
+            const inputs = row.find('.product_name, .quantity, .price');
+            const idx = inputs.index(this);
+
+            if (typeof isValidRow === 'function' && isValidRow(row)) {
+                if (typeof addRow === 'function') addRow();
+                return;
+            }
+            const next = inputs.get(idx + 1);
+            if (next) $(next).focus();
+            }
+        });
+        })();
+
+        /* ========= END MOBILE-ONLY JS ========= */
+
+    }); // end document.ready
+
+
+    (function() {
+    // when typing in product_name -> move totals below search table
+        $(document).on('input', '.product_name', function() {
+            var val = $(this).val().trim();
+            if (val !== '') {
+            if (!$('#totalsPlaceholder #totalsBox').length) {
+                $('#totalsBox').appendTo('#totalsPlaceholder');
+            }
+            } else {
+            if (!$('#sales_table').closest('.row').find('#totalsBox').length) {
+                // move back to the original column (col-lg-4)
+                $('.col-lg-4').append($('#totalsBox'));
+            }
+            }
+        });
+
+        // also hide search results restores totals
+        $(document)
+        .off('click touchstart._closeResults')
+        .on('click touchstart._closeResults', function(e) {
+            if (blockResultsAutoClose) return; // <-- don't close while image modal is open
+
+            const $t = $(e.target);
+            const insideResults = $t.closest('#search_results_container').length > 0;
+            const insideInput   = $t.closest('.product_name').length > 0;
+
+            if (!insideResults && !insideInput) {
+            $('#search_results_container').removeClass('results-expanded');
+            $('#search_results_table').hide();
+
+            // (only the bottom block had this part — keep it here if this is that block)
+            if (!$('#sales_table').closest('.row').find('#totalsBox').length) {
+                $('.col-lg-4').append($('#totalsBox'));
+            }
+            }
+        });
+
+                // helper: handle selection + show/hide delete button
+        function selectRowForDelete($row) {
+        if (window._lastClickedRow && window._lastClickedRow.length) {
+            window._lastClickedRow.removeClass('selected-row');
+        }
+
+        if (window._lastClickedRow && window._lastClickedRow.is($row)) {
+            // same row tapped again -> unselect
+            window._lastClickedRow = null;
+            $('#delete_row').hide();
+        } else {
+            window._lastClickedRow = $row;
+            $row.addClass('selected-row');
+            $('#delete_row').show();
+        }
+        }
+
+        // make it work on mobile too (touch/click)
+        $(document)
+        .off('click touchstart', '#product_rows td:first-child')
+        .on('click touchstart', '#product_rows td:first-child', function (e) {
+            // avoid competing global handlers swallowing the event
+            e.stopPropagation();
+            e.preventDefault();
+
+            const $row = $(this).closest('tr');
+            selectRowForDelete($row);
+        });
+
 });
 
 </script>
+</body>
+</html>

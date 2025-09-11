@@ -183,7 +183,15 @@
             height: 100%;
         }
 
+        .admin-actions { display: none; }
+        .show-admin-actions .admin-actions { display: block; }
+
     </style>
+
+    <?php if ($this->session->userdata('role') == 'admin') : ?>
+
+    <?php endif ?>
+
     
     <div role="search" class="background-blur" id="searchContainer">
         <label for="s1">Search for:</label>
@@ -226,6 +234,21 @@
                             </div>
                         <?php endif ?>
                     </div>
+                    <?php if ($this->session->userdata('role') == 'admin') : ?>
+                        <div class="mt-2 admin-actions">
+                            <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>"  target="_blank">
+                                <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_<?php echo $value['id']; ?>">
+                                    <i class="fa fa-edit"></i> Ndrysho Produktin
+                                </button>
+                            </a>
+                            <a href="<?php echo base_url('admin/products/delete_product/' . $value['category_id'] . '/' . $value['id']); ?>" 
+                                data-toggle="modal" data-target="#confirmDeleteModal" data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $value['category_id']; ?>" >
+                                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_<?php echo $value['id']; ?>">
+                                    <i class="fa fa-trash"></i> Fshije Produktin
+                                </button>
+                            </a>
+                        </div>
+                    <?php endif ?>
                 </div>
             </div>
         <?php } ?>
@@ -238,21 +261,61 @@
 
     <?php foreach ($products as $key => $value) { ?>
         <div class="modal" id="imagemodal_<?php echo $key; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header border-0">
-                                    <div class="modal-header d-flex justify-content-between align-items-center">
-                                        <h4 class="modal-title" id="myModalLabel"><?php echo $value['name']; ?></h4>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                </div>
-                                <div class="modal-body">
-                                    <img src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" id="imagepreview_<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                                </div>
-                            </div>
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <div class="modal-header d-flex justify-content-between align-items-center">
+                            <h4 class="modal-title" id="myModalLabel"><?php echo $value['name']; ?></h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+                    </div>
+                    <div class="modal-body">
+                        <img src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" id="imagepreview_<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
+                    </div>
+                </div>
+            </div>
         </div>
     <?php } ?>
+
+    <div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    A jeni i sigurt qe deshironi te fshini kete produkt?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                    <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="confirmUNDeleteModalLabel">Konfirmo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                A jeni i sigurt qe deshironi te riktheni kete produkt?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                <a id="UNdeleteProductLink" href="#" class="btn btn-danger">Rikthe</a>
+            </div>
+        </div>
+        </div>
+    </div>
 
 
     <script>
@@ -261,12 +324,28 @@
                 setTimeout(() => {
                 window.scrollTo(0, 0);
             }, 10);
+            var role = "<?php echo $_SESSION['role']; ?>";
             const searchInput = document.getElementById("searchInput");
             const searchIcon = document.getElementById("searchIcon");
             const productListing = document.getElementById("productListing");
             window.base_url = <?php echo json_encode(base_url()); ?>;
             const url = window.base_url;
             
+            function onCtrlB(e) {
+                if (e.ctrlKey && (e.key === 'b' || e.key === 'B')) {
+                e.preventDefault();        // stop browser default (bold, bookmarks, etc.)
+                e.stopPropagation();       // stop other handlers
+                document.body.classList.toggle('show-admin-actions');
+                }
+            }
+
+            // Capture-phase listener so it runs even when inputs have focus
+            document.addEventListener('keydown', onCtrlB, true);
+
+            // (Optional) belt-and-suspenders: also bind directly to the input
+            if (searchInput) {
+                searchInput.addEventListener('keydown', onCtrlB);
+            }
             let loadingIndicator = document.getElementById("loadingIndicator");
             let isLoading = false; // Prevent multiple simultaneous requests
             let offset = 0; // Start after the initially loaded products
@@ -385,6 +464,7 @@
                 // productListing.innerHTML = "";
 
                 if (products.length > 0) {
+                    console.log(products,'products')
                     products.forEach(product => {
                         const productCard = `
                                             <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="margin-bottom: 18px; padding-right: 10px;">
@@ -406,6 +486,30 @@
                                                             </div>
                                                             ` : ''}
                                                         </div>
+                                                        
+                                                        ${role === 'admin' ? `
+                                                        <div class="mt-2 admin-actions">
+                                                            ${product.is_deleted == 0 ? `
+                                                                <a href="${url}admin/products/get_product/${product.id}"  target="_blank">
+                                                                    <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_${product.id}">
+                                                                        <i class="fa fa-edit"></i> Ndrysho Produktin
+                                                                    </button>
+                                                                </a>
+                                                                <a href="${url}admin/products/delete_product/${product.category_id}/${product.id}" 
+                                                                    data-toggle="modal" data-target="#confirmDeleteModal" data-productid="${product.id}" data-categoryid="${product.category_id}">
+                                                                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
+                                                                        <i class="fa fa-trash"></i> Fshije Produktin
+                                                                    </button>
+                                                                </a>`
+                                                                :
+                                                                `<a href="${url}admin/products/delete_product/${product.category_id}/${product.id}" 
+                                                                    data-toggle="modal" data-target="#confirmUNDeleteModal" data-productid="${product.id}" data-categoryid="${product.category_id}">
+                                                                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
+                                                                        <i class="fa fa-angle-left"></i> Rikthe Produktin
+                                                                    </button>
+                                                                </a>`
+                                                            }
+                                                        </div>` : ''}
                                                 </div>
                                             </div>
                                             <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -439,6 +543,30 @@
             }
         });
 
+        $(document).ready(function() {
+            // Listen for the modal's "Delete" button click event
+            $('#confirmDeleteModal').on('show.bs.modal', function(e) {
+            var productID = $(e.relatedTarget).data('productid'); // Get the product ID
+            var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
+            var deleteButton = $(this).find('#deleteProductLink'); // Get the "Delete" button in the modal
+
+            // Update the "Delete" button link with the appropriate product ID
+            deleteButton.attr('href', '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID + '/' + 'true');
+            });
+        });
+        
+        $(document).ready(function() {
+            // Listen for the modal's "Delete" button click event
+            $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
+            var productID = $(e.relatedTarget).data('productid'); // Get the product ID
+            var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
+            var undeleteButton = $(this).find('#UNdeleteProductLink'); // Get the "Delete" button in the modal
+
+            // Update the "Delete" button link with the appropriate product ID
+            undeleteButton.attr('href', '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID + '/'  + 'true');
+            });
+        });
+
         function moveModalsOutside() {
             $('#productListing .modal').each(function () {
                 $('body').append(this); // move modal to body
@@ -461,26 +589,26 @@
         });
     </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var searchContainer = document.getElementById('searchContainer');
-        var searchInput = document.getElementById('searchInput');
-        var searchIcon = document.getElementById('searchIcon');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchContainer = document.getElementById('searchContainer');
+            var searchInput = document.getElementById('searchInput');
+            var searchIcon = document.getElementById('searchIcon');
 
-        searchInput.addEventListener('focus', function() {
-        searchContainer.classList.add('focused');
-        });
+            searchInput.addEventListener('focus', function() {
+            searchContainer.classList.add('focused');
+            });
 
-        searchInput.addEventListener('blur', function() {
-        searchContainer.classList.remove('focused');
-        });
+            searchInput.addEventListener('blur', function() {
+            searchContainer.classList.remove('focused');
+            });
 
-        searchIcon.addEventListener('focus', function() {
-        searchContainer.classList.add('focused');
-        });
+            searchIcon.addEventListener('focus', function() {
+            searchContainer.classList.add('focused');
+            });
 
-        searchIcon.addEventListener('blur', function() {
-        searchContainer.classList.remove('focused');
+            searchIcon.addEventListener('blur', function() {
+            searchContainer.classList.remove('focused');
+            });
         });
-    });
-</script>
+    </script>

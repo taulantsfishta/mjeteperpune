@@ -658,19 +658,30 @@
         });
     });
 
-    document.getElementById("productListing").addEventListener("click", function(event) {
-        // Check if the clicked element has the class "img-fluid"
-        if (event.target.classList.contains("img-fluid")) {
-            var fullid = event.target.getAttribute('imgId');
-                $('#imageresource_' + fullid).attr('src', $('#imagepreview_' + fullid).attr('src'));
-                $('#imagemodal_' + fullid).modal('show');
-            }
-    });
+    function cacheBust(url) {
+        if (!url) return url;
+        const sep = url.includes('?') ? '&' : '?';
+        return url + sep + 'cb=' + Date.now();
+    }
 
-    $(".img-fluid").on("click", function() {
-        var fullid = $(this).attr('imgId');
-        $('#imageresource_' + fullid).attr('src', $('#imagepreview_' + fullid).attr('src')); // here asign the image to the modal when the user click the enlarge link
-        $('#imagemodal_' + fullid).modal('show'); // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
+    document.getElementById("productListing").addEventListener("click", function(event) {
+        // only react when a product image is clicked
+        const el = event.target;
+        if (!el.classList.contains("img-fluid")) return;
+
+        const fullid = el.getAttribute('imgId');
+        // prefer src if present; otherwise fall back to data-src (lazyload)
+        const listImg = document.getElementById('imageresource_' + fullid);
+        const currentListUrl = listImg.getAttribute('src') || listImg.getAttribute('data-src');
+
+        // set the MODAL preview src to the *current* list image url with cache-buster
+        const modalImg = document.getElementById('imagepreview_' + fullid);
+        modalImg.removeAttribute('data-src');     // ensure lazyload won’t interfere
+        modalImg.classList.remove('lazyload');    // modal should load immediately
+        modalImg.setAttribute('src', cacheBust(currentListUrl));
+
+        // show the modal
+        $('#imagemodal_' + fullid).modal('show');
     });
 
 

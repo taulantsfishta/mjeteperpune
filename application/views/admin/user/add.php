@@ -9,14 +9,8 @@
 
 <div class="row">
     <div class="col-lg-12">
-
-
         <div class="panel panel-info" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
-            <!-- <div class="panel-heading"> -->
-                <!-- <i class="fa fa-plus"></i> &nbsp;Shto perdorues<a href="<?php echo base_url('admin/user/all_user_list') ?>" class="btn btn-success btn-sm pull-right"><i class="fa fa-list"></i>Lista e perdoruesve</a> -->
-            <!-- </div> -->
             <div class="panel-body table-responsive">
-
                 <?php $error_msg = $this->session->flashdata('error_msg'); ?>
                 <?php if (isset($error_msg)) : ?>
                     <div class="alert alert-danger delete_msg pull" style="width: 100%"> <i class="fa fa-times"></i> <?php echo $error_msg; ?> &nbsp;
@@ -32,8 +26,6 @@
                             <input type="text" name="first_name" class="form-control" data-validation-required-message="Kerkohet emri i perdoruesit" required>
                         </div>
                     </div>
-
-
                     <div class="form-group">
                         <label class="col-md-12" for="example-text">Fjalekalimi</label>
                         <div class="col-sm-12">
@@ -41,8 +33,8 @@
                         </div>
                     </div>
                     <div id="formaCheckbox">
-                        Perdorues i ri <input type="radio" onclick="yesnoCheck();" name="role" id="yesCheck" value="user">
-                        Admin i ri <input type="radio" onclick="yesnoCheck();" name="role" id="noCheck" value="admin" checked='checked'><br>
+                        <span>ADMIN </span><input type="radio" onclick="yesnoCheck();" name="role" id="yesCheck" value="user"><br><br>
+                        <span>PËRDORUES </span> <input type="radio" onclick="yesnoCheck();" name="role" id="noCheck" value="admin" checked='checked'><br>
                         <div id="ifYes" style="display: none;"> <!-- Set display to none -->
                             <hr>
                             Zgjedh Kategorit:&nbsp;<br>
@@ -65,11 +57,10 @@
                             <button type="submit" class="btn btn-success btn-rounded btn-sm"> <i class="fa fa-plus"></i>&nbsp;&nbsp;Ruaj</button>
                         </div>
                     </div>
+                </form>
             </div>
-            </form>
         </div>
     </div>
-</div>
 </div>
 
 <!-- End Page Content -->

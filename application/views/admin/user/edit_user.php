@@ -43,7 +43,7 @@
                         </div>
                     </div>
                     <div id="useradmindiV">
-                        <span>ADMIN </span><input <?php if ($user->role == "admin") { echo "checked"; }; ?> type="radio" onclick="javascript:yesnoCheck();" name="role" id="noCheck" value="admin"><br>
+                        <span>ADMIN </span><input <?php if ($user->role == "admin") { echo "checked"; }; ?> type="radio" onclick="javascript:yesnoCheck();" name="role" id="noCheck" value="admin"><br><br>
                         <span>PËRDORUES </span> <input <?php if ($user->role == "user") { echo "checked";}; ?> type="radio" onclick="javascript:yesnoCheck();" name="role" id="yesCheck" value="user"><br>
 
                     </div>

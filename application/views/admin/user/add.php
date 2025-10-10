@@ -33,8 +33,8 @@
                         </div>
                     </div>
                     <div id="formaCheckbox">
-                        <span>ADMIN </span><input type="radio" onclick="yesnoCheck();" name="role" id="yesCheck" value="user"><br><br>
-                        <span>PËRDORUES </span> <input type="radio" onclick="yesnoCheck();" name="role" id="noCheck" value="admin" checked='checked'><br>
+                        <span>ADMIN </span> <input type="radio" onclick="yesnoCheck();" name="role" id="noCheck" value="admin" checked='checked'><br><br>
+                        <span>PËRDORUES </span><input type="radio" onclick="yesnoCheck();" name="role" id="yesCheck" value="user"><br>
                         <div id="ifYes" style="display: none;"> <!-- Set display to none -->
                             <hr>
                             Zgjedh Kategorit:&nbsp;<br>

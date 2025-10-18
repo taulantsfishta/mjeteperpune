@@ -220,7 +220,7 @@ class Invoices extends CI_Controller {
                                 <th style="width:47%;"> EMRI I PRODUKTIT</th>
                                 <th style="width:10%;"> SASIA</th>
                                 <th style="width:10%;"> ÇMIMI</th>
-                                <th style="width:15%;"> CMIMI TOTAL I PRODUKTIT</th>
+                                <th style="width:15%;"> TOTALI</th>
                             </tr>
                         </thead>
                         <tbody style="border-right:none;">
@@ -307,7 +307,7 @@ class Invoices extends CI_Controller {
                     // === TABLE HEADER ===
                     $headerRow = 6;
                     $sheet->fromArray(
-                        ['#', 'KODI', 'EMRI I PRODUKTIT', 'SASIA', 'ÇMIMI', 'CMIMI TOTAL I PRODUKTIT'],
+                        ['#', 'KODI', 'EMRI I PRODUKTIT', 'SASIA', 'ÇMIMI', 'TOTALI'],
                         null,
                         "A{$headerRow}"
                     );

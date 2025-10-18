@@ -1,180 +1,455 @@
 <style>
- 
- /* body {
-   zoom: 90%;
-} */
+:root{
+  --border:#e4e7ea;
+  --warn:#ffcfcf;
+  --radius:12px;
+  --shadow:0 6px 20px rgba(0,0,0,.06);
 
-#invoiceTableData{
-    zoom: 83%;
+  /* MAIN table column widths */
+  --w-nr:50px;   /* main table NR */
+  --w-name:45%;
+  --w-code:8%;
+  --w-qty:12%;
+  --w-price:12%;
+  --w-total:12%;
 }
 
-tbody, td, tfoot, th, thead, tr {
-    border-color: inherit;
-    border-style: solid;
-    border-width: medium;
+/* Main layout */
+#mainDiv{
+  max-width:1600px;       /* bigger workspace */
+  margin:0 auto;
+  padding:35px 40px;
+  background:#fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size:15px;
 }
 
-.table-hover > tbody > tr:hover {
-  background-color: #7395b3;
+/* Top form */
+.form-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:20px;
+  align-items:end;
+}
+.form-grid label{ font-weight:600; color:#4b5563; font-size:14px; }
+.form-grid input{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  font-size:15px;
+  outline:none;
 }
 
-.table-col-7 { width: 7%; }
-.table-col-33 { width: 33%; }
-.table-col-12 { width: 12%; }
-.table-col-36 { width: 41%; }
-.table-col-20 { width: 20%; }
-.table-col-10 { width: 10%; }
+/* Two-column content area */
+.content-grid{
+  display:grid;
+  grid-template-columns: 2fr 1fr;
+  gap:20px;
+}
+
+/* Tables */
+.table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+.table th, .table td{
+  border:1px solid var(--border);
+  padding:8px;
+  font-size:15px;
+  text-align:left;
+  vertical-align:middle;
+}
+.table th{
+  background:#f5f7fb;
+  font-weight:700;
+}
+.table input{
+  width:100%;
+  border:none;
+  border-bottom:1px solid var(--border);
+  outline:none;
+  font-size:15px;
+  padding:5px;
+}
+
+/* MAIN table widths ONLY (do NOT target #search_results_table here) */
+#sales_table thead th:nth-child(1),
+#sales_table tbody td:nth-child(1){ width:var(--w-nr); text-align:center; }
+#sales_table thead th:nth-child(2),
+#sales_table tbody td:nth-child(2){ width:var(--w-name); }
+#sales_table thead th:nth-child(3),
+#sales_table tbody td:nth-child(3){ width:var(--w-code); }
+#sales_table thead th:nth-child(4),
+#sales_table tbody td:nth-child(4){ width:var(--w-qty); }
+#sales_table thead th:nth-child(5),
+#sales_table tbody td:nth-child(5){ width:var(--w-price); }
+#sales_table thead th:nth-child(6),
+#sales_table tbody td:nth-child(6){ width:var(--w-total); }
+
+/* Search results: NR centered (width is enforced by <colgroup>) */
+#search_results_table thead th:first-child,
+#search_results_table tbody td:first-child{
+  text-align:center;
+  padding:4px 6px;
+}
+
+/* Wrappers */
+.table-wrap{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:auto;
+  box-shadow:var(--shadow);
+  background:#fff;
+}
+
+/* Search results directly under the main table */
+#search_results_container{ margin-top:12px; }
+#search_results_table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;          /* honors colgroup widths */
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:#fff;
+  display:none;                /* shown by JS when results exist */
+}
+
+/* Totals card */
+.totals-card{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  background:#fff;
+  padding:16px;
+}
+.totals-line{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:12px;
+}
+.totals-card input{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px;
+  font-weight:bold;
+  font-size:16px;
+}
+
+/* Buttons */
+.btn{
+  border:none;
+  border-radius:8px;
+  padding:10px 16px;
+  font-weight:bold;
+  color:#fff;
+}
+#saveBtn{background:#ff5733;}
+#printBtn{background:#7396CE;}
+#downloadBtn{background:green;}
+#delete_row{background:#ff5e2d;}
+
+.input-error{border:1px solid red !important; background:#ffecec;}
+.price-zero-row td,.price-zero-row input{background:var(--warn) !important;}
+.selected-row{background:#d1e7dd !important;}
+
+.modal-backdrop { display: none !important; }
+
+/* Preferred: stop stretching all items in the grid row */
+.content-grid{
+  align-items: start;   /* prevents the right column from matching left column height */
+}
+
+/* Extra safety: explicitly keep the totals card at its intrinsic height */
+.totals-card{
+  align-self: start;
+}
+
+/* --- Responsive behavior for totals-card --- */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;   /* stack vertically */
+  }
+
+  .totals-card {
+    margin-top: 20px;             /* spacing from table */
+    order: 2;                     /* ensures it stays after the table */
+    width: 100%;
+  }
+
+  .table-col {
+    order: 1;
+  }
+}
 
 
-.no-border {
+/* --- Equal height for table section and totals-card on desktop --- */
+@media (min-width: 1025px) {
+  .content-grid {
+    align-items: stretch; /* forces both columns to equal height */
+  }
+
+  .table-col,
+  .totals-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .table-wrap {
+    flex: 1 1 auto; /* makes the table fill available space */
+  }
+
+  #search_results_container {
+    flex-shrink: 0; /* keeps search results visible below */
+  }
+}
+
+
+/* === Buttons: vertical, full-width, same visual size as other cards === */
+
+/* Target the last row in the form (the one with the buttons) */
+#sales_form > .row:last-of-type {
+  /* make the whole block a card like totals/table */
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: #fff;
+  padding: 16px;
+  margin: 0;        /* keep tight with container */
+}
+
+/* Make its column fill the row and stack buttons vertically */
+#sales_form > .row:last-of-type .col-lg-10 {
+  width: 100%;           /* full width so it matches other blocks */
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;             /* space between buttons */
+  padding: 0;            /* remove Bootstrap column padding so card edges line up */
+}
+
+/* Buttons fill width and look consistent */
+#sales_form > .row:last-of-type .btn {
+  width: 100%;
+  padding: 16px 0;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+/* Optional: tighten on small screens (already stacks, but keep consistency) */
+@media (max-width: 1024px) {
+  #sales_form > .row:last-of-type {
+    margin-top: 16px;
+  }
+}
+
+/* Buttons section (no border, no card look) */
+#sales_form > .row:last-of-type {
+  background: transparent;   /* no background box */
+  border: none;               /* remove border */
+  box-shadow: none;           /* remove shadow */
+  border-radius: 0;           /* remove rounding */
+  padding: 16px;
+
+  display: flex;
+  justify-content: center;    /* center horizontally */
+  align-items: center;        /* center vertically */
+}
+
+/* Stack buttons vertically and center them */
+#sales_form > .row:last-of-type .col-lg-10 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  padding: 0;
+}
+
+/* Buttons same width, clean layout */
+#sales_form > .row:last-of-type .btn {
+  width: 70%;        /* adjust to 80% or 100% if you want wider */
+  padding: 14px 0;
+  font-size: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+
+/*invocieStructure*/
+
+/* Wrapper për tablet/desktop: scroll horizontal kur ka shumë kolona */
+.invoices-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pak konsolidim spacing në ekran të vogël */
+#invoicesStructure #myInput {
+  margin-bottom: 8px;
+}
+
+/* —— Tablet (<= 992px): ruaj tabelën me scroll, pak tipografi më e vogël —— */
+@media (max-width: 992px) {
+  #invoiceData {
+    font-size: 14px;
+  }
+  #invoicesStructure .table th,
+  #invoicesStructure .table td {
+    white-space: nowrap;
+  }
+}
+
+/* —— Mobile (<= 768px): kthim në "card/list" —— */
+@media (max-width: 768px) {
+  /* Fshi header për mobile */
+  #invoiceData thead {
+    display: none;
+  }
+
+  /* Çdo rresht si kartë */
+  #invoiceData tbody tr {
+    display: block;
+    border: 1px solid #e4e7ea;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    background: #fff;
+  }
+
+  /* Qelizat në dy kolona: Label (para) + Vlera (pas) */
+  #invoiceData tbody td {
+    display: grid;
+    grid-template-columns: 42% 58%;
+    align-items: center;
     border: none !important;
+    padding: 6px 0 !important;
+    font-size: 15px;
+  }
+
+  /* Vija ndarëse e lehtë mes fushave */
+  #invoiceData tbody td + td {
+    border-top: 1px dashed #e9ecef !important;
+    padding-top: 8px !important;
+    margin-top: 6px;
+  }
+
+  /* Label-at e kolonave (hard-coded me nth-child) */
+  #invoiceData tbody td:nth-child(1)::before { content: "ID"; }
+  #invoiceData tbody td:nth-child(2)::before { content: "Klienti"; }
+  #invoiceData tbody td:nth-child(3)::before { content: "Adresa"; }
+  #invoiceData tbody td:nth-child(4)::before { content: "Totali"; }
+  #invoiceData tbody td:nth-child(5)::before { content: "Parapagesë"; }
+  #invoiceData tbody td:nth-child(6)::before { content: "Shuma e mbetur"; }
+  #invoiceData tbody td:nth-child(7)::before { content: "Data e krijimit"; }
+  #invoiceData tbody td:nth-child(8)::before { content: "Veprimi"; }
+
+  /* Stili i label-it */
+  #invoiceData tbody td::before {
+    font-weight: 600;
+    color: #475569;
+    padding-right: 10px;
+  }
+
+  /* Butoni i veprimit në fund, i rreshtuar bukur */
+  #invoiceData tbody td:last-child {
+    margin-top: 8px;
+  }
+  #invoiceData tbody td:last-child a .btn {
+    transform: scale(1.05);
+  }
+
+  /* Hover/selected ngjyrat të përshtatshme për card */
+  #invoiceData.table-hover > tbody > tr:hover {
+    background-color: #f8fafc !important;
+  }
+  .selected-row {
+    background-color: #eef6ff !important;
+  }
+
+  /* Shmang overflow nga width fiks të kolonave */
+  .table-col-7, .table-col-10, .table-col-12, .table-col-33, .table-col-36, .table-col-20 {
+    width: auto !important;
+  }
 }
 
-.product_name, .quantity, .price, .code,.total_product_price {
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    width: 100%;
-    border-bottom: 0.1px solid #e4e7ea;;
+/* —— Small mobile (<= 380px): tipografi edhe më kompakte —— */
+@media (max-width: 380px) {
+  #invoiceData tbody td {
+    grid-template-columns: 48% 52%;
+    font-size: 14px;
+  }
+  #invoicesStructure .btn.btn-circle.btn-xs {
+    transform: scale(0.95);
+  }
 }
 
-.results-expanded {
-    max-height: 750px; /* më shumë lartësi për 12–15 rreshta */
-    overflow-y: auto;
-    font-size: 17px;
-}
-
-textarea:focus, input:focus{
-    outline: none;
-}
-
-.selected-row {
-    background-color: #d1e7dd !important;
-}
-
-#total_price{
-    border-right: none;
-}
-
-#total_price_invoice{
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    width: 100%;
-    border-bottom: 1px solid #e4e7ea;
-    font-weight: bold;
-    font-size:16px;
-}
-
-#total_price_invoice_name{
-    border-right: none;
-}
-
-#total_price{
-    border-right: none;
-}
-
-#total_price_invoice{
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    width: 100%;
-    border-bottom: 1px solid #e4e7ea;
-    font-weight: bold;
-    font-size:16px;
-}
-
-#prepayment_price_invoice{
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    width: 100%;
-    border-bottom: 1px solid #e4e7ea;
-    font-weight: bold;
-    font-size:16px;
-
-}
-
-#total_price_left_invoice{
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    width: 100%;
-    border-bottom: 1px solid #e4e7ea;
-    font-weight: bold;
-}
-#search_results_container {
-    max-height: 600px;
-    overflow-y: auto;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-#search_results_table td, #search_results_table th {
-    padding: 4px 6px !important;
-}
-
-.modal-backdrop {
-    display: none !important;
-}
-
-.input-error {
-    border: 1px solid rgb(238, 100, 100) !important;
-    background-color:rgb(245, 236, 236);
-}
-
-.price-zero-row {
-    background-color:  #ffcfcf !important;/* ngjyrë e verdhë e lehtë, për paralajmërim */
-}
-
-.price-zero-row td {
-    background-color: #ffcfcf !important; /* ngjyrë rozë paralajmëruese për input cells */
-}
-
-.price-zero-row input {
-    background-color: #ffcfcf !important; /* sfond për input-et */
-}
 
 </style>
-<div class="row" id='invoicesStructure'>
-    <div class="col-lg-12">
-        <div class="row">
-            <div class="col-lg-3"></div>
-            <div class="col-lg-6"><input class="form-control" id="myInput" type="text" placeholder="Kerko..."></div>
-            <div class="col-lg-3"></div>
-        </div>
-        <br>
-        <table class="table table-bordered table-striped table-hover" data-tablesaw-mode="columntoggle" id="invoiceData" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
-            <thead>
-            <tr>
-                <th  class="table-col-7">ID</th>
-                <th class="table-col-10">KLIENTI</th>
-                <th class="table-col-10">ADRESA</th>
-                <th class="table-col-10">TOTALI</th>
-                <th class="table-col-10">PARAPAGESË</th>
-                <th class="table-col-10">SHUMA E MBETUR</th>
-                <th class="table-col-10">DATA E KRIJIMIT</th>
-                <th class="table-col-7">VEPRIMI</th>
-            </tr>
-            </thead>
-            <tbody id="invoicesStructureBody">
-            <?php if(isset($invoicesCreated)) { ?>
-                    <?php foreach ($invoicesCreated as $key => $value) { ?>
-                    <tr data-id="<?php echo $value['id']; ?>">
-                        <td  class="table-col-7"><?php echo $adminName.'-'.$value['id']; ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['client_name']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['address']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['prepayment_price_invoice']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_left_invoice']); ?></td>
-                        <td class="table-col-10"><?php echo htmlspecialchars($value['created_at']); ?></td>
-                        <td class="table-col-7"><a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="<?php echo $value['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a></td>
-                    </tr>
-                    <?php } ?>
-                <?php } ?>
-            </tbody>
-        </table>
+<div class="row" id="invoicesStructure">
+  <div class="col-lg-12">
+    <div class="row">
+      <div class="col-lg-3 d-none d-lg-block"></div>
+      <div class="col-12 col-md-8 col-lg-6">
+        <input class="form-control" id="myInput" type="text" placeholder="Kerko...">
+      </div>
+      <div class="col-lg-3 d-none d-lg-block"></div>
     </div>
+    <br>
+
+    <!-- WRAPPER për responsivitet -->
+    <div class="invoices-table-wrap">
+      <table class="table table-bordered table-striped table-hover"
+             data-tablesaw-mode="columntoggle"
+             id="invoiceData"
+             style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
+        <thead>
+          <tr>
+            <th class="table-col-7">ID</th>
+            <th class="table-col-10">KLIENTI</th>
+            <th class="table-col-10">ADRESA</th>
+            <th class="table-col-10">TOTALI</th>
+            <th class="table-col-10">PARAPAGESË</th>
+            <th class="table-col-10">SHUMA E MBETUR</th>
+            <th class="table-col-10">DATA E KRIJIMIT</th>
+            <th class="table-col-7">VEPRIMI</th>
+          </tr>
+        </thead>
+        <tbody id="invoicesStructureBody">
+          <?php if(isset($invoicesCreated)) { ?>
+            <?php foreach ($invoicesCreated as $key => $value) { ?>
+            <tr data-id="<?php echo $value['id']; ?>">
+              <td class="table-col-7"><?php echo $adminName.'-'.$value['id']; ?></td>
+              <td class="table-col-10"><?php echo htmlspecialchars($value['client_name']); ?></td>
+              <td class="table-col-10"><?php echo htmlspecialchars($value['address']); ?></td>
+              <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
+              <td class="table-col-10"><?php echo htmlspecialchars($value['prepayment_price_invoice']); ?></td>
+              <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_left_invoice']); ?></td>
+              <td class="table-col-10"><?php echo htmlspecialchars($value['created_at']); ?></td>
+              <td class="table-col-7">
+                <a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>"
+                   data-toggle="modal"
+                   data-target="#confirmDeleteModal"
+                   data-invoiceid="<?php echo $value['id']; ?>">
+                  <button type="button" class="btn btn-danger btn-circle btn-lg"><i class="icon-trash"></i></button>
+                </a>
+              </td>
+            </tr>
+            <?php } ?>
+          <?php } ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
 
 <div class="modal" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -196,7 +471,7 @@ textarea:focus, input:focus{
     </div>
 </div>
 
-<div class="row" id="invoiceTableData" style="display:none;">
+<div class="row" id="mainDiv" style="display:none;">
     <div class="col-lg-12">
         <div class="row">
             <div class="col-lg-3 text-left">
@@ -204,124 +479,157 @@ textarea:focus, input:focus{
             </div>
         </div>
         <br>
-        <div class="white-box" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
-            <!-- Form to display the detailed invoice data -->
-            <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
-                <div class="row">
-                    <div class="col-lg-2"></div>
-                    <div class="col-lg-3">
-                        <label for="client_name">Emri I Klientit:</label>
-                        <input type="text" id="client_name" name="client_name" autocomplete="off" required><br><br>
-                    </div>
-                    <div class="col-lg-3">
-                        <label for="address">Adresa:</label>
-                        <input type="text" id="address" name="address" autocomplete="off" required><br><br>
-                    </div>
-                    
-                    <div class="col-lg-3">
-                        <label for="date">Data:</label>
-                        <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required>
-                    </div>
+        <div class="white-box">
+        <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
+
+            <!-- Top inputs -->
+            <div class="form-grid">
+            <div>
+                <label for="client_name">Emri I Klientit:</label>
+                <input type="text" id="client_name" name="client_name" value="QYTETAR" required>
+            </div>
+            <div>
+                <label for="address">Adresa:</label>
+                <input type="text" id="address" name="address" value="KOSOVE" required>
+            </div>
+            <div>
+                <label for="date">Data:</label>
+                <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required>
+            </div>
+            </div>
+
+            <br>
+
+            <!-- Main content -->
+            <div class="content-grid">
+            <!-- LEFT: table + search -->
+            <div class="table-col">
+                <div class="table-wrap">
+                <table id="sales_table" class="table table-bordered">
+                    <colgroup>
+                    <!-- NR fixed at ~34px -->
+                    <col style="width:38px">
+                    <!-- Keep other columns aligned; last column soaks the remaining space so NR never expands -->
+                    <col style="width:50%">
+                    <col style="width:5%">
+                    <col style="width:5%">
+                    <col style="width:calc(100% - 38px - 50% - 5% - 5%)">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th >NR</th>
+                        <th>EMRI I PRODUKTIT</th>
+                        <th>KODI</th>
+                        <th>SASIA</th>
+                        <th>ÇMIMI</th>
+                        <th>TOTALI</th>
+                    </tr>
+                    </thead>
+                    <tbody id="product_rows">
+
+                    </tbody>
+                </table>
                 </div>
-                <br><br>
-                <div class="row">
-                    <div class="col-lg-8">
-                        <table id="sales_table" class="table-bordered table">
-                            <thead>
-                                <tr>
-                                    <th class="table-col-7">#</th>
-                                    <th class="table-col-33">EMRI I PRODUKTIT</th>
-                                    <th class="table-col-12">KODI</th>
-                                    <th class="table-col-12">SASIA</th>
-                                    <th class="table-col-12">ÇMIMI</th>
-                                    <th class="table-col-12">CMIMI TOTAL I PRODUKTIT</th>
-                                </tr>
-                            </thead>
-                            <tbody id="product_rows">
-                                <!-- Placeholder for detailed invoice rows -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="totals-section-box col-lg-4">
-                        <div class="totals-line">
-                            <label><strong>TOTALI</strong></label>
-                            <input type="text" id="total_price_invoice" name="total_price_invoice" readonly>
-                        </div>
-                        <div class="totals-line">
-                            <label><strong>PARAPAGESË</strong></label>
-                            <input type="text" id="prepayment_price_invoice" name="prepayment_price_invoice">
-                        </div>
-                        <div class="totals-line">
-                            <label><strong>SHUMA E MBETUR</strong></label>
-                            <input type="text" id="total_price_left_invoice" name="total_price_left_invoice" readonly>
-                        </div>    
-                    </div>
+
+                <!-- Search results directly under -->
+                <div id="search_results_container">
+                <table id="search_results_table" class="table table-bordered">
+                    <!-- Force a smaller NR only for the search table -->
+                    <colgroup>
+                    <!-- NR fixed at ~34px -->
+                    <col style="width:38px">
+                    <!-- Keep other columns aligned; last column soaks the remaining space so NR never expands -->
+                    <col style="width:50%">
+                    <col style="width:10%">
+                    <col style="width:10%">
+                    <col style="width:calc(100% - 38px - 50% - 10% - 10%)">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>NR</th>
+                        <th>EMRI I PRODUKTIT</th>
+                        <th>KODI</th>
+                        <th>SASIA</th>
+                        <th>ÇMIMI</th>
+                    </tr>
+                    </thead>
+                    <tbody id="search_results_body"></tbody>
+                </table>
                 </div>
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div id="search_results_container" >
-                            <table id="search_results_table" class="table table-bordered" style="display: none;">
-                                <thead>
-                                    <tr>
-                                        <th class="table-col-7">NR <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
-                                        <th class="table-col-42">EMRI I PRODUKTIT <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
-                                        <th class="table-col-12">KODI</th>
-                                        <th class="table-col-12">SASIA</th>
-                                        <th class="table-col-12">ÇMIMI <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
-                                    </tr>
-                                </thead>
-                                <br>
-                                <tbody id="search_results_body"></tbody>
-                            </table>
-                        </div>
-                    </div>
+            </div>
+
+            <!-- RIGHT: totals -->
+            <div class="totals-card">
+                <div class="totals-line">
+                <label><strong>TOTALI I FATURES</strong></label>
+                <input type="text" id="total_price_invoice" name="total_price_invoice" readonly>
                 </div>
-                <br><br>
-                <div class="row">
-                    <div class="col-lg-8"><textarea name="comment" id="comment" style="width:100%;height:90px;" placeholder="Koment"></textarea></div>
+                <div class="totals-line">
+                <label><strong>PARAPAGESË</strong></label>
+                <input type="text" id="prepayment_price_invoice" name="prepayment_price_invoice">
                 </div>
-                <br>
-                <div class="row">    
-                    <div class="col-lg-10">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
-                        <button type="submit" id="saveBtn"  class="btn" name="submit_type" style="color:white;background:#ff5733;width:170px;" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
-                        <button type="submit" id="printBtn" class="btn" name="submit_type" style="color:white;background:#7396CE;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
-                        <button type="submit" id="downloadBtn" class="btn" name="submit_type" style="color:white;background:green;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
-                        <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
-                    </div>              
+                <div class="totals-line">
+                <label><strong>SHUMA E MBETUR</strong></label>
+                <input type="text" id="total_price_left_invoice" name="total_price_left_invoice" readonly>
                 </div>
-            </form>
+            </div>
+            </div>
+
+            <br>
+
+            <!-- Comment -->
+            <div class="row">
+            <div class="col-lg-12">
+                <textarea name="comment" id="comment" style="width:100%;height:90px;font-size:16px;" placeholder="Koment"></textarea>
+            </div>
+            </div>
+
+            <br>
+
+            <!-- Actions -->
+            <div class="row">
+            <div class="col-lg-10">
+                <button type="submit" id="saveBtn" class="btn" name="submit_type" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
+                <button type="submit" id="printBtn" class="btn" name="submit_type" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
+                <button type="submit" id="downloadBtn" class="btn" name="submit_type" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
+                <button type="button" id="delete_row" class="btn" style="display:none;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
+            </div>
+            </div>
+
+        </form>
         </div>
     </div>
 </div>
 
 
-<div class="modal" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" data-dismiss='imageModal' aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header d-flex justify-content-between align-items-center">
-                <h4 class="modal-title" id="productName"></h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <img id="productImage" src="" alt="Product Image" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-            </div>
-        </div>
+<!-- Image preview modal (required by the hover on NR) -->
+<div class="modal" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:12px;">
+      <div class="modal-header d-flex justify-content-between align-items-center" style="border-bottom:1px solid #e4e7ea;">
+        <h4 class="modal-title" id="productName" style="margin:0;"></h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <img id="productImage" src="" alt="Product Image" style="display:block;margin:0 auto;width:270px;height:220px;object-fit:contain;">
+      </div>
     </div>
+  </div>
 </div>
 
+<!-- Validation / errors modal (your JS already uses #noRowAdded) -->
 <div class="modal" id="noRowAdded" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header d-flex justify-content-between align-items-center">
-                <h4 class="modal-title" id="myModalLabel"></h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id='noRowAddedMessage'  style="color:black;font-size:15px;">
-              <div></div>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:12px;">
+      <div class="modal-header d-flex justify-content-between align-items-center" style="border-bottom:1px solid #e4e7ea;">
+        <h4 class="modal-title" id="myModalLabel" style="margin:0;">Vërejtje</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="noRowAddedMessage" style="color:black;font-size:15px;">
+        <div></div>
+      </div>
     </div>
+  </div>
 </div>
 
 
@@ -332,6 +640,25 @@ $(document).ready(function() {
     var lastClickedRow = null;
     var prepayment;
     var totalSum;
+
+    function jumpToTopImmediate() {
+        // vendose scroll në krye në mënyrë agresive, pa animacion
+        document.body.style.scrollBehavior = 'auto';
+        document.documentElement.style.scrollBehavior = 'auto';
+
+        // vendos 0 në të dyja, disa herë për siguri (para pikturimit)
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        window.scrollTo(0, 0);
+
+        // forcoje edhe në frame-in tjetër (shmang flicker në disa browsera)
+        requestAnimationFrame(function () {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+            window.scrollTo(0, 0);
+        });
+    }
+
     
     $(document).on('blur', '.product_name, .quantity, .price', function() {
         const row = $(this).closest('tr');
@@ -821,7 +1148,9 @@ $(document).ready(function(){
                                 </div>
                             </div>`;
             $("#invoicesStructure").html(html);
-            $("#invoiceTableData").hide();
+            $("#mainDiv").hide();
+            jumpToTopImmediate();
+
             $("#invoicesStructure").show();
                 // 🔁 ADD THIS BELOW
             $("#myInput").on("keyup", function() {
@@ -862,13 +1191,14 @@ function loadDetailsTable(invoiceId) {
         data: { id: invoiceId },
         success: function(response) {
             $("#invoicesStructure").hide();
-            $("#invoiceTableData").show();
+            $("#mainDiv").show();
             var res = JSON.parse(response);
 
             $("#client_name").val(res.client_name);
             $("#address").val(res.address);
             $("#date").val(res.date);
             $("#comment").val(res.comment);
+  jumpToTopImmediate();
 
             // Clear and populate product rows
             $("#product_rows").empty();

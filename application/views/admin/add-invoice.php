@@ -1,234 +1,411 @@
 <style>
-        /* body {
-            zoom: 90%;
-        } */
+:root{
+  --border:#e4e7ea;
+  --warn:#ffcfcf;
+  --radius:12px;
+  --shadow:0 6px 20px rgba(0,0,0,.06);
 
-        #mainDiv{
-            zoom: 83%
-        }
-        .no-border {
-            border: none !important;
-        }
-        .product_name, .quantity, .price, .code,.total_product_price {
-            border-top: none;
-            border-right: none;
-            border-left: none;
-            width: 100%;
-            border-bottom: 0.1px solid #e4e7ea;;
-        }
+  /* MAIN table column widths */
+  --w-nr:50px;   /* main table NR */
+  --w-name:45%;
+  --w-code:8%;
+  --w-qty:12%;
+  --w-price:12%;
+  --w-total:12%;
+}
 
-        .results-expanded {
-            max-height: 750px; /* më shumë lartësi për 12–15 rreshta */
-            overflow-y: auto;
-            font-size: 17px;
-        }
+/* Main layout */
+#mainDiv{
+  max-width:1600px;       /* bigger workspace */
+  margin:0 auto;
+  padding:35px 40px;
+  background:#fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size:15px;
+}
 
-        textarea:focus, input:focus{
-            outline: none;
-        }
+/* Top form */
+.form-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:20px;
+  align-items:end;
+}
+.form-grid label{ font-weight:600; color:#4b5563; font-size:14px; }
+.form-grid input{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  font-size:15px;
+  outline:none;
+}
 
-        .selected-row {
-            background-color: #d1e7dd !important;
-        }
+/* Two-column content area */
+.content-grid{
+  display:grid;
+  grid-template-columns: 2fr 1fr;
+  gap:20px;
+}
 
-        .table-col-7 { width: 7%; }
-        .table-col-33 { width: 35%; }
-        .table-col-12 { width: 12%; }
-        .table-col-36 { width: 41%; }
-        
-        #total_price{
-            border-right: none;
-        }
+/* Tables */
+.table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+.table th, .table td{
+  border:1px solid var(--border);
+  padding:8px;
+  font-size:15px;
+  text-align:left;
+  vertical-align:middle;
+}
+.table th{
+  background:#f5f7fb;
+  font-weight:700;
+}
+.table input{
+  width:100%;
+  border:none;
+  border-bottom:1px solid var(--border);
+  outline:none;
+  font-size:15px;
+  padding:5px;
+}
 
-        #total_price_invoice{
-            border-top: none;
-            border-right: none;
-            border-left: none;
-            width: 100%;
-            border-bottom: 1px solid #e4e7ea;
-            font-weight: bold;
-            font-size:16px;
-        }
+/* MAIN table widths ONLY (do NOT target #search_results_table here) */
+#sales_table thead th:nth-child(1),
+#sales_table tbody td:nth-child(1){ width:var(--w-nr); text-align:center; }
+#sales_table thead th:nth-child(2),
+#sales_table tbody td:nth-child(2){ width:var(--w-name); }
+#sales_table thead th:nth-child(3),
+#sales_table tbody td:nth-child(3){ width:var(--w-code); }
+#sales_table thead th:nth-child(4),
+#sales_table tbody td:nth-child(4){ width:var(--w-qty); }
+#sales_table thead th:nth-child(5),
+#sales_table tbody td:nth-child(5){ width:var(--w-price); }
+#sales_table thead th:nth-child(6),
+#sales_table tbody td:nth-child(6){ width:var(--w-total); }
 
-        #prepayment_price_invoice{
-            border-top: none;
-            border-right: none;
-            border-left: none;
-            width: 100%;
-            border-bottom: 1px solid #e4e7ea;
-            font-weight: bold;
-            font-size:16px;
+/* Search results: NR centered (width is enforced by <colgroup>) */
+#search_results_table thead th:first-child,
+#search_results_table tbody td:first-child{
+  text-align:center;
+  padding:4px 6px;
+}
 
-        }
+/* Wrappers */
+.table-wrap{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:auto;
+  box-shadow:var(--shadow);
+  background:#fff;
+}
 
-        #total_price_left_invoice{
-            border-top: none;
-            border-right: none;
-            border-left: none;
-            width: 100%;
-            border-bottom: 1px solid #e4e7ea;
-            font-weight: bold;
-        }
-        #search_results_container {
-            max-height: 600px;
-            overflow-y: auto;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        
-        #search_results_table td, #search_results_table th {
-            padding: 4px 6px !important;
-        }
+/* Search results directly under the main table */
+#search_results_container{ margin-top:12px; }
+#search_results_table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;          /* honors colgroup widths */
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:#fff;
+  display:none;                /* shown by JS when results exist */
+}
 
-        .modal-backdrop {
-            display: none !important;
-        }
+/* Totals card */
+.totals-card{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  background:#fff;
+  padding:16px;
+}
+.totals-line{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:12px;
+}
+.totals-card input{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px;
+  font-weight:bold;
+  font-size:16px;
+}
 
-        .input-error {
-            border: 1px solid rgb(238, 100, 100) !important;
-            background-color:rgb(245, 236, 236);
-        }
+/* Buttons */
+.btn{
+  border:none;
+  border-radius:8px;
+  padding:10px 16px;
+  font-weight:bold;
+  color:#fff;
+}
+#saveBtn{background:#ff5733;}
+#printBtn{background:#7396CE;}
+#downloadBtn{background:green;}
+#delete_row{background:#ff5e2d;}
 
-        .price-zero-row {
-            background-color:  #ffcfcf !important;/* ngjyrë e verdhë e lehtë, për paralajmërim */
-        }
+.input-error{border:1px solid red !important; background:#ffecec;}
+.price-zero-row td,.price-zero-row input{background:var(--warn) !important;}
+.selected-row{background:#d1e7dd !important;}
 
-        .price-zero-row td {
-            background-color: #ffcfcf !important; /* ngjyrë rozë paralajmëruese për input cells */
-        }
+.modal-backdrop { display: none !important; }
 
-        .price-zero-row input {
-            background-color: #ffcfcf !important; /* sfond për input-et */
-        }
+/* Preferred: stop stretching all items in the grid row */
+.content-grid{
+  align-items: start;   /* prevents the right column from matching left column height */
+}
+
+/* Extra safety: explicitly keep the totals card at its intrinsic height */
+.totals-card{
+  align-self: start;
+}
+
+/* --- Responsive behavior for totals-card --- */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;   /* stack vertically */
+  }
+
+  .totals-card {
+    margin-top: 20px;             /* spacing from table */
+    order: 2;                     /* ensures it stays after the table */
+    width: 100%;
+  }
+
+  .table-col {
+    order: 1;
+  }
+}
+
+
+/* --- Equal height for table section and totals-card on desktop --- */
+@media (min-width: 1025px) {
+  .content-grid {
+    align-items: stretch; /* forces both columns to equal height */
+  }
+
+  .table-col,
+  .totals-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .table-wrap {
+    flex: 1 1 auto; /* makes the table fill available space */
+  }
+
+  #search_results_container {
+    flex-shrink: 0; /* keeps search results visible below */
+  }
+}
+
+/* Buttons section (no border, no card look) */
+#sales_form > .row:last-of-type {
+  background: transparent;   /* no background box */
+  border: none;               /* remove border */
+  box-shadow: none;           /* remove shadow */
+  border-radius: 0;           /* remove rounding */
+  padding: 16px;
+
+  display: flex;
+  justify-content: center;    /* center horizontally */
+  align-items: center;        /* center vertically */
+}
+
+/* Stack buttons vertically and center them */
+#sales_form > .row:last-of-type .col-lg-10 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  padding: 0;
+}
+
+/* Buttons same width, clean layout */
+#sales_form > .row:last-of-type .btn {
+  width: 70%;        /* adjust to 80% or 100% if you want wider */
+  padding: 14px 0;
+  font-size: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+
 </style>
-<div class="row" id='mainDiv'>
-    <div class="col-lg-12">
-        <div class="white-box" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
-            <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
-                <div class="row">
-                    <div class="col-lg-2"></div>
-                    <div class="col-lg-3">
-                        <label for="client_name">Emri I Klientit:</label>
-                        <input type="text" id="client_name" name="client_name" autocomplete="off" value="QYTETAR" required><br><br>
-                    </div>
-                    <div class="col-lg-3">
-                        <label for="address">Adresa:</label>
-                        <input type="text" id="address" name="address" value="KOSOVE" autocomplete="off" required><br><br>
-                    </div>
-                    
-                    <div class="col-lg-3">
-                        <label for="date">Data:</label>
-                        <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required>
-                    </div>
-                </div>
-                <br><br>
-                <div class="row">
-                    <div class="col-lg-8">
-                        <table id="sales_table" class="table-bordered table">
-                            <thead>
-                                <tr>
-                                    <th class="table-col-5">#</th>
-                                    <th class="table-col-35">EMRI I PRODUKTIT</th>
-                                    <th class="table-col-12">KODI</th>
-                                    <th class="table-col-12">SASIA</th>
-                                    <th class="table-col-12">ÇMIMI</th>
-                                    <th class="table-col-12">CMIMI TOTAL I PRODUKTIT</th>
-                                </tr>
-                            </thead>
-                            <tbody id="product_rows">
-                                <tr>
-                                    <td class="table-col-7">1</td>
-                                    <td class="table-col-33"><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
-                                    <td class="table-col-12"><input class="code" name="code[]" readonly></td>
-                                    <td class="table-col-12"><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
-                                    <td class="table-col-12"><input type="text" class="price" name="price[]" autocomplete="off"></td>
-                                    <td class="table-col-12"><input class="total_product_price" name="total_product_price[]" readonly></td>
-                                    <td hidden><input type="text" class="image" name="image[]" hidden></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="totals-section-box col-lg-4">
-                        <div class="totals-line">
-                            <label><strong>TOTALI</strong></label>
-                            <input type="text" id="total_price_invoice" name="total_price_invoice" readonly>
-                        </div>
-                        <div class="totals-line">
-                            <label><strong>PARAPAGESË</strong></label>
-                            <input type="text" id="prepayment_price_invoice" name="prepayment_price_invoice">
-                        </div>
-                        <div class="totals-line">
-                            <label><strong>SHUMA E MBETUR</strong></label>
-                            <input type="text" id="total_price_left_invoice" name="total_price_left_invoice" readonly>
-                        </div>    
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div id="search_results_container">
-                            <table id="search_results_table" class="table table-bordered" style="display: none;border: 1px solid #e4e7ea;">
-                                <thead>
-                                    <tr>
-                                        <th class="table-col-5">NR <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
-                                        <th class="table-col-42">EMRI I PRODUKTIT <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
-                                        <th class="table-col-12">KODI</th>
-                                        <th class="table-col-12">SASIA</th>
-                                        <th class="table-col-12">ÇMIMI <i class="fa fa-sort p-r-10" aria-hidden="true"></i></th>
-                                    </tr>
-                                </thead>
-                                <br>
-                                <tbody id="search_results_body"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <br><br>
-                <div class="row">
-                    <div class="col-lg-8"><textarea name="comment" id="comment" style="width:100%;height:90px;font-size:16px;" placeholder="Koment" autocomplete="off"></textarea></div>
-                </div>
-                <br>
-                <div class="row">    
-                    <div class="col-lg-10">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
-                        <button type="submit" id="saveBtn"  class="btn" name="submit_type" style="color:white;background:#ff5733;width:170px;font-weight:bold;font-family: Arial, Helvetica, sans-serif;" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
-                        <button type="submit" id="printBtn" class="btn" name="submit_type" style="color:white;background:#7396CE;font-weight: bold;font-family: Arial, Helvetica, sans-serif;" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
-                        <button type="submit" id="downloadBtn"  class="btn" name="submit_type" style="color:white;background:green;font-weight:bold;font-family: Arial, Helvetica, sans-serif;" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
-                        <button type="button" class="btn" id="delete_row" style="display: none;background:#ff5e2dcc;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
-                    </div>              
-                </div>
-            </form>
+
+<div class="row" id="mainDiv">
+  <div class="col-lg-12">
+    <div class="white-box">
+      <form id="sales_form" method="post" action="<?php echo base_url('admin/invoices/sheet_invoice/'); ?>" target="_blank" enctype="multipart/form-data">
+
+        <!-- Top inputs -->
+        <div class="form-grid">
+          <div>
+            <label for="client_name">Emri I Klientit:</label>
+            <input type="text" id="client_name" name="client_name" value="QYTETAR" required>
+          </div>
+          <div>
+            <label for="address">Adresa:</label>
+            <input type="text" id="address" name="address" value="KOSOVE" required>
+          </div>
+          <div>
+            <label for="date">Data:</label>
+            <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required>
+          </div>
         </div>
+
+        <br>
+
+        <!-- Main content -->
+        <div class="content-grid">
+          <!-- LEFT: table + search -->
+          <div class="table-col">
+            <div class="table-wrap">
+              <table id="sales_table" class="table table-bordered">
+                <colgroup>
+                  <!-- NR fixed at ~34px -->
+                  <col style="width:38px">
+                  <!-- Keep other columns aligned; last column soaks the remaining space so NR never expands -->
+                  <col style="width:50%">
+                  <col style="width:5%">
+                  <col style="width:5%">
+                  <col style="width:calc(100% - 38px - 50% - 5% - 5%)">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th >NR</th>
+                    <th>EMRI I PRODUKTIT</th>
+                    <th>KODI</th>
+                    <th>SASIA</th>
+                    <th>ÇMIMI</th>
+                    <th>TOTALI</th>
+                  </tr>
+                </thead>
+                <tbody id="product_rows">
+                  <tr>
+                    <td>1</td>
+                    <td><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
+                    <td><input class="code" name="code[]" readonly></td>
+                    <td><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
+                    <td><input type="text" class="price" name="price[]" autocomplete="off"></td>
+                    <td><input class="total_product_price" name="total_product_price[]" readonly></td>
+                    <td hidden><input type="text" class="image" name="image[]" hidden></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Search results directly under -->
+            <div id="search_results_container">
+              <table id="search_results_table" class="table table-bordered">
+                <!-- Force a smaller NR only for the search table -->
+                <colgroup>
+                  <!-- NR fixed at ~34px -->
+                  <col style="width:38px">
+                  <!-- Keep other columns aligned; last column soaks the remaining space so NR never expands -->
+                  <col style="width:50%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:calc(100% - 38px - 50% - 10% - 10%)">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>NR</th>
+                    <th>EMRI I PRODUKTIT</th>
+                    <th>KODI</th>
+                    <th>SASIA</th>
+                    <th>ÇMIMI</th>
+                  </tr>
+                </thead>
+                <tbody id="search_results_body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- RIGHT: totals -->
+          <div class="totals-card">
+            <div class="totals-line">
+              <label><strong>TOTALI I FATURES</strong></label>
+              <input type="text" id="total_price_invoice" name="total_price_invoice" readonly>
+            </div>
+            <div class="totals-line">
+              <label><strong>PARAPAGESË</strong></label>
+              <input type="text" id="prepayment_price_invoice" name="prepayment_price_invoice">
+            </div>
+            <div class="totals-line">
+              <label><strong>SHUMA E MBETUR</strong></label>
+              <input type="text" id="total_price_left_invoice" name="total_price_left_invoice" readonly>
+            </div>
+          </div>
+        </div>
+
+        <br>
+
+        <!-- Comment -->
+        <div class="row">
+          <div class="col-lg-12">
+            <textarea name="comment" id="comment" style="width:100%;height:90px;font-size:16px;" placeholder="Koment"></textarea>
+          </div>
+        </div>
+
+        <br>
+
+        <!-- Actions -->
+        <div class="row">
+          <div class="col-lg-10">
+            <button type="submit" id="saveBtn" class="btn" name="submit_type" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
+            <button type="submit" id="printBtn" class="btn" name="submit_type" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
+            <button type="submit" id="downloadBtn" class="btn" name="submit_type" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
+            <button type="button" id="delete_row" class="btn" style="display:none;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
+          </div>
+        </div>
+
+      </form>
     </div>
+  </div>
 </div>
 
 
-
-<div class="modal" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" data-dismiss='imageModal' aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header d-flex justify-content-between align-items-center">
-                <h4 class="modal-title" id="productName"></h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <img id="productImage" src="" alt="Product Image" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-            </div>
-        </div>
+<!-- Image preview modal (required by the hover on NR) -->
+<div class="modal" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:12px;">
+      <div class="modal-header d-flex justify-content-between align-items-center" style="border-bottom:1px solid #e4e7ea;">
+        <h4 class="modal-title" id="productName" style="margin:0;"></h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <img id="productImage" src="" alt="Product Image" style="display:block;margin:0 auto;width:270px;height:220px;object-fit:contain;">
+      </div>
     </div>
+  </div>
 </div>
 
+<!-- Validation / errors modal (your JS already uses #noRowAdded) -->
 <div class="modal" id="noRowAdded" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header d-flex justify-content-between align-items-center">
-                <h4 class="modal-title" id="myModalLabel"></h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id='noRowAddedMessage'  style="color:black;font-size:15px;">
-              <div></div>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:12px;">
+      <div class="modal-header d-flex justify-content-between align-items-center" style="border-bottom:1px solid #e4e7ea;">
+        <h4 class="modal-title" id="myModalLabel" style="margin:0;">Vërejtje</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="noRowAddedMessage" style="color:black;font-size:15px;">
+        <div></div>
+      </div>
     </div>
+  </div>
 </div>
+
 
 
 <script>

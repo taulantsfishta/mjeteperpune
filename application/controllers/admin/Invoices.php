@@ -50,35 +50,61 @@ class Invoices extends CI_Controller {
             $_SESSION['title_name'] = 'KRIJO FATUREN';
             $data['page_title'] = 'KRIJO FATUREN';
     
-            if (isset($_GET['product_name'])) {
-                $searchTerm = $_GET['product_name'];
-                if($searchTerm == ''){
-                    $products =[];
-                    $data['products'] = $products;
-                    echo json_encode($data);
-                    return;
-                }
-                if (preg_match('/^[0-9\-]+$/', $searchTerm)) {
-                    $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')
-                        ->from('products')
-                        ->group_start()
-                        ->where('code', $searchTerm)
-                        ->where('is_deleted',0)
-                        ->group_end()
-                        ->get()
-                        ->result_array();
-                } else {
-                    if (strpos($searchTerm, '%') !== false) {
-                        $removeChar = str_replace('%','.*',$searchTerm);
-                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->group_start()->where('name REGEXP', $removeChar)->where('is_deleted',0)->order_by('category_id','ASC')->group_end()->get()->result_array();
-                    } else {
-                        $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')->from('products')->like('name', $searchTerm,'after')->where('is_deleted',0)->order_by('category_id','ASC')->get()->result_array();
-                    }
-                }
-                $data['products'] = $products;
-                echo json_encode($data);
+        if (isset($_GET['product_name'])) {
+            $searchTerm = trim($_GET['product_name']);
+
+            if ($searchTerm === '') {
+                echo json_encode(['products' => []]);
                 return;
             }
+
+            // 1) CODE-ONLY (digits and dashes) → exact code
+            if (preg_match('/^[0-9\-]+$/', $searchTerm)) {
+                $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')
+                    ->from('products')
+                    ->where('code', $searchTerm)
+                    ->where('is_deleted', 0)
+                    ->get()->result_array();
+
+            // 2) USER PROVIDED WILDCARD (% or _) → use LIKE (REPLACE YOUR OLD REGEXP BLOCK WITH THIS)
+            } else if (strpos($searchTerm, '%') !== false || strpos($searchTerm, '_') !== false) {
+                $like = $searchTerm;
+
+                // normalize so "%set" / "set%" behave like "contains" unless user explicitly set both
+                if ($like[0] !== '%')                $like = '%' . $like;
+                if (substr($like, -1) !== '%')       $like = $like . '%';
+
+                $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')
+                    ->from('products')
+                    ->where("name LIKE " . $this->db->escape($like), null, false)
+                    ->where('is_deleted', 0)
+                    ->order_by('category_id', 'ASC')
+                    ->get()->result_array();
+
+            // 3) PLAIN TEXT → start-with OR whole-word anywhere
+            } else {
+                $term  = $searchTerm;
+                $regex = '[[:<:]]' . preg_quote($term, '/') . '[[:>:]]'; // word boundary
+                $likePrefix = $term . '%';
+
+                $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')
+                    ->from('products')
+                    ->group_start()
+                        ->like('name', $term, 'after') // starts with
+                        ->or_where("name REGEXP " . $this->db->escape($regex), null, false) // whole word anywhere
+                    ->group_end()
+                    ->where('is_deleted', 0)
+                    // rank: prefix first, then whole-word, then shorter names, then name asc
+                    ->order_by("(name LIKE " . $this->db->escape($likePrefix) . ") DESC", null, false)
+                    ->order_by("(name REGEXP " . $this->db->escape($regex) . ") DESC", null, false)
+                    ->order_by('category_id', 'ASC')
+                    ->get()->result_array();
+            }
+
+            echo json_encode(['products' => $products]);
+            return;
+        }
+
     
             $data['main_content'] = $this->load->view('admin/add-invoice', $data, TRUE);
             $this->load->view('admin/index', $data);

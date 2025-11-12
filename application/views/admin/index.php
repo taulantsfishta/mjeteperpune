@@ -321,6 +321,43 @@ button i {
 }
 
 
+/* ===== Navbar dropdown behavior per device ===== */
+
+/* Desktop/tablet: show full list (no internal scroll) */
+@media (min-width: 768px) {
+  .navbar .dropdown-menu {
+    max-height: none !important;
+    overflow: visible !important;
+    position: absolute !important;
+  }
+}
+
+/* Mobile: constrain height and enable internal scroll */
+@media (max-width: 767.98px) {
+  /* Ensure the collapse area doesn't clip the dropdown */
+  .navbar-collapse { overflow: visible; }
+
+  /* Make the dropdown a full-width scrolling panel */
+  .navbar .dropdown-menu {
+    position: static !important;      /* align within the collapsed menu */
+    width: 100% !important;
+    max-height: 65vh !important;      /* visible area */
+    overflow-y: auto !important;      /* scroll inside */
+    overscroll-behavior: contain;     /* prevent body scroll chaining */
+    -webkit-overflow-scrolling: touch;/* smooth iOS scroll */
+    margin-top: 4px;
+    z-index: 1200 !important;         /* above page content */
+  }
+
+  /* Optional: slightly tighter items on mobile for more visible rows */
+  .navbar .dropdown-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+
+
 </style>
 
 

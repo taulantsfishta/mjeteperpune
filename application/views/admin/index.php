@@ -1,577 +1,467 @@
 <?php include 'layout/css.php'; ?>
 
+<style>
+/* —— Remove old sidebar —— */
+.navbar-default.sidebar,
+.slimscrollsidebar {
+  display: none !important;
+}
+#page-wrapper {
+  margin-left: 0 !important;
+}
+
+/* Navbar adjustments */
+body { padding-top: 64px; }
+
+.navbar {
+  background: #fff;
+}
+.navbar .nav-link,
+.navbar .navbar-brand {
+  font-family: Verdana, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: #111 !important;
+}
+.dropdown-menu {
+  font-family: Verdana, sans-serif;
+  font-size: 12px;
+}
+
+/* Badge style (mimics label-danger look) */
+.nav-badge {
+  display:inline-block;
+  padding: 2px 6px;
+  font-size: 11px;
+  line-height: 1;
+  border-radius: 9999px;
+}
+.nav-badge-danger {
+  background: #ef5350; color: #fff;
+}
+
+/* Mobile fix for collapse overlay */
+@media (max-width: 991.98px) {
+  .navbar-collapse.collapse:not(.show) { display: none !important; }
+}
+
+/* ===== Light modern, realistic palette ===== */
+:root {
+  --header-bg: #fbfcfd;        /* very light blue-gray */
+  --header-text: #2d3e50;      /* neutral dark for contrast */
+  --header-hover: #dce6ed;     /* slight hover tint */
+  --accent: #1694fa8c;           /* red for counts / actions */
+  --body-bg: #f8fafc;          /* near-white background */
+  --card-bg: #ffffff;
+  --border: #e3e7eb;
+  --text-main: #212529;
+  --text-muted: #6c757d;
+}
+
+/* ===== General ===== */
+body {
+  background: var(--body-bg);
+  color: var(--text-main);
+  font-family: "Segoe UI", "Verdana", sans-serif;
+  font-size: 13px;
+}
+#page-wrapper { background: var(--body-bg); }
+
+/* ===== Navbar ===== */
+.navbar.navbar-light {
+  background-color: var(--header-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.navbar .navbar-brand,
+.navbar .nav-link {
+  color: var(--header-text) !important;
+  font-weight: 600;
+}
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+  background-color: var(--header-hover);
+  color: var(--header-text) !important;
+  border-radius: 4px;
+}
+.navbar .dropdown-menu {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.navbar .dropdown-item {
+  color: var(--text-main);
+}
+.navbar .dropdown-item:hover {
+  background: #f1f5f8;
+}
+
+/* ===== Badges ===== */
+.nav-badge, .label-danger, .badge-danger {
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* ===== Search box ===== */
+input.form-control {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  transition: all 0.2s ease;
+}
+input.form-control:focus {
+  border-color: #b7c7d3;
+  box-shadow: 0px -3px 6px -2px var(--accent);
+}
+
+/* ===== Cards / product boxes ===== */
+.panel, .white-box, .card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.panel:hover, .white-box:hover, .card:hover {
+  border-color: #d4dae0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+}
+
+/* ===== Titles / Text ===== */
+.page-title {
+  color: var(--text-main);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.text-muted { color: var(--text-muted) !important; }
+
+/* ===== Buttons ===== */
+.btn-primary {
+  background: #90a4b7;
+  border-color: #90a4b7;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #7d95a8;
+  border-color: #7d95a8;
+}
+.btn-outline-primary {
+  color: #7d95a8;
+  border-color: #7d95a8;
+}
+.btn-outline-primary:hover {
+  background: #7d95a8;
+  color: #fff;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-thumb {
+  background-color: #cfd5da;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #b7c0c7;
+}
+
+/* Add space between menu links */
+.navbar-nav > li {
+  margin-right: 22px;       /* increase/decrease as needed (16–28px is good range) */
+}
+
+/* Reduce margin on the very last element (profile dropdown) */
+.navbar-nav > li:last-child {
+  margin-right: 0;
+}
+
+/* Improve dropdown toggle padding (clickable area) */
+.navbar .nav-link {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;                 /* small gap between icon and text */
+}
+
+/* On larger screens, increase separation visually */
+@media (min-width: 992px) {
+  .navbar-nav > li {
+    margin-right: 28px;
+  }
+}
+
+/* Dropdowns: small padding tweak for consistent spacing */
+.dropdown-menu {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* Inside dropdown items */
+.dropdown-item {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* Ensure icons and text in dropdowns align nicely */
+.dropdown-item i {
+  width: 16px;
+  text-align: center;
+  opacity: 0.85;
+}
+
+/* ===== Navbar border styling ===== */
+.navbar.navbar-light {
+  background-color: var(--header-bg);
+  border-bottom: #f9f7f7; /* light black separator */
+  box-shadow: 0px -4px 20px 0px var(--accent);
+}
+
+.bg-title h4 {
+    color: #4b4a4aff;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+/* ===== Mobile fix: make every menu row full-width and align badge+arrow right ===== */
+@media (max-width: 767.98px) {
+  /* Make the collapsed list truly full width */
+  .navbar-collapse .navbar-nav { width: 100% !important; display: block !important; }
+  .navbar-collapse .navbar-nav .nav-item { width: 100% !important; }
+
+  /* Each link spans the row and uses flex */
+  .navbar-collapse .navbar-nav .nav-link {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 12px 18px !important;
+    position: static !important;     /* kill any absolute rules from earlier */
+  }
+
+  /* Left icon */
+  .navbar-collapse .navbar-nav .nav-link i {
+    margin-right: 10px;
+    opacity: .65;
+    flex-shrink: 0;
+  }
+
+  /* Badge pushes everything after it to the far right */
+  .navbar-collapse .navbar-nav .nav-link .nav-badge {
+    margin-left: auto !important;
+    position: static !important;
+    transform: none !important;
+    background: #90a4b7 !important;
+    color: #fff !important;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 8px;
+    border-radius: 9999px;
+  }
+
+  /* Arrow sits right after the badge, same baseline */
+  .navbar-collapse .navbar-nav .dropdown-toggle::after {
+    content: '›';
+    display: inline-block !important;
+    border: 0 !important;
+    margin-left: 8px !important;
+    color: #9aa5b1;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+    position: static !important;
+    transform: none !important;
+  }
+}
+/* Mobile-only logout row styling (arrow at the far right) */
+@media (max-width: 767.98px) {
+  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    color: #2d3e50 !important;
+    font-weight: 700;
+    width: 100%;
+  }
+  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron i {
+    opacity: .65;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron::after {
+    content: '›';
+    display: inline-block;
+    margin-left: auto;         /* push to the far right */
+    color: #9aa5b1;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+  }
+}
+
+/* Make ALL buttons' text bolder */
+button,
+.btn,
+.btn.btn-block,
+.btn[class*="btn-"] {
+  font-weight: 600 !important;   /* 700–800 looks solid; raise/lower if you want */
+  letter-spacing: 0.4px;         /* tiny spacing so bold doesn't look cramped */
+}
+
+/* Keep icons from getting weirdly bold */
+.btn i,
+button i {
+  font-weight:600 !important;
+}
+
+/* If you also want dropdown toggles (that look like buttons) bolder */
+.dropdown .btn.dropdown-toggle {
+  font-weight: 600 !important;
+}
+
+
+</style>
+
+
 <!-- Preloader -->
 <h1></h1>
 <div class="preloader">
-    <div class="cssload-speeding-wheel"></div>
+  <div class="cssload-speeding-wheel"></div>
 </div>
+
 <div id="wrapper">
-    <!-- Navigation -->
-    <nav class="navbar navbar-default navbar-static-top navbar-fixed-top m-b-0">
-        <div class="navbar-header">
-            <a class="navbar-toggle hidden-sm hidden-md hidden-lg " href="javascript:void(0)" data-toggle="collapse" data-target=".navbar-collapse"><i class="icon-menu"></i></a>
-            <!-- <div class="top-left-part"><a class="logo" href="<?php echo base_url('admin/dashboard/') ?>"><b>
-                    </b><span class="hidden-xs">MJETE PER PUNE</span></a></div> -->
-            <ul class="nav navbar-top-links navbar-left hidden-xs">
-                <li><a href="javascript:void(0)" class="open-close hidden-xs"><i class="icon-menu"></i></a></li>
+  <!-- Top Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top border-bottom">
+    <div class="container-fluid">
 
-            </ul>
-
-            <ul class="nav navbar-top-links navbar-right pull-right">
-                <!-- <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-fax"></i>
-					
-          <div class=""><span class=""></span><span class="point"></span></div>
-          </a>
-		  -->
-                <!-- <ul class="dropdown-menu  animated bounceInDown"> -->
+      <!-- Brand -->
 
 
-                <!-- calculator-->
-                <!-- <style>
-                .calculator_button{
-                    border : 1px solid #303641;
-                    width: 50px;
-                    background-color: #5A606C;
-                    color: #F5FAFC;
-                    cursor:auto;
-                }
-                .calculator_button:hover{
-                    border : 1px solid #303641;
-                    background-color: #5A606C;
-                    color: #F5FAFC;
-                }
-                .calculator_button:focus{
-                    border : 1px solid #303641;
-                    background-color: #5A606C;
-                    color: #F5FAFC;
-                }
-            </style>     -->
-                <!-- <form name="form1" onsubmit="return false">
-            <table style="">
-                <tr>
-                    <td colspan="4"><input type="text" id="display" style="width:100%; border:0px; background-color:#303641;text-align: right;  font-size: 24px;  font-weight: 100;  color: #fff;" readonly placeholder="0" /></td>
-                </tr>
-                <tr>
-                    <td colspan="4"><button type="button" class="btn btn-default calculator_button" style="width:100%;"  onclick="reset()">Clear</button></td>
-                </tr>
-                <tr>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(7)">7</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(8)" >8</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(9)" >9</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="operator(&quot;+&quot;)">+</button></td>
-                </tr>
-                <tr>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(4)">4</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(5)" >5</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(6)" >6</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="operator(&quot;-&quot;)" >-</button></td>
-                </tr>
-                <tr>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(1)">1</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(2)" >2</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(3)" >3</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="operator(&quot;*&quot;)" >&times;</button></td>
-                </tr>
-                <tr>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(0)">0</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="displaynum(&quot;.&quot;)" >.</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="equals()" >=</button></td>
-                    <td><button type="button" class="btn btn-default calculator_button" onclick="operator(&quot;/&quot;)" >&divide;</button></td>
-                </tr>
-            </table>
-            </form>
-                    -->
-                <!-- </ul> -->
+      <!-- Mobile hamburger -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topbarNav" aria-controls="topbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
+      <div class="collapse navbar-collapse" id="topbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navProducts" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="ti-dashboard p-r-10 me-1"></i>
+              PRODUKTET
+              <span class="ms-2 nav-badge nav-badge-danger">
+                <?php echo count($this->session->userdata('category')) + 1; ?>
+              </span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navProducts">
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/dashboard'); ?>">
+                  <i class="fa fa-wrench me-2"></i> TË GJITHA PRODUKTET
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
 
-
-                <!-- /.dropdown-messages -->
-                <!-- </li> -->
-                <!-- /.dropdown -->
-
-
-
-
-                <ul class="nav navbar-top-links navbar-right pull-right">
-                    <!-- <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-language"></i>
-					
-          <div class=""><span class=""></span><span class="point"></span></div>
-          </a>
-		 
-           <ul class="dropdown-menu  animated bounceInDown">
-		   
-                         
-                            <li class="active">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/english.png" style="width:16px; height:16px;" />	
-                                    <span>English</span>
-                                </a>
-                            </li>
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/arabic.png" style="width:16px; height:16px;" />	
-                                    <span>Arabic</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/german.png" style="width:16px; height:16px;" />	
-                                    <span>German</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/dutch.png" style="width:16px; height:16px;" />	
-                                    <span>Dutch</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/french.png" style="width:16px; height:16px;" />	
-                                    <span>French</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/bengali.png" style="width:16px; height:16px;" />	
-                                    <span>Bengali</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/italian.png" style="width:16px; height:16px;" />	
-                                    <span>Italian</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/russian.png" style="width:16px; height:16px;" />	
-                                    <span>Russian</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/spanish.png" style="width:16px; height:16px;" />	
-                                    <span>Spanish</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/thai.png" style="width:16px; height:16px;" />	
-                                    <span>Thai</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/turkish.png" style="width:16px; height:16px;" />	
-                                    <span>Turkish</span>
-                                </a>
-                            </li>
-							
-								<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/greek.png" style="width:16px; height:16px;" />	
-                                    <span>Greek</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/urdu.png" style="width:16px; height:16px;" />	
-                                    <span>Urdu</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/indonesian.png" style="width:16px; height:16px;" />	
-                                    <span>Indonesian</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/hungarian.png" style="width:16px; height:16px;" />	
-                                    <span>Hungarian</span>
-                                </a>
-                            </li>
-							
-							<li class="">
-                                <a href="">
-                                    <img src="<?php echo base_url(); ?>optimum/flag/hindi.png" style="width:16px; height:16px;" />	
-                                    <span>Hindi</span>
-                                </a>
-                            </li>
-                   
-                    </ul>
-										
-						
-						
-                    </li> -->
-                    <!-- /.dropdown -->
-
-
-
-
-
-                    <ul class="nav navbar-top-links navbar-right pull-right">
-                        <!-- <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-screen-desktop"></i>
-          <div class="notify"><span class=""></span><span class=""></span></div>
-          </a>
-                        <ul class="dropdown-menu mailbox animated bounceInRight">
-                            <li>
-                                <div class="drop-title">You have 4 new messages</div>
-                            </li>
-                            <li>
-                                <div class="message-center">
-                                    <a href="#">
-                                        <div class="user-img"> <img src="<?php echo base_url(); ?>optimum/plugins/images/users/pawandeep.jpg" alt="user" class="img-circle"> <span class="profile-status online pull-right"></span> </div>
-                                        <div class="mail-contnet">
-                                            <h5>Pavan kumar</h5> <span class="mail-desc">Just see the my admin!</span> <span class="time">9:30 AM</span> </div>
-                                    </a>
-                                    <a href="#">
-                                        <div class="user-img"> <img src="<?php echo base_url(); ?>optimum/plugins/images/users/sonu.jpg" alt="user" class="img-circle"> <span class="profile-status busy pull-right"></span> </div>
-                                        <div class="mail-contnet">
-                                            <h5>Sonu Nigam</h5> <span class="mail-desc">I've sung a song! See you at</span> <span class="time">9:10 AM</span> </div>
-                                    </a>
-                                    <a href="#">
-                                        <div class="user-img"> <img src="<?php echo base_url(); ?>optimum/plugins/images/users/arijit.jpg" alt="user" class="img-circle"> <span class="profile-status away pull-right"></span> </div>
-                                        <div class="mail-contnet">
-                                            <h5>Arijit Sinh</h5> <span class="mail-desc">I am a singer!</span> <span class="time">9:08 AM</span> </div>
-                                    </a>
-                                    <a href="#">
-                                        <div class="user-img"> <img src="<?php echo base_url(); ?>optimum/plugins/images/users/pawandeep.jpg" alt="user" class="img-circle"> <span class="profile-status offline pull-right"></span> </div>
-                                        <div class="mail-contnet">
-                                            <h5>Pavan kumar</h5> <span class="mail-desc">Just see the my admin!</span> <span class="time">9:02 AM</span> </div>
-                                    </a>
-                                </div>
-                            </li>
-                            <li>
-                                <a class="text-center" href="javascript:void(0);"> <strong>See all notifications</strong> <i class="fa fa-angle-right"></i> </a>
-                            </li>
-                        </ul>
-                    </li> -->
-                        <!-- /.dropdown -->
-
-                        <!-- <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-feed"></i>
-          <div class="notify"><span class=""></span><span class=""></span></div>
-          </a>
-                        <ul class="dropdown-menu dropdown-tasks animated bounceInRight">
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <p> <strong>Task 1</strong> <span class="pull-right text-muted">40% Complete</span> </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%"> <span class="sr-only">40% Complete (success)</span> </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <p> <strong>Task 2</strong> <span class="pull-right text-muted">20% Complete</span> </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%"> <span class="sr-only">20% Complete</span> </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <p> <strong>Task 3</strong> <span class="pull-right text-muted">60% Complete</span> </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%"> <span class="sr-only">60% Complete (warning)</span> </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <p> <strong>Task 4</strong> <span class="pull-right text-muted">80% Complete</span> </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%"> <span class="sr-only">80% Complete (danger)</span> </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a class="text-center" href="#"> <strong>See All Tasks</strong> <i class="fa fa-angle-right"></i> </a>
-                            </li>
-                        </ul>
-                    </li> -->
-                        <!-- /.dropdown -->
-                        <!--<li class="dropdown">-->
-                        <!--    <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#"> <img src="<?php echo base_url(); ?>optimum/images/profile-icon1.png" alt="user-img" width="38" class="img-circle"><b class="hidden-xs" style="font-size:13px;"><?php echo $this->session->userdata('name'); ?></b> </a>-->
-                        <!--    <ul class="dropdown-menu dropdown-user animated flipInY" style="width:117px;font-size:12px">-->
-                        <!--        <li><a href="<?php echo base_url('auth/logout') ?>"><i class="fa fa-power-off"></i> Logout</a></li>-->
-                        <!--    </ul>-->
-                            <!-- /.dropdown-user -->
-                        <!--</li>-->
-                        
-                        <div class="dropdown">
-                            <button class="btn dropdown-toggle shadow-none" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="border:none;box-shadow:none;">
-                                <a><img src="<?php echo base_url(); ?>optimum/images/profile-icon1.png" alt="user-img" width="40" class="img-circle"><b class="hidden-xs" style="border-right:0px;font-size:13px;color:black;"> <?php echo $this->session->userdata('name'); ?></b> </a>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="width:110px;font-size:12px">
-                                <li><a href="<?php echo base_url('auth/logout') ?>"><i class="fa fa-power-off"></i> Logout</a></li>
-                            </ul>
-                        </div>
-                        <!--<li class="right-side-toggle"> <a class="waves-effect waves-light" href="javascript:void(0)"><i class="ti-settings"></i></a></li>-->
-                        <!-- /.dropdown -->
-                    </ul>
-        </div>
-        <!-- /.navbar-header -->
-        <!-- /.navbar-top-links -->
-        <!-- /.navbar-static-side -->
-    </nav>
-    <!-- Left navbar-header -->
-    <div class="navbar-default sidebar" role="navigation">
-        <div class="sidebar-nav navbar-collapse slimscrollsidebar">
-            <ul class="nav" id="side-menu">
-                <!-- <li class="sidebar-search hidden-sm hidden-md hidden-lg">
-                    <div class="input-group custom-search-form">
-                        <input type="text" class="form-control" placeholder="Search<?php echo base_url(); ?>optimum."> <span class="input-group-btn">
-                            <button class="btn btn-default" type="button"> <i class="fa fa-search"></i> </button>
-                        </span>
-                    </div>
-                </li> -->
-                <!-- <li class="user-pro">
-                    <a href="#" class="waves-effect"><img src="<?php echo base_url(); ?>optimum/images/admin.jpg" alt="user-img" class="img-circle"> <span class="hide-menu"><?php echo $this->session->userdata('name'); ?><span class="fa arrow"></span></span>
-                    </a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="javascript:void(0)"><i class="ti-user"></i> My Profile</a></li>
-                        <li><a href="javascript:void(0)"><i class="ti-email"></i> Inbox</a></li>
-                        <li><a href="javascript:void(0)"><i class="ti-settings"></i> Account Setting</a></li>
-                        <li><a href="<?php echo base_url('auth/logout') ?>"><i class="fa fa-power-off"></i> Logout</a></li>
-                    </ul>
-                </li> -->
-                <li> <a href="javascript:void(0);" class="waves-effect"><i class="ti-dashboard p-r-10"></i> <span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;" >PRODUKTET<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right"><?php echo count($this->session->userdata('category')) + 1; ?></span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li> <a href="<?php echo base_url('admin/dashboard') ?>"><i class="fa fa-wrench"></i><span class="hide-menu"  style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;"> TË GJITHA PRODUKTET</span></a></li>
-                        <?php foreach ($this->session->userdata('category') as $key => $value) { ?>
-                            <li><a href="<?php echo base_url('admin/dashboard/get_category/' . $value['id']) ?>"><i class="fa fa-wrench"></i><span style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" class="hide-menu"><?php echo ' '.$value['id']; ?>. <?php echo $value['name']; ?></span></a></li>
-                        <?php } ?>
-                    </ul>
+              <!-- Categories -->
+              <?php foreach ($this->session->userdata('category') as $key => $value) { ?>
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/dashboard/get_category/' . $value['id']); ?>">
+                    <i class="fa fa-wrench me-2"></i>
+                    <?php echo $value['id'] . '. ' . $value['name']; ?>
+                  </a>
                 </li>
-                <?php if (($this->session->userdata('name') == 'Admin' || $this->session->userdata('name') == 'Adminpz'))  : ?>
-                    <li> <a href="javascript:void(0);" class="waves-effect"><i class="icon-user p-r-10"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">KRIJO<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">4</span></span></a>
-                        <ul class="nav nav-second-level">
-                            <li> <a href="<?php echo base_url('admin/user') ?>"><i class="fa fa-plus p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >PËRDORUES I RI</span></a></li>
-                            <li><a href="<?php echo base_url('admin/user/all_user_list') ?>"><i class="fa fa-list p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;">LISTA E TË GJITHË PËRDORUESVE</span></a></li>
-                            <li><a href="<?php echo base_url('admin/categories') ?>"><i class="fa fa-list p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;">KATEGORIT</span></a></li>
-                            <li><a href="<?php echo base_url('admin/user/login_history') ?>"><i class="fa fa-list p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;">HISTORIKU I PËRDORUESVE</span></a></li>
-                        </ul>
-                    </li>
-                <?php endif ?>
-                <?php if (($this->session->userdata('name') == 'Admin' || $this->session->userdata('name') == 'Adminpz')) : ?>
-                    <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-print p-r-10"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">PRINTO<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
-                        <ul class="nav nav-second-level">
-                            <li> <a href="<?php echo base_url('admin/printproduct') ?>"><i class="fa fa-print p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >PRINTO PRODUKTET</span></a></li>
-                            <li> <a href="<?php echo base_url('admin/printproduct/page_dimension') ?>"><i class="fa fa-paper-plane p-r-10"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >DIMENSIONET E FLETËS</span></a></li>
-                        </ul>
-                    </li>
-                    <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-file p-r-10" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">FATURAT<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
-                        <ul class="nav nav-second-level">
-                            <li> <a href="<?php echo base_url('admin/invoices/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO FATURËN</span></a></li>
-                            <li> <a href="<?php echo base_url('admin/invoices/created') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >FATURAT E KRIJUARA</span></a></li>
-                        </ul>
-                    </li>
-                    <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-truck p-r-12" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">POSTA<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
-                        <ul class="nav nav-second-level">
-                            <li> <a href="<?php echo base_url('admin/expresspostaapi/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO POROSINË NË EXPRESS POSTË</span></a></li>
-                            <li> <a href="<?php echo base_url('admin/expresspostaapi/order_list') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >POROSITË E KRIJUARA NË EXPRESS POSTË</span></a></li>
-                        </ul>
-                    </li> -->
-                    <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-file p-r-10" aria-hidden="true"></i> <span class="hide-menu"style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">PUNËTORËT<span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">2</span></span></a>
-                        <ul class="nav nav-second-level">
-                            <li> <a href="<?php echo base_url('admin/employee/') ?>"><i class="fa fa-plus p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >KRIJO PUNËTORIN</span></a></li>
-                            <li> <a href="<?php echo base_url('admin/employee/created') ?>"><i class="fa fa-file p-r-10" aria-hidden="true"></i><span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:12px;font-weight: bold;" >LISTA E PUNËTORËVE</span></a></li>
-                        </ul>
-                    </li> -->
-                <?php endif ?>
-                <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="icon-envelope p-r-10"></i> <span class="hide-menu"> Mailbox <span class="fa arrow"></span><span class="label label-rouded label-danger pull-right">6</span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li> <a href="<?php echo base_url('admin/mail/inbox') ?>">Inbox</a></li>
-                        <li> <a href="<?php echo base_url('admin/mail/inbox_details') ?>">Inbox detail</a></li>
-                        <li> <a href="<?php echo base_url('admin/mail/compose_message') ?>">Compose mail</a></li>
-                    </ul>
-                </li> -->
-
-                <!-- <li> <a href="#" class="waves-effect"><i data-icon="/" class="linea-icon linea-basic fa-fw"></i> <span class="hide-menu">UI Elements<span class="fa arrow"></span> <span class="label label-rouded label-info pull-right">25</span> </span></a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="<?php echo base_url('admin/ui/card') ?>">Cards</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/panel_well') ?>">Panels and Wells</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/panel_block') ?>">Panels With BlockUI</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/drag_panel') ?>">Draggable Panel</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/dragPortlet') ?>">Draggable Portlet</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/buttons') ?>">Buttons</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/bootsrap_switch') ?>">Bootstrap Switch</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/date_pagination') ?>">Date Paginator</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/sweet_alert') ?>">Sweat alert</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/typography') ?>">Typography</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/grid') ?>">Grid</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/tabs') ?>">Tabs</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/stylish') ?>">Stylish Tabs</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/modals') ?>">Modals</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/progressbar') ?>">Progress Bars</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/notification') ?>">Notifications</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/carousel') ?>">Carousel</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/list_media') ?>">List & Media object</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/user_card') ?>">User Cards</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/timeline') ?>">Timeline</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/horizontal_timeline') ?>">Horizontal Timeline</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/nestable') ?>">Nesteble</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/range_slider') ?>">Range Slider</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/ribbon') ?>">Ribbons</a></li>
-                        <li><a href="<?php echo base_url('admin/ui/steps') ?>">Steps</a></li>
-                    </ul>
-                </li> -->
-
-                <!-- <li> <a href="javascript:void(0);" class="waves-effect"><i class="icon-chart p-r-10"></i> <span class="hide-menu"> Reports <span class="fa arrow"></span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li> <a href="<?php echo base_url('admin/report/payment_report') ?>">Payment Report</a></li>
-                        <li> <a href="<?php echo base_url('admin/report/income_report') ?>">Income Report</a></li>
-                        <li> <a href="<?php echo base_url('admin/report/sales_report') ?>">Sales Report</a></li>
-                    </ul>
-                </li>
-                <li> <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-inr p-r-10"></i> <span class="hide-menu"> Payments <span class="fa arrow"></span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li> <a href="<?php echo base_url('admin/payment/all_payments') ?>">All Payments</a></li>
-                        <li> <a href="<?php echo base_url('admin/payment/create_payment') ?>">Create Payment</a></li>
-                        <li> <a href="<?php echo base_url('admin/payment/payment_invoice') ?>">Payment Invoice</a></li>
-                    </ul>
-                </li> -->
-
-                <!-- <li> <a href="forms.html" class="waves-effect"><i data-icon="&#xe00b;" class="linea-icon linea-basic fa-fw"></i> <span class="hide-menu">Forms<span class="fa arrow"></span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="<?php echo base_url('admin/form/form_basic') ?>">Basic Forms</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_layout') ?>">Form Layout</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_addon') ?>">Form Addons</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_material') ?>">Form Material</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_float') ?>">Form Float Input</a></li>
-                        <li><a href="<?php echo base_url('admin/form/file_upload') ?>">File Upload</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_mask') ?>">Form Mask</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_validation') ?>">Form Validation</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_dropzone') ?>">File Dropzone</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_picker') ?>">Form-pickers</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_icheck') ?>">Icheck Form Controls</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_wizard') ?>">Form-wizards</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_typehead') ?>">Typehead</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_editable') ?>">X-editable</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_summernote') ?>">Summernote</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_wysihtml5') ?>">Bootstrap wysihtml5</a></li>
-                        <li><a href="<?php echo base_url('admin/form/form_tinymyce') ?>">Tinymce wysihtml5</a></li>
-                    </ul>
-                </li> -->
-                <!-- <li> <a href="<?php echo base_url('admin/dashboard/backup') ?>" class="waves-effect"><i data-icon="P" class="linea-icon linea-basic fa-fw"></i> <span class="hide-menu">Backup Database</span></a> </li>
-
-                <li> <a href="<?php echo base_url('admin/widget/widget') ?>" class="waves-effect"><i data-icon="P" class="linea-icon linea-basic fa-fw"></i> <span class="hide-menu">Widgets</span></a> </li> -->
-                <!-- <li> <a href="#" class="waves-effect"><i data-icon="7" class="linea-icon linea-basic fa-fw"></i> <span class="hide-menu">Icons<span class="fa arrow"></span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li> <a href="<?php echo base_url('admin/icon/font_awesome') ?>">Font awesome</a> </li>
-                        <li> <a href="<?php echo base_url('admin/icon/themifyIcon') ?>">Themify Icons</a> </li>
-                        <li> <a href="<?php echo base_url('admin/icon/simpleLineIcon') ?>">Simple line Icons</a> </li>
-                        <li><a href="<?php echo base_url('admin/icon/lineIcon') ?>">Linea Icons</a></li>
-                        <li><a href="<?php echo base_url('admin/icon/weatherIcon') ?>">Weather Icons</a></li>
-                    </ul>
-                </li> -->
-
-                <!-- <li> <a href="#" class="waves-effect"><i data-icon="&#xe008;" class="linea-icon linea-basic fa-fw"></i> <span class="hide-menu">Sample Pages<span class="fa arrow"></span><span class="label label-rouded label-purple pull-right">29</span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="<?php echo base_url('admin/page/starter') ?>">Starter Page</a></li>
-                        <li><a href="<?php echo base_url('admin/page/blank') ?>">Blank Page</a></li>
-                        <li><a href="javascript:void(0)" class="waves-effect">Email Templates
-                                <span class="fa arrow"></span></a>
-                            <ul class="nav nav-third-level">
-                                <li><a href="<?php echo base_url('admin/page/email_basic') ?>">Basic</a></li>
-                                <li><a href="<?php echo base_url('admin/page/email_alert') ?>">Alert</a></li>
-                                <li><a href="<?php echo base_url('admin/page/email_billing') ?>">Billing</a></li>
-                                <li><a href="<?php echo base_url('admin/page/reset_password') ?>">Reset Password</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="<?php echo base_url('admin/page/lightBox') ?>">Lightbox Popup</a></li>
-                        <li><a href="<?php echo base_url('admin/page/treeview') ?>">Treeview</a></li>
-                        <li><a href="<?php echo base_url('admin/page/search_result') ?>">Search Result</a></li>
-                        <li><a href="<?php echo base_url('admin/page/utility_class') ?>">Utility Classes</a></li>
-                        <li><a href="<?php echo base_url('admin/page/custom_scroll') ?>">Custom Scrolls</a></li>
-                        <li><a href="<?php echo base_url('admin/page/login_page') ?>">Login Page</a></li>
-                        <li><a href="<?php echo base_url('admin/page/second_login') ?>">Login v2</a></li>
-                        <li><a href="<?php echo base_url('admin/page/animation') ?>">Animations</a></li>
-                        <li><a href="<?php echo base_url('admin/page/profile') ?>">Profile</a></li>
-                        <li><a href="<?php echo base_url('admin/page/invoice') ?>">Invoice</a></li>
-                        <li><a href="<?php echo base_url('admin/page/faq') ?>">FAQ</a></li>
-                        <li><a href="<?php echo base_url('admin/page/gallery') ?>">Gallery</a></li>
-                        <li><a href="<?php echo base_url('admin/page/pricing') ?>">Pricing</a></li>
-                        <li><a href="<?php echo base_url('admin/page/register') ?>">Register</a></li>
-                        <li><a href="<?php echo base_url('admin/page/second_register') ?>">Register v2</a></li>
-                        <li><a href="<?php echo base_url('admin/page/step_registration') ?>">3 Step Registration</a></li>
-                        <li><a href="<?php echo base_url('admin/page/recover_password') ?>">Recover Password</a></li>
-                    </ul>
-                </li> -->
-
-                <!-- <li> <a href="tables.html" class="waves-effect"><i data-icon="O" class="linea-icon linea-software fa-fw"></i> <span class="hide-menu">Tables<span class="fa arrow"></span><span class="label label-rouded label-info pull-right">7</span></span></a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="<?php echo base_url('admin/table/basic_table') ?>">Basic Tables</a></li>
-                        <li><a href="<?php echo base_url('admin/table/table_layout') ?>">Table Layouts</a></li>
-                        <li><a href="<?php echo base_url('admin/table/data_table') ?>">Data Table</a></li>
-                        <li><a href="<?php echo base_url('admin/table/bootsrap_table') ?>">Bootstrap Tables</a></li>
-                        <li><a href="<?php echo base_url('admin/table/responsive_table') ?>">Responsive Tables</a></li>
-                        <li><a href="<?php echo base_url('admin/table/editable_table') ?>">Editable Tables</a></li>
-                        <li><a href="<?php echo base_url('admin/table/footable') ?>">FooTables</a></li>
-                    </ul>
-                </li> -->
-
-                <li><a href="<?php echo base_url('auth/logout') ?>" class="waves-effect"><i class="icon-logout fa-fw"></i> <span class="hide-menu" style="font-family: Verdana, sans-serif;font-size:13px;font-weight: bold;">DIL NGA PROGRAMI</span></a></li>
+              <?php } ?>
             </ul>
-        </div>
+          </li>
+
+          <?php if (($this->session->userdata('name') == 'Admin' || $this->session->userdata('name') == 'Adminpz')): ?>
+
+          <!-- KRIJO dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="icon-user p-r-10 me-1"></i>
+              KRIJO
+              <span class="ms-2 nav-badge nav-badge-danger">4</span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navCreate">
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user'); ?>"><i class="fa fa-plus me-2"></i> PËRDORUES I RI</a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/all_user_list'); ?>"><i class="fa fa-list me-2"></i> LISTA E TË GJITHË PËRDORUESVE</a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/categories'); ?>"><i class="fa fa-list me-2"></i> KATEGORIT</a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/login_history'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PËRDORUESVE</a></li>
+            </ul>
+          </li>
+
+          <!-- PRINTO dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navPrint" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-print p-r-10 me-1"></i>
+              PRINTO
+              <span class="ms-2 nav-badge nav-badge-danger">2</span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navPrint">
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/printproduct'); ?>"><i class="fa fa-print me-2"></i> PRINTO PRODUKTET</a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/printproduct/page_dimension'); ?>"><i class="fa fa-paper-plane me-2"></i> DIMENSIONET E FLETËS</a></li>
+            </ul>
+          </li>
+
+          <!-- FATURAT dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navInvoices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-file p-r-10 me-1" aria-hidden="true"></i>
+              FATURAT
+              <span class="ms-2 nav-badge nav-badge-danger">2</span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navInvoices">
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/'); ?>"><i class="fa fa-plus me-2"></i> KRIJO FATURËN</a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/created'); ?>"><i class="fa fa-file me-2"></i> FATURAT E KRIJUARA</a></li>
+            </ul>
+          </li>
+
+          <?php endif; ?>
+        </ul>
+
+        <!-- Right side: Profile + Logout -->
+      <li class="nav-item dropdown d-none d-md-flex" id="navProfile">
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navProfile" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="<?php echo base_url(); ?>optimum/images/profile-icon1.png" alt="user-img" width="32" height="32" class="rounded-circle me-2">
+          <span class="d-none d-lg-inline"><?php echo $this->session->userdata('name'); ?></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navProfile">
+          <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('auth/logout'); ?>"><i class="fa fa-power-off me-2"></i> Logout</a></li>
+        </ul>
+      </li>
+
+      <!-- Mobile-only logout item -->
+      <li class="nav-item d-md-none">
+        <a href="<?php echo base_url('auth/logout'); ?>" class="nav-link d-flex align-items-center mobile-chevron">
+          <i class="icon-logout fa-fw me-2"></i>
+          DIL NGA PROGRAMI
+        </a>
+      </li>
+
+        
+      </div>
     </div>
-    <!-- Left navbar-header end -->
+  </nav>
 
-
-    <!-- Page Content -->
-    <div id="page-wrapper">
-        <div class="container-fluid">
-
-            <div class="row bg-title">
-                <!-- <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12"> -->
-                <h4 class="page-title"><?php echo $page_title; ?></h4>
-                <!-- </div> -->
-            </div>
-
-            <?php echo $main_content; ?>
-
-        </div>
-        <?php include 'layout/footer.php'; ?>
+  <!-- Page content -->
+  <div id="page-wrapper">
+    <div class="container-fluid">
+      <div class="row bg-title">
+        <h4 class="page-title"><?php echo $page_title; ?></h4>
+      </div>
+      <?php echo $main_content; ?>
     </div>
-    <!-- /#page-wrapper -->
+    <?php include 'layout/footer.php'; ?>
+  </div>
 </div>
-<!-- /#wrapper -->
-<!-- jQuery -->
-<script>
-    $(document).ready(
-        $('.navbar-collapse').on('show.bs.collapse hide.bs.collapse', function(e) {
-            e.preventDefault();
-        }),
-        $('[data-toggle="collapse"]').on('click', function(e) {
-            e.preventDefault();
-            $($(this).data('target')).toggleClass('in');
-        })
-    );
-</script>
+
 <?php include 'layout/js.php'; ?>
+
+<script>
+(function($){
+  $(function(){
+    $('body').removeClass('mini-sidebar');
+    $('.navbar-collapse').removeClass('in show').attr('aria-expanded','false');
+  });
+})(jQuery);
+</script>

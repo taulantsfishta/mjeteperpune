@@ -1,15 +1,5 @@
 <style>
-        #searchContainer {
-             position: sticky;
-             top: 0;
-             z-index: 999;
-             background-color: white;
-             width: 100%;
-             padding-right: 0px;
-             padding-left: 0px;
-             margin-right: auto;
-             margin-left: auto;
-        }
+
 
             /* Insert the updated CSS here */
             #searchContainer {
@@ -26,12 +16,23 @@
             margin-top:35px;
             display: flex;
             align-items: center;
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
             transition: box-shadow 0.3s ease;
         }
 
+        #searchContainer {
+            position: sticky;
+            top: 90px;                 /* adjust this value to move it lower (try 120–180px) */
+            z-index: 110 !important;    /* above content, below dropdown */
+            background: #fff;
+            width: min(960px, 100%);
+            margin: 20px auto 24px;     /* spacing around */
+            border-radius: 8px;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+
         #searchContainer.focused {
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+            box-shadow: 0 0 10px #5aa8e98c;
         }
 
         svg {
@@ -205,8 +206,8 @@
     <img id="previewImage" class="background-blur" class="mt-3 img-thumbnail" style="display: none;">
 
 
-    <div class="col-md-12 background-blur">
-        <hr>
+    <div class="col-md-12" >
+            <hr style="border-top: 2px solid #bdb8b8ff;">
     </div>
     <!-- /.usercard -->
     <div class="row el-element-overlay m-b-40 background-blur" id="productListing">
@@ -533,7 +534,7 @@
                     });
                 } else {
                     productListing.innerHTML = ""; 
-                    productListing.innerHTML += `<h4 class="page-title" style="color:rgba(0,0,0,.5);font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
+                    productListing.innerHTML += `<h4 class="page-title" style="color:#d9534f;font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
                     window.scrollTo(0, 0);
                     searchInput.focus();
 

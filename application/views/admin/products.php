@@ -1,27 +1,4 @@
 <style>
-        /* Insert the updated CSS here */
-        #searchContainer {
-            position: sticky;
-            top: 12px;
-            z-index: 999;
-            background-color: white;
-            width: 100%;
-            padding-right: 0px;
-            padding-left: 0px;
-            margin-right: auto;
-            margin-left: auto;
-            margin-bottom: 20px; /* Add bottom margin for spacing */
-            margin-top:35px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
-            transition: box-shadow 0.3s ease;
-        }
-
-        #searchContainer.focused {
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
-        }
-
         .dropdown-toggle {
             border-color: #fff;
             border-top: none;
@@ -197,6 +174,61 @@
             white-space:normal;      /* lejo rreshta të shumtë */
         }
 
+        /* Navbar dropdown (click toggles, no internal scroll) */
+        .navbar .dropdown-menu {
+        width: auto !important;
+        max-height: none !important;     /* show all categories */
+        overflow: visible !important;    /* no scrollbar inside */
+        z-index: 1200 !important;        /* above sticky search */
+        border: 1px solid #e3e7eb;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        padding-top: 6px;
+        padding-bottom: 6px;
+        }
+
+        /* Make sure the sticky search never sits above it */
+        #searchContainer { z-index: 100 !important; }
+
+        /* Optional: if you previously set dropdowns to 100% width for page toolbars,
+        scope that only to the toolbar, not the navbar */
+        .container.background-blur .dropdown .dropdown-toggle { width: 100%; }
+        .container.background-blur .dropdown .dropdown-menu   { width: 100%; }
+
+        #searchContainer {
+            position: sticky;
+            top: 12px;
+            z-index: 999;
+            background-color: white;
+            width: 100%;
+            padding-right: 0px;
+            padding-left: 0px;
+            margin-right: auto;
+            margin-left: auto;
+            margin-bottom: 20px; /* Add bottom margin for spacing */
+            margin-top:35px;
+            display: flex;
+            align-items: center;
+            transition: box-shadow 0.3s ease;
+        }
+
+        #searchContainer {
+            position: sticky;
+            top: 90px;                 /* adjust this value to move it lower (try 120–180px) */
+            z-index: 110 !important;    /* above content, below dropdown */
+            background: #fff;
+            width: min(960px, 100%);
+            margin: 20px auto 24px;     /* spacing around */
+            border-radius: 8px;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+
+        #searchContainer.focused {
+            box-shadow: 0 0 10px #67b2f08c;
+        }
+        /* Make sure sticky works even inside blurred wrapper */
+        .background-blur { overflow: visible; }
 
         </style>
 
@@ -236,8 +268,8 @@
             </button>
         </div>
 
-        <div class="col-md-12 background-blur">
-            <hr>
+        <div class="col-md-12" >
+            <hr style="border-top: 2px solid #bdb8b8ff;">
         </div>
 
         <!-- /.usercard -->
@@ -610,7 +642,7 @@
                 moveModalsOutside();
             });
         } else if (query !== '') {
-            productListing.innerHTML = `<h4 class="page-title" style="color:rgba(0,0,0,.5);font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
+            productListing.innerHTML = `<h4 class="page-title" style="color:#d9534f;;font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
             searchInput.focus();
             window.scrollTo(0, 0);
         }

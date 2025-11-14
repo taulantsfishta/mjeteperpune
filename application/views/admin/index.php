@@ -374,6 +374,30 @@ button i {
   }
 }
 
+/* === Prevent mobile zoom on navbar taps (iOS) === */
+@media (max-width: 767.98px) {
+  /* Hamburger button */
+  .navbar-toggler {
+    font-size: 16px !important;
+    line-height: 1.2;
+  }
+
+  /* The three-line icon inside (so Safari sees it as 16px too) */
+  .navbar-toggler-icon {
+    width: 1.5em;
+    height: 1.5em;
+  }
+
+  /* Menu links inside the opened mobile menu */
+  .navbar-collapse .navbar-nav .nav-link {
+    font-size: 16px !important;
+  }
+
+  /* Mobile logout row as well */
+  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron {
+    font-size: 16px !important;
+  }
+}
 
 
 

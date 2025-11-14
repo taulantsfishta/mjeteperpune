@@ -40,10 +40,6 @@ body { padding-top: 64px; }
   background: #ef5350; color: #fff;
 }
 
-/* Mobile fix for collapse overlay */
-@media (max-width: 991.98px) {
-  .navbar-collapse.collapse:not(.show) { display: none !important; }
-}
 
 /* ===== Light modern, realistic palette ===== */
 :root {
@@ -355,6 +351,29 @@ button i {
     padding-bottom: 8px;
   }
 }
+
+/* Mobile: make the navbar collapse open/close instantly and keep children visible */
+@media (max-width: 991.98px) {
+  /* Let Bootstrap manage visibility; don't hide with display:none */
+  .navbar-collapse { overflow: visible; }
+
+  /* Remove the slide animation that makes the shell move before the content */
+  .navbar-collapse.collapsing {
+    height: auto !important;
+    transition: none !important;
+  }
+
+  /* Ensure the shown state is just block with no animation lag */
+  .navbar-collapse.collapse.show {
+    display: block !important;
+  }
+
+  /* Also make dropdowns inside the collapse render immediately */
+  .navbar .dropdown-menu {
+    transition: none !important;
+  }
+}
+
 
 
 

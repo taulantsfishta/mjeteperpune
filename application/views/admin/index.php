@@ -390,12 +390,12 @@ button i {
 
   /* Menu links inside the opened mobile menu */
   .navbar-collapse .navbar-nav .nav-link {
-    font-size: 16px !important;
+    font-size: 14px !important;
   }
 
   /* Mobile logout row as well */
   .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron {
-    font-size: 16px !important;
+    font-size: 14px !important;
   }
 }
 

@@ -320,13 +320,19 @@ button i {
 /* ===== Navbar dropdown behavior per device ===== */
 
 /* Desktop/tablet: show full list (no internal scroll) */
+/* Desktop/tablet: dropdown scrolls if too tall */
 @media (min-width: 768px) {
   .navbar .dropdown-menu {
-    max-height: none !important;
-    overflow: visible !important;
     position: absolute !important;
+    top: 100% !important;
+    max-height: calc(100vh - 120px) !important; /* viewport minus navbar + spacing */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 }
+
 
 /* Mobile: constrain height and enable internal scroll */
 @media (max-width: 767.98px) {

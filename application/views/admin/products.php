@@ -1,874 +1,771 @@
 <style>
-        .dropdown-toggle {
-            border-color: #fff;
-            border-top: none;
-            border-right: none;
-            border-left: none;
-            width: 100%;
-        }
+    .dropdown-toggle {
+        border-color: #fff;
+        border-top: none;
+        border-right: none;
+        border-left: none;
+        width: 100%;
+    }
 
-        .dropdown-menu {
-            width: 100%;
-        }
+    .dropdown-menu { width: 100%; }
 
-        .product-card.selected {
-            background-color: lightblue; /* Change this to the desired color */
-        }
+    .product-card.selected { background-color: lightblue; }
 
-        #selectedProductsButtonContainer {
-            position: fixed;
-            bottom: 20px;
-            left: 60%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            display: none;
-        }
+    #selectedProductsButtonContainer {
+        position: fixed;
+        bottom: 20px;
+        left: 60%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: none;
+    }
 
-        svg {
-            display: none;
-        }
+    svg { display: none; }
 
-        [role="search"] {
-            box-sizing: border-box;
-            background-color: #fff;
-            border: 1px solid rgba(0, 0, 0, .5);
-            border-radius: 1em;
-            padding: 0;
-            max-width: 100em;
-            height: 34px;
-        }
+    [role="search"] {
+        box-sizing: border-box;
+        background-color: #fff;
+        border: 1px solid rgba(0,0,0,.5);
+        border-radius: 1em;
+        padding: 0;
+        max-width: 100em;
+        height: 34px;
+    }
+    [role="search"] label {
+        display: inline-block;
+        width: 0; overflow: hidden; text-indent: -1000px; margin: 0;
+    }
 
-        [role="search"] label {
-            display: inline-block;
-            width: 0;
-            overflow: hidden;
-            text-indent: -1000px;
-            margin: 0;
-        }
+    input::-webkit-input-placeholder { color: #757575; }
+    input:-ms-input-placeholder { color: #757575; }
+    input::-moz-placeholder { color: #757575; }
 
-        input::-webkit-input-placeholder {
-            color: #757575;
-        }
+    input[type="text"] {
+        border-radius: .5em;
+        border: 0.1em solid #666;
+        padding: .5em .75em;
+        font-family: Lato, Arial, sans-serif;
+        font-size: 100%;
+    }
 
-        input:-ms-input-placeholder {
-            color: #757575;
-        }
+    [role="search"] input[type="text"] {
+        border: none;
+        background-color: transparent;
+        width: 100%;
+        padding: .5em 1em;
+        font-size: 18px;
+        font-family: Lato, Arial, sans-serif;
+        border-radius: 20px 0 0 20px;
+        box-sizing: border-box;
+        transition: box-shadow .3s ease;
+    }
 
-        input::-moz-placeholder {
-            color: #757575;
-        }
+    [role="search"] button {
+        background: transparent;
+        cursor: pointer;
+        border: none;
+        padding: .5em;
+        border-radius: 0 20px 20px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    [role="search"] button svg {
+        display: block; margin: 0 auto; fill: #666; width: 100%; height: auto;
+    }
+    [role="search"] button:hover, [role="search"] button:focus { outline: none; }
+    [role="search"] button:hover svg, [role="search"] button:focus svg { fill: #7396CE; }
 
-        input[type="text"] {
-            border-radius: .5em;
-            border: 0.1em solid #666;
-            padding: .5em .75em;
-            font-family: Lato, Arial, sans-serif;
-            font-size: 100%;
-        }
+    [role="search"] input[type="text"]:focus { outline: none; box-shadow: none; }
 
-        [role="search"] input[type="text"] {
-            border: none;
-            background-color: transparent;
-            width: 100%;
-            padding: .5em 1em;
-            font-size: 18px;
-            font-family: Lato, Arial, sans-serif;
-            border-radius: 20px 0 0 20px;
-            box-sizing: border-box;
-            transition: box-shadow 0.3s ease;
-        }
+    [role="search"] button i {
+        color: #666; transition: color .3s ease; font-size: 1.2em;
+    }
+    [role="search"] button:hover i,
+    [role="search"] button:focus i { color: #7396CE; }
 
-        [role="search"] button {
-            background: transparent;
-            cursor: pointer;
-            border: none;
-            padding: .5em;
-            border-radius: 0 20px 20px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    #loadingIndicator .spinner {
+        display: inline-block;
+        width: 40px; height: 40px;
+        border: 3px solid rgba(0,0,0,0.1);
+        border-radius: 50%;
+        border-top-color: #3498db;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        [role="search"] button svg {
-            display: block;
-            margin: 0 auto;
-            fill: #666;
-            width: 100%;
-            height: auto;
-        }
+    body.modal-open .background-blur:not(.modal):not(.modal *) {
+        filter: blur(5px);
+        pointer-events: none;
+        user-select: none;
+    }
+    .modal { z-index: 1055; position: fixed; }
 
-        [role="search"] button:hover, [role="search"] button:focus {
-            outline: none;
-        }
+    .card.product-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
 
-        [role="search"] button:hover svg, [role="search"] button:focus svg {
-            fill: #7396CE;
-        }
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+    }
 
-        [role="search"] input[type="text"]:focus {
-            outline: none;
-            box-shadow: none;
-        }
+    .product-description{
+        margin-left:10px;
+        font-size:14px;
+        line-height:1.3;
+        display:block;
+        overflow:visible;
+        white-space:normal;
+    }
 
-        [role="search"] button i {
-            color: #666;
-            transition: color 0.3s ease;
-            font-size: 1.2em;
-        }
-
-        [role="search"] button:hover i, 
-        [role="search"] button:focus i {
-            color: #7396CE;
-        }
-        
-        #loadingIndicator .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top-color: #3498db;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 8px; /* Space between spinner and text */
-        }
-
-        /* Spinner animation */
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        body.modal-open .background-blur:not(.modal):not(.modal *) {
-            filter: blur(5px);
-            pointer-events: none;
-            user-select: none;
-        }
-
-
-        .modal {
-            z-index: 1055; /* default is 1050, this just ensures it's above */
-            position: fixed; /* ensure it's outside blur flow */
-        }
-
-        .card.product-card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
-        }
-
-        .card-body {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            flex-grow: 1;
-        }
-
-        .product-description{
-            margin-left:10px;
-            font-size:14px;
-            line-height:1.3;
-            display:block;           /* jo -webkit-box */
-            overflow:visible;        /* jo hidden */
-            white-space:normal;      /* lejo rreshta të shumtë */
-        }
-
-        /* Navbar dropdown (click toggles, no internal scroll) */
-        .navbar .dropdown-menu {
+    .navbar .dropdown-menu {
         width: auto !important;
-        max-height: none !important;     /* show all categories */
-        overflow: visible !important;    /* no scrollbar inside */
-        z-index: 1200 !important;        /* above sticky search */
+        max-height: none !important;
+        overflow: visible !important;
+        z-index: 1200 !important;
         border: 1px solid #e3e7eb;
         border-radius: 4px;
         box-shadow: 0 2px 8px rgba(0,0,0,.06);
         padding-top: 6px;
         padding-bottom: 6px;
-        }
+    }
+    #searchContainer { z-index: 100 !important; }
 
-        /* Make sure the sticky search never sits above it */
-        #searchContainer { z-index: 100 !important; }
+    .container.background-blur .dropdown .dropdown-toggle { width: 100%; }
+    .container.background-blur .dropdown .dropdown-menu   { width: 100%; }
 
-        /* Optional: if you previously set dropdowns to 100% width for page toolbars,
-        scope that only to the toolbar, not the navbar */
-        .container.background-blur .dropdown .dropdown-toggle { width: 100%; }
-        .container.background-blur .dropdown .dropdown-menu   { width: 100%; }
+    #searchContainer {
+        position: sticky;
+        top: 90px;
+        z-index: 110 !important;
+        background: #fff;
+        width: min(960px, 100%);
+        margin: 20px auto 24px;
+        border-radius: 8px;
+        transition: box-shadow .2s ease, transform .2s ease;
+        padding-right: 0;
+        padding-left: 0;
+        display: flex;
+        align-items: center;
+    }
 
-        #searchContainer {
-            position: sticky;
-            top: 12px;
-            z-index: 999;
-            background-color: white;
-            width: 100%;
-            padding-right: 0px;
-            padding-left: 0px;
-            margin-right: auto;
-            margin-left: auto;
-            margin-bottom: 20px; /* Add bottom margin for spacing */
-            margin-top:35px;
-            display: flex;
-            align-items: center;
-            transition: box-shadow 0.3s ease;
-        }
+    #searchContainer.focused { box-shadow: 0 0 10px #67b2f08c; }
 
-        #searchContainer {
-            position: sticky;
-            top: 90px;                 /* adjust this value to move it lower (try 120–180px) */
-            z-index: 110 !important;    /* above content, below dropdown */
-            background: #fff;
-            width: min(960px, 100%);
-            margin: 20px auto 24px;     /* spacing around */
-            border-radius: 8px;
-            transition: box-shadow 0.2s ease, transform 0.2s ease;
-        }
+    .background-blur { overflow: visible; }
+</style>
 
-
-        #searchContainer.focused {
-            box-shadow: 0 0 10px #67b2f08c;
-        }
-        /* Make sure sticky works even inside blurred wrapper */
-        .background-blur { overflow: visible; }
-
-        </style>
-
-        <?php if ($this->session->userdata('role') == 'admin') : ?>
-            <div class="container background-blur">
-                <div class="row">
-                    <div class="col-lg-5"></div>
-                    <div class="col-lg-3">
-                        <div class="dropdown">
-                            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="background:#7396CE;">
-                                <i class="fa fa-print"></i> Aktivizo Printimin
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" id="printOption" onClick="onClickButton('print')" style="font-size:13px;"><i class="fa fa-print"></i> Printo</a></li>
-                                <li><a class="dropdown-item" id="selectOption" onClick="onClickButton('select')" style="font-size:13px;"><i class="fa fa-check" aria-hidden="true"></i> Selekto</a></li>
-                                <li><a class="dropdown-item" id="cancelOption" onClick="onClickButton('cancel')" style="font-size:13px;"><i class="fa fa-times" aria-hidden="true"></i> Anulo Printimin</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <br/>
-                    <div class="col-lg-3 mb-3 mb-lg-0">
-                        <a href="<?php echo base_url('admin/products/add/' . $category['id']); ?>"> 
-                            <button type="submit" class="btn btn-block" style="background:#ffcd35;"> 
-                                <i class="fa fa-plus"></i>&nbsp;&nbsp;Shto Produktin
-                            </button>
-                        </a>
-                    </div>
+<?php if ($this->session->userdata('role') == 'admin') : ?>
+    <div class="container background-blur">
+        <div class="row">
+            <div class="col-lg-5"></div>
+            <div class="col-lg-3">
+                <div class="dropdown">
+                    <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1"
+                            data-bs-toggle="dropdown" aria-expanded="false" style="background:#7396CE;">
+                        <i class="fa fa-print"></i> Aktivizo Printimin
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" id="printOption" onClick="onClickButton('print')" style="font-size:13px;">
+                            <i class="fa fa-print"></i> Printo</a></li>
+                        <li><a class="dropdown-item" id="selectOption" onClick="onClickButton('select')" style="font-size:13px;">
+                            <i class="fa fa-check" aria-hidden="true"></i> Selekto</a></li>
+                        <li><a class="dropdown-item" id="cancelOption" onClick="onClickButton('cancel')" style="font-size:13px;">
+                            <i class="fa fa-times" aria-hidden="true"></i> Anulo Printimin</a></li>
+                    </ul>
                 </div>
             </div>
-        <?php endif ?>
-
-        <div role="search" id="searchContainer" class="background-blur">
-            <label for="s1">Search for:</label>
-            <input type="text" id="searchInput" placeholder="Kerko...">
-            <button aria-label="Do search" id="searchIcon">
-                <i class="fa fa-search"></i>
-            </button>
+            <br/>
+            <div class="col-lg-3 mb-3 mb-lg-0">
+                <a href="<?php echo base_url('admin/products/add/' . $category['id']); ?>">
+                    <button type="submit" class="btn btn-block" style="background:#ffcd35;">
+                        <i class="fa fa-plus"></i>&nbsp;&nbsp;Shto Produktin
+                    </button>
+                </a>
+            </div>
         </div>
+    </div>
+<?php endif ?>
 
-        <div class="col-md-12" >
-            <hr style="border-top: 2px solid #bdb8b8ff;">
-        </div>
+<div role="search" id="searchContainer" class="background-blur">
+    <label for="s1">Search for:</label>
+    <input type="text" id="searchInput" placeholder="Kerko...">
+    <button aria-label="Do search" id="searchIcon">
+        <i class="fa fa-search"></i>
+    </button>
+</div>
 
-        <!-- /.usercard -->
-        <div class="row el-element-overlay background-blur" id="productListing">
-            <?php foreach ($products as $key => $value) { ?>
-                <div class="col-md-12 col-lg-4 mb-lg-0" id="mainDiv" style='padding-left:5px;padding-right: 5px;padding-bottom: 15px;'>
-                    <div class="card product-card d-flex flex-column h-100" data-product-id-main="<?php echo $value['id']; ?>">                        
-                        <img 
-                            id="imageresource_<?php echo $key; ?>"
-                            imgId="<?php echo $key; ?>"
-                            class="lazyload img-fluid mx-auto mt-3"
-                            style="width:90px; height:70px; object-fit: contain;"
-                            data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" 
-                        />
+<div class="col-md-12">
+    <hr style="border-top: 2px solid #bdb8b8ff;">
+</div>
 
-                        <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+<!-- PRODUCT LIST -->
+<div class="row el-element-overlay background-blur" id="productListing">
+    <?php foreach ($products as $key => $value) { ?>
+        <div class="col-md-12 col-lg-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+            <div class="card product-card d-flex flex-column h-100"
+                 data-product-id-main="<?php echo $value['id']; ?>"
+                 data-product-name="<?php echo htmlspecialchars($value['name']); ?>">
+                <img
+                    id="imageresource_<?php echo $value['id']; ?>"
+                    imgId="<?php echo $value['id']; ?>"
+                    class="lazyload img-fluid mx-auto mt-3"
+                    style="width:90px; height:70px; object-fit: contain;"
+                    data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
+                />
 
-                            <div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <h5 class="mb-0">Kodi:</h5>
-                                    <h5 class="text-dark mb-0"><b><?php echo $value['code']; ?></b></h5>
-                                </div>
-
-                                <div class="d-flex justify-content-between mb-2">
-                                    <h5 class="mb-0">Përshkrimi:</h5>
-                                    <h5 class="text-dark mb-0 text-end product-description">
-                                        <b><?php echo htmlspecialchars($value['name']); ?></b>
-                                    </h5>
-                                </div>
-
-                                <?php if ($this->session->userdata('price_status') == 1) : ?>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <h5 class="mb-0">Çmimi:</h5>
-                                    <h5 class="text-dark mb-0"><b><?php echo $value['price']; ?><i class="fa fa-euro"></i></b></h5>
-                                </div>
-                                <?php endif ?>
-                            </div>
-
-                            <?php if ($this->session->userdata('role') == 'admin') : ?>
-                                <div class="mt-2">
-                                    <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>"  target="_blank">
-                                        <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_<?php echo $value['id']; ?>">
-                                            <i class="fa fa-edit"></i> Ndrysho Produktin
-                                        </button>
-                                    </a>
-                                    <a href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>" 
-                                        data-toggle="modal" data-target="#confirmDeleteModal" data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $category['id']; ?>" >
-                                        <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_<?php echo $value['id']; ?>">
-                                            <i class="fa fa-trash"></i> Fshije Produktin
-                                        </button>
-                                    </a>
-                                    <a href="<?php echo base_url('admin/printproduct/print_one_product/'. $value['id']); ?>" 
-                                        style="display:none;" id="printButton_<?php echo $value['id']; ?>"  target="_blank">
-                                        <button class="btn btn-block mt-2" style="background:#7396CE; font-size: 14px;">
-                                            <i class="fa fa-print"></i> Printo Produktin
-                                        </button>
-                                    </a>
-                                </div>
-                            <?php endif ?>
+                <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <h5 class="mb-0">Kodi:</h5>
+                            <h5 class="text-dark mb-0"><b><?php echo $value['code']; ?></b></h5>
                         </div>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <h5 class="mb-0">Përshkrimi:</h5>
+                            <h5 class="text-dark mb-0 text-end product-description">
+                                <b><?php echo htmlspecialchars($value['name']); ?></b>
+                            </h5>
+                        </div>
+
+                        <?php if ($this->session->userdata('price_status') == 1) : ?>
+                            <div class="d-flex justify-content-between mb-2">
+                                <h5 class="mb-0">Çmimi:</h5>
+                                <h5 class="text-dark mb-0">
+                                    <b><?php echo $value['price']; ?><i class="fa fa-euro"></i></b>
+                                </h5>
+                            </div>
+                        <?php endif ?>
                     </div>
+
+                    <?php if ($this->session->userdata('role') == 'admin') : ?>
+                        <div class="mt-2">
+                            <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>" target="_blank">
+                                <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;"
+                                        id="editButton_<?php echo $value['id']; ?>">
+                                    <i class="fa fa-edit"></i> Ndrysho Produktin
+                                </button>
+                            </a>
+
+                            <a href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>"
+                               data-toggle="modal" data-target="#confirmDeleteModal"
+                               data-productid="<?php echo $value['id']; ?>"
+                               data-categoryid="<?php echo $category['id']; ?>">
+                                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;"
+                                        id="deleteButton_<?php echo $value['id']; ?>">
+                                    <i class="fa fa-trash"></i> Fshije Produktin
+                                </button>
+                            </a>
+
+                            <a href="<?php echo base_url('admin/printproduct/print_one_product/'. $value['id']); ?>"
+                               style="display:none;" id="printButton_<?php echo $value['id']; ?>" target="_blank">
+                                <button class="btn btn-block mt-2" style="background:#7396CE; font-size: 14px;">
+                                    <i class="fa fa-print"></i> Printo Produktin
+                                </button>
+                            </a>
+                        </div>
+                    <?php endif ?>
                 </div>
-            <?php } ?>
-            <div class="col-md-12 col-lg-4 mb-lg-0" id="selectedProductsButtonContainer">
-                <button id="gatherSelectedProductsBtn" class="btn" style="background:#7396CE;">
-                    <span><i class="fa fa-print" aria-hidden="true"></i> PRINTO PRODUKTET</span>
+            </div>
+        </div>
+    <?php } ?>
+</div>
+
+<!-- Print selected container OUTSIDE listing so it's never deleted -->
+<div class="col-md-12 col-lg-4 mb-lg-0" id="selectedProductsButtonContainer">
+    <button id="gatherSelectedProductsBtn" class="btn" style="background:#7396CE;">
+        <span><i class="fa fa-print" aria-hidden="true"></i> PRINTO PRODUKTET</span>
+    </button>
+</div>
+
+<!-- SINGLE IMAGE MODAL -->
+<div class="modal" id="imagemodal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h4 class="modal-title" id="imagemodal_title"></h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="imagemodal_img" class="img-fluid"
+                     style="margin-left:auto;margin-right:auto;display:block;width:270px;height:220px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE MODALS -->
+<div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog"
+     aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <div class="modal-body">A jeni i sigurt qe deshironi te fshini kete produkt?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
+            </div>
         </div>
+    </div>
+</div>
 
-        <?php foreach ($products as $key => $value) { ?>
-            <div class="modal" id="imagemodal_<?php echo $key; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header d-flex justify-content-between align-items-center">
-                        <h4 class="modal-title" id="myModalLabel"><?php echo htmlspecialchars($value['name']); ?></h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                        <img src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" id="imagepreview_<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                        </div>
-                    </div>
-                </div>
+<div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog"
+     aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="confirmUNDeleteModalLabel">Konfirmo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-        <?php } ?>
+            <div class="modal-body">A jeni i sigurt qe deshironi te riktheni kete produkt?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                <a id="UNdeleteProductLink" href="#" class="btn btn-danger">Rikthe</a>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmo</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        A jeni i sigurt qe deshironi te fshini kete produkt?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
-                        <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title" id="confirmUNDeleteModalLabel">Konfirmo</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        A jeni i sigurt qe deshironi te riktheni kete produkt?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
-                        <a id="UNdeleteProductLink" href="#" class="btn btn-danger">Rikthe</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="loadingIndicator" style="display: none; text-align: center; padding: 10px;">
-            <div class="spinner"></div><br>
-            <span>Me shume produkte..</span>
-        </div>
+<div id="loadingIndicator" style="display:none;text-align:center;padding:10px;">
+    <div class="spinner"></div><br>
+    <span>Me shume produkte..</span>
+</div>
 
 <script>
-    let productsList = <?php echo json_encode($products); ?>;
-    let total_row_products = <?php echo json_encode($total_row_products); ?>;
-    let selectedProducts = []; // Clear selected products
-    document.addEventListener("DOMContentLoaded", function() {
+// ===== products.php JS (only) =====
 
-    history.scrollRestoration = "manual";
-        setTimeout(() => {
-        window.scrollTo(0, 0);
-    }, 10);
+// server data
+let productsList = <?php echo json_encode($products); ?>;
+let total_row_products = <?php echo json_encode($total_row_products); ?>;
 
-    const searchInput = document.getElementById("searchInput");
-    const searchIcon = document.getElementById("searchIcon");
-    window.base_url = <?php echo json_encode(base_url()); ?>;
-    const url = window.base_url;
-    var priceStatus = "<?php echo $_SESSION['price_status']; ?>";
-    var role = "<?php echo $_SESSION['role']; ?>";
-    let productListing = document.getElementById("productListing");
-    let products;
-    let getSearchResult;
+// selection / print state
+let selectedProducts = [];
+let stateDropdown = '';
 
-    let isLoading = false; // Prevent multiple simultaneous requests
-    let offset = 0; // Start after the initially loaded products
-    const limit = 20; // Number of products to load per request
+document.addEventListener("DOMContentLoaded", function () {
+  history.scrollRestoration = "manual";
+  setTimeout(() => window.scrollTo(0, 0), 10);
 
-    let isSearching = false; // Flag to track if a search is active
-    let searchInProgress = false;
-    let loadingIndicator = document.getElementById("loadingIndicator");
+  const searchInput = document.getElementById("searchInput");
+  const searchIcon = document.getElementById("searchIcon");
+  const productListing = document.getElementById("productListing");
+  const loadingIndicator = document.getElementById("loadingIndicator");
+  const selectedBtnContainer = document.getElementById("selectedProductsButtonContainer");
+  const gatherBtn = document.getElementById("gatherSelectedProductsBtn");
+
+  window.base_url = <?php echo json_encode(base_url()); ?>;
+  const url = window.base_url;
+
+  const priceStatus = "<?php echo $_SESSION['price_status']; ?>";
+  const role = "<?php echo $_SESSION['role']; ?>";
+
+  // paging / search flags
+  let isLoading = false;
+  let isSearching = false;
+  let searchInProgress = false;
+  let hasMore = true;                 // HARD stop when no more data
+  let getSearchResult = 0;            // total matches from backend (if provided)
+
+  const limit = 20;
+
+  // IMPORTANT: start after SSR products
+  let offset = Array.isArray(productsList) ? productsList.length : 0;
+  if (offset >= total_row_products) hasMore = false;
+
+  let searchAbort = null;
+
+  function showLoadingIndicator() {
+    loadingIndicator.style.display = "block";
+  }
+  function hideLoadingIndicator() {
+    loadingIndicator.style.display = "none";
+    isLoading = false;
+  }
+
+  async function makeAsyncRequest(urlParam) {
+    if (searchAbort) searchAbort.abort();
+    searchAbort = new AbortController();
+
+    const res = await fetch(urlParam, { signal: searchAbort.signal });
+    if (!res.ok) throw new Error(res.statusText);
+    return await res.json();
+  }
+
+  function resetSearchState() {
+    offset = 0;
+    isLoading = false;
+    isSearching = false;
+    searchInProgress = false;
+    hasMore = true;
+    getSearchResult = 0;
+
+    productListing.innerHTML = "";
+    productsList.length = 0;
+    selectedProducts.length = 0;
+
+    if (selectedBtnContainer) selectedBtnContainer.style.display = "none";
+  }
+
+  function showNotFound() {
+    productListing.innerHTML =
+      `<h4 class="page-title" style="color:#d9534f;font-weight:600;margin-left:26px;">
+         PRODUKTI NUK U GJEND!
+       </h4>`;
+    searchInput.focus();
+    window.scrollTo(0, 0);
+  }
+
+  async function searchProducts(query) {
+    let response;
+
+    if (query === "") {
+      if (!hasMore || offset >= total_row_products) {
+        hasMore = false;
+        return;
+      }
+      response = await makeAsyncRequest(
+        url + `admin/dashboard/get_products_with_limit/<?php echo $category['id']; ?>/${offset}`
+      );
+    } else {
+      response = await makeAsyncRequest(
+        url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${encodeURIComponent(query)}&offset=${offset}`
+      );
+      if (typeof response.total === "number") getSearchResult = response.total;
+    }
+
+    const batch = response.products || [];
+
+    // end of results
+    if (batch.length === 0) {
+      hasMore = false;
+
+      // only show "not found" on first page of a search
+      if (query !== "" && offset === 0) showNotFound();
+      return;
+    }
+
+    // move forward only after successful batch
+    offset += limit;
+
+    productsList.push(...batch);
+    updateProductListing(batch, response.category_id, query);
+
+    // restore dropdown mode
+    if (stateDropdown === "print") onClickButton("print");
+    else if (stateDropdown === "select") onClickButton("select");
+    else onClickButton("cancel");
+  }
+
+  function updateProductListing(products, category_id, query) {
+    searchInput.value = query;
+
+    if (products.length === 0) return;
+
+    const html = products.map(product => `
+      <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+        <div class="card product-card d-flex flex-column h-100"
+             data-product-id-main="${product.id}"
+             data-product-name="${product.name}">
+          <img
+            id="imageresource_${product.id}"
+            imgId="${product.id}"
+            class="lazyload img-fluid mx-auto mt-3"
+            style="width:90px; height:70px; object-fit: contain;"
+            data-src="${url}optimum/products_images/${product.image}"
+          />
+          <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+            <div>
+              <div class="d-flex justify-content-between mb-2">
+                <h5 class="mb-0">Kodi:</h5>
+                <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <h5 class="mb-0">Përshkrimi:</h5>
+                <h5 class="text-dark mb-0 text-end product-description"><b>${product.name}</b></h5>
+              </div>
+              ${priceStatus == 1 ? `
+              <div class="d-flex justify-content-between mb-2">
+                <h5 class="mb-0">Çmimi:</h5>
+                <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
+              </div>` : ''}
+            </div>
+
+            ${role === "admin" ? `
+            <div class="mt-2">
+              ${product.is_deleted == 0 ? `
+              <a href="${url}admin/products/get_product/${product.id}" target="_blank">
+                <button class="btn btn-block" style="background:#53d1b2; font-size:14px;" id="editButton_${product.id}">
+                  <i class="fa fa-edit"></i> Ndrysho Produktin
+                </button>
+              </a>
+              <a href="${url}admin/products/delete_product/${category_id}/${product.id}"
+                 data-toggle="modal" data-target="#confirmDeleteModal"
+                 data-productid="${product.id}" data-categoryid="${category_id}">
+                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_${product.id}">
+                  <i class="fa fa-trash"></i> Fshije Produktin
+                </button>
+              </a>
+              <a href="${url}admin/printproduct/print_one_product/${product.id}"
+                 style="display:none;" id="printButton_${product.id}" target="_blank">
+                <button class="btn btn-block mt-2" style="background:#7396CE; font-size:14px;">
+                  <i class="fa fa-print"></i> Printo Produktin
+                </button>
+              </a>
+              ` : `
+              <a href="${url}admin/products/delete_product/${category_id}/${product.id}"
+                 data-toggle="modal" data-target="#confirmUNDeleteModal"
+                 data-productid="${product.id}" data-categoryid="${category_id}">
+                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_${product.id}">
+                  <i class="fa fa-angle-left"></i> Rikthe Produktin
+                </button>
+              </a>`}
+            </div>` : ""}
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    productListing.insertAdjacentHTML("beforeend", html);
+
+    // attach select handler to newly added cards only if in select mode
+    if (stateDropdown === "select") {
+      productListing.querySelectorAll(".product-card:not([data-select-bound])").forEach(card => {
+        card.setAttribute("data-select-bound", "1");
+        card.addEventListener("click", handleProductCardClick);
+      });
+    }
+  }
+
+  function performSearch() {
+    const searchQuery = searchInput.value.trim();
+
+    resetSearchState();
+    window.scrollTo(0, 0);
+
+    if (searchQuery === "") {
+      isSearching = false;
+      searchProducts("").catch(console.error);
+    } else {
+      isSearching = true;
+      searchInProgress = true;
+      searchProducts(searchQuery)
+        .catch(console.error)
+        .finally(() => (searchInProgress = false));
+    }
+  }
+
+  // click / enter search
+  searchIcon.addEventListener("click", performSearch);
+  searchInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") performSearch();
+  });
 
 
-    function checkScrollLoadMore() {
-        if (isLoading || searchInProgress) return; // Skip if loading or searching is active
+  // infinite scroll (throttled)
+  function checkScrollLoadMore() {
+    if (isLoading || searchInProgress || !hasMore) return;
 
-        const scrollTop = $(window).scrollTop();
-        const windowHeight = $(window).height();
-        const documentHeight = $(document).height();
+    // stop if we know total and we've loaded all
+    if (isSearching && getSearchResult > 0 && offset >= getSearchResult) {
+      hasMore = false;
+      return;
+    }
 
-        if (scrollTop + windowHeight >= documentHeight - 100) {
-            isLoading = true;
-            offset += limit;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
 
-            if (isSearching) {
-                if (getSearchResult > offset) {
-                    showLoadingIndicator();
-                    searchProducts(searchInput.value).finally(() => hideLoadingIndicator());
-                }
-            } else {
-                showLoadingIndicator();
-                searchProducts('').finally(() => hideLoadingIndicator());
-            }
+    if (scrollTop + windowHeight >= documentHeight - 120) {
+      isLoading = true;
+      showLoadingIndicator();
+
+      const q = isSearching ? searchInput.value.trim() : "";
+      searchProducts(q)
+        .catch(console.error)
+        .finally(hideLoadingIndicator);
+    }
+  }
+
+  let scrollTick = false;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (scrollTick) return;
+      scrollTick = true;
+      requestAnimationFrame(() => {
+        checkScrollLoadMore();
+        scrollTick = false;
+      });
+    },
+    { passive: true }
+  );
+
+  // ===== single image modal =====
+  function cacheBust(u) {
+    if (!u) return u;
+    const sep = u.includes("?") ? "&" : "?";
+    return u + sep + "cb=" + Date.now();
+  }
+
+  productListing.addEventListener("click", function (e) {
+    const el = e.target;
+    if (!el.classList.contains("img-fluid")) return;
+
+    const id = el.getAttribute("imgId");
+    const listImg = document.getElementById("imageresource_" + id);
+    const src = listImg.getAttribute("src") || listImg.getAttribute("data-src");
+
+    document.getElementById("imagemodal_img").src = cacheBust(src);
+
+    const card = el.closest(".product-card");
+    document.getElementById("imagemodal_title").textContent =
+      card?.getAttribute("data-product-name") || "";
+
+    $("#imagemodal").modal("show");
+  });
+
+  // ===== print/select dropdown =====
+  updateButtonContainerWidth();
+  window.addEventListener("resize", updateButtonContainerWidth);
+
+  function updateButtonContainerWidth() {
+    const overlayRow = document.querySelector("#productListing");
+    if (overlayRow && selectedBtnContainer) {
+      selectedBtnContainer.style.width = `${overlayRow.offsetWidth}px`;
+    }
+  }
+
+  window.onClickButton = function (option) {
+    stateDropdown = option;
+
+    productsList.forEach(value => {
+      const printButton = document.getElementById("printButton_" + value.id);
+      const editButton = document.getElementById("editButton_" + value.id);
+      const deleteButton = document.getElementById("deleteButton_" + value.id);
+      const productCard = document.querySelector(
+        `.product-card[data-product-id-main="${value.id}"]`
+      );
+      if (!productCard) return;
+
+      if (option === "print") {
+        if (printButton) printButton.style.display = "block";
+        if (editButton) editButton.style.display = "none";
+        if (deleteButton) deleteButton.style.display = "none";
+        productCard.removeEventListener("click", handleProductCardClick);
+      } else if (option === "select") {
+        if (printButton) printButton.style.display = "none";
+        if (editButton) editButton.style.display = "none";
+        if (deleteButton) deleteButton.style.display = "none";
+
+        if (!productCard.hasAttribute("data-select-bound")) {
+          productCard.setAttribute("data-select-bound", "1");
+          productCard.addEventListener("click", handleProductCardClick);
         }
-    }
+      } else {
+        if (printButton) printButton.style.display = "none";
+        if (editButton) editButton.style.display = "block";
+        if (deleteButton) deleteButton.style.display = "block";
+        productCard.removeEventListener("click", handleProductCardClick);
+      }
 
-    function showLoadingIndicator() {
-        loadingIndicator.style.display = "block";
-    }
-
-    function hideLoadingIndicator() {
-        loadingIndicator.style.display = "none";
-        isLoading = false; // Reset loading state
-    }
-
-    searchIcon.addEventListener("click", performSearch);
-
-    searchInput.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            performSearch();
-        }
+      productCard.classList.remove("selected");
     });
 
-    function performSearch() {
-        const searchQuery = searchInput.value.trim();
-        if (searchQuery === "") {
-            isSearching = false;
-            window.location.href = url + `admin/dashboard/get_category/<?php echo $category['id']; ?>`;
-        } else {
-            resetSearchState();
-            isSearching = true;
-            searchInProgress = true;
-            window.scrollTo(0, 0);
-
-            $(window).off("scroll", checkScrollLoadMore);
-            searchProducts(searchQuery).finally(() => {
-                searchInProgress = false;
-                $(window).on("scroll", checkScrollLoadMore);
-            });
-        }
+    if (option !== "select" && selectedBtnContainer) {
+      selectedBtnContainer.style.display = "none";
+      selectedProducts.length = 0;
     }
-    
-    function resetSearchState() {
-        offset = 0;                    // Reset offset for fresh search
-        isLoading = false;              // Allow new requests
-        productListing.innerHTML = "";  // Clear displayed products
+  };
+
+  function handleProductCardClick(e) {
+    if (stateDropdown !== "select") return;
+
+    const card = e.currentTarget;
+    const id = parseInt(card.getAttribute("data-product-id-main"), 10);
+
+    card.classList.toggle("selected");
+
+    if (card.classList.contains("selected")) {
+      if (!selectedProducts.includes(id)) selectedProducts.push(id);
+    } else {
+      const i = selectedProducts.indexOf(id);
+      if (i > -1) selectedProducts.splice(i, 1);
     }
 
-    async function searchProducts(query) {   
-        if (query === '') {
-            // Load more of the default product list
-            if (offset < total_row_products) {
-                response = await makeAsyncRequest(url + `admin/dashboard/get_products_with_limit/<?php echo $category['id']; ?>/${offset}`);
-            } else {
-                return; // No more products to load
-            }
-        } else {
-            response = await makeAsyncRequest(url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${encodeURIComponent(query)}&offset=${offset}`);
-            getSearchResult = response.productsAll.length;
-        }
-        if (query === '') {
-            productsList.push(...response.products);
-        } else {
-            if (offset === 0) {
-                productListing.innerHTML = "";
-                productsList.length = 0;
-            }
-            productsList.push(...response.products); // Append search results
-        }
+    if (!selectedBtnContainer) return;
 
-        updateProductListing(response.products, response.category_id, query);
-
-        if (stateDropdown === 'print') {
-            onClickButton('print');
-        } else if (stateDropdown === 'select') {
-            onClickButton('select');
-        } else {
-            onClickButton('cancel');
-        }
+    if (selectedProducts.length > 0) {
+      selectedBtnContainer.style.display = "block";
+      updateButtonContainerWidth();
+    } else {
+      selectedBtnContainer.style.display = "none";
     }
-    $(window).on("scroll", checkScrollLoadMore);
+  }
 
-    function makeAsyncRequest(urlParam) {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", urlParam, true); // true makes it asynchronous
+  // attach to initial cards
+  document.querySelectorAll(".product-card").forEach(card => {
+    card.setAttribute("data-select-bound", "1");
+    card.addEventListener("click", handleProductCardClick);
+  });
 
-            xhr.onload = () => {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    if (xhr.responseText.length < 2) {
-                        window.location.href = url + `admin/dashboard/`;
-                    } else {
-                        resolve(JSON.parse(xhr.responseText));
-                    }
-                } else {
-                    reject(`Error: ${xhr.status} - ${xhr.statusText}`);
-                }
-            };
+  // ===== print selected =====
+  function makeRequestToBackEnd(products) {
+    if (Array.isArray(products)) products = products.join(",");
+    if (!products) return;
 
-            xhr.onerror = () => reject("Network error");
+    const form = document.createElement("form");
+    form.setAttribute("method", "get");
+    form.setAttribute("action", `${window.base_url}admin/printproduct/print_selected_products`);
 
-            xhr.send();
-        });
-    }
+    const hiddenField = document.createElement("input");
+    hiddenField.setAttribute("type", "hidden");
+    hiddenField.setAttribute("name", "products");
+    hiddenField.setAttribute("value", products);
 
-    function updateProductListing(products, category_id, query) {
-        searchInput.value = query;
+    form.appendChild(hiddenField);
+    form.style.display = "none";
+    document.body.appendChild(form);
+    form.submit();
+  }
 
-        // Clear the message area if reloading products
-        if (query !== '' && offset === 0) {
-            productListing.innerHTML = "";
-        }
+  gatherBtn.addEventListener("click", function (ev) {
+    ev.preventDefault();
+    const ids = selectedProducts.join(",");
+    if (!ids) return;
+    makeRequestToBackEnd(ids);
+  });
+});
 
-        if (products.length > 0) {
-            products.forEach(product => {
-               const productCard = `
-                                    <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
-                                        <div class="card product-card d-flex flex-column h-100" data-product-id-main="${product.id}">
-                                            <img 
-                                                id="imageresource_${product.id}"
-                                                imgId="${product.id}"
-                                                class="lazyload img-fluid mx-auto mt-3"
-                                                style="width:90px; height:70px; object-fit: contain;"
-                                                data-src="${url}optimum/products_images/${product.image}" 
-                                            />
-                                            <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
-                                                <div>
-                                                    <div class="d-flex justify-content-between mb-2">
-                                                        <h5 class="mb-0">Kodi:</h5>
-                                                        <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between mb-2">
-                                                        <h5 class="mb-0">Përshkrimi:</h5>
-                                                        <h5 class="text-dark mb-0 text-end product-description">
-                                                            <b>${product.name}</b>
-                                                        </h5>
-                                                    </div>
-                                                    ${priceStatus == 1 ? `
-                                                    <div class="d-flex justify-content-between mb-2">
-                                                        <h5 class="mb-0">Çmimi:</h5>
-                                                        <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
-                                                    </div>` : ''}
-                                                </div>
+// ===== focus glow for search bar =====
+document.addEventListener("DOMContentLoaded", function () {
+  const searchContainer = document.getElementById("searchContainer");
+  const searchInput = document.getElementById("searchInput");
+  const searchIcon = document.getElementById("searchIcon");
 
-                                                ${role === 'admin' ? `
-                                                <div class="mt-2">
-                                                    ${product.is_deleted == 0 ? `
-                                                        <a href="${url}admin/products/get_product/${product.id}"  target="_blank">
-                                                            <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_${product.id}">
-                                                                <i class="fa fa-edit"></i> Ndrysho Produktin
-                                                            </button>
-                                                        </a>
-                                                        <a href="${url}admin/products/delete_product/${category_id}/${product.id}" 
-                                                            data-toggle="modal" data-target="#confirmDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
-                                                            <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
-                                                                <i class="fa fa-trash"></i> Fshije Produktin
-                                                            </button>
-                                                        </a>
-                                                        <a href="${url}admin/printproduct/print_one_product/${product.id}" 
-                                                            style="display:none;" id="printButton_${product.id}" target="_blank">
-                                                            <button class="btn btn-block mt-2" style="background:#7396CE; font-size: 14px;">
-                                                                <i class="fa fa-print"></i> Printo Produktin
-                                                            </button>
-                                                        </a>`
-                                                        :
-                                                        `<a href="${url}admin/products/delete_product/${category_id}/${product.id}" 
-                                                            data-toggle="modal" data-target="#confirmUNDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
-                                                            <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
-                                                                <i class="fa fa-angle-left"></i> Rikthe Produktin
-                                                            </button>
-                                                        </a>`
-                                                    }
-                                                </div>` : ''}
-                                            </div>
-                                        </div>
-                                    </div>
+  function addFocus() {
+    searchContainer.classList.add("focused");
+  }
+  function removeFocus() {
+    searchContainer.classList.remove("focused");
+  }
 
-                                    <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header d-flex justify-content-between align-items-center">
-                                                    <h4 class="modal-title" id="myModalLabel">${product.name}</h4>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <img data-src="${url}optimum/products_images/${product.image}" id="imagepreview_${product.id}" class="lazyload img-fluid" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
+  searchInput.addEventListener("focus", addFocus);
+  searchInput.addEventListener("blur", removeFocus);
+  searchIcon.addEventListener("focus", addFocus);
+  searchIcon.addEventListener("blur", removeFocus);
+});
 
-                productListing.innerHTML += productCard;
-                moveModalsOutside();
-            });
-        } else if (query !== '') {
-            productListing.innerHTML = `<h4 class="page-title" style="color:#d9534f;;font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
-            searchInput.focus();
-            window.scrollTo(0, 0);
-        }
-        
-        productListing.innerHTML += `
-            <div class="col-md-12 col-lg-4 mb-lg-0" id="selectedProductsButtonContainer">
-                <a href="#"><button onclick="foo(event)" id="gatherSelectedProductsBtn" class="btn btn-primary" style="background:#7396CE;"><span><i class="fa fa-print" aria-hidden="true"></i> PRINTO PRODUKTET</span></button></a>
-            </div>`;
-
-        document.getElementById('gatherSelectedProductsBtn').addEventListener('click', function() {
-            event.preventDefault(); // Prevent the default action of the link
-            var gatheredProductIds = selectedProducts.join(',');
-            makeRequestToBackEnd(gatheredProductIds);
-        });
-    }
-    
-    function moveModalsOutside() {
-        $('#productListing .modal').each(function () {
-            $('body').append(this); // move modal to body
-        });
-    }
-    });
-
-    $(document).ready(function() {
-        // Listen for the modal's "Delete" button click event
-        $('#confirmDeleteModal').on('show.bs.modal', function(e) {
-        var productID = $(e.relatedTarget).data('productid'); // Get the product ID
-        var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
-        var deleteButton = $(this).find('#deleteProductLink'); // Get the "Delete" button in the modal
-
-        // Update the "Delete" button link with the appropriate product ID
-        deleteButton.attr('href', '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID);
-        });
-    });
-    
-    $(document).ready(function() {
-        // Listen for the modal's "Delete" button click event
-        $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
-        var productID = $(e.relatedTarget).data('productid'); // Get the product ID
-        var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
-        var undeleteButton = $(this).find('#UNdeleteProductLink'); // Get the "Delete" button in the modal
-
-        // Update the "Delete" button link with the appropriate product ID
-        undeleteButton.attr('href', '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID);
-        });
-    });
-
-    function cacheBust(url) {
-        if (!url) return url;
-        const sep = url.includes('?') ? '&' : '?';
-        return url + sep + 'cb=' + Date.now();
-    }
-
-    document.getElementById("productListing").addEventListener("click", function(event) {
-        // only react when a product image is clicked
-        const el = event.target;
-        if (!el.classList.contains("img-fluid")) return;
-
-        const fullid = el.getAttribute('imgId');
-        // prefer src if present; otherwise fall back to data-src (lazyload)
-        const listImg = document.getElementById('imageresource_' + fullid);
-        const currentListUrl = listImg.getAttribute('src') || listImg.getAttribute('data-src');
-
-        // set the MODAL preview src to the *current* list image url with cache-buster
-        const modalImg = document.getElementById('imagepreview_' + fullid);
-        modalImg.removeAttribute('data-src');     // ensure lazyload won’t interfere
-        modalImg.classList.remove('lazyload');    // modal should load immediately
-        modalImg.setAttribute('src', cacheBust(currentListUrl));
-
-        // show the modal
-        $('#imagemodal_' + fullid).modal('show');
-    });
-
-
-    //PRINT PRODUCTS
-
-    let stateDropdown = '';
-   
-
-    updateButtonContainerWidth();
-
-    function updateButtonContainerWidth() {
-        const overlayRow = document.querySelector("#productListing");
-        const selectedProductsButtonContainer = document.querySelector("#selectedProductsButtonContainer"); // Add this line to select the element
-
-        if (overlayRow && selectedProductsButtonContainer) {
-            const overlayRowWidth = overlayRow.offsetWidth;
-            selectedProductsButtonContainer.style.width = `${overlayRowWidth}px`;
-        }
-    }
-
-    window.addEventListener('resize', updateButtonContainerWidth);
-
-    function onClickButton(option) {
-        stateDropdown = option;
-
-        productsList.forEach(value => {
-            const printButton = document.getElementById("printButton_" + value.id);
-            const editButton = document.getElementById("editButton_" + value.id);
-            const deleteButton = document.getElementById("deleteButton_" + value.id);
-            const productCard = document.querySelector(`.product-card[data-product-id-main="${value.id}"]`);
-            if (option === 'print') {
-
-                printButton.style.display = "block";
-                editButton.style.display = "none";
-                deleteButton.style.display = "none";
-
-                productCard.removeEventListener('click', handleProductCardClick);
-            } else if (option === 'select') {
-                printButton.style.display = "none";
-                editButton.style.display = "none";
-                deleteButton.style.display = "none";
-
-                productCard.addEventListener('click', handleProductCardClick);
-            } else if (option === 'cancel') {
-                printButton.style.display = "none";
-                editButton.style.display = "block";
-                deleteButton.style.display = "block";
-
-                productCard.removeEventListener('click', handleProductCardClick);
-            }
-
-                // Clear selected styles
-                productCard.classList.remove('selected');
-        });
-        
-        if (option !== 'select') {
-            document.getElementById('selectedProductsButtonContainer').style.display = 'none';
-        }
-    }
-
-    function handleProductCardClick(event) {
-        if (stateDropdown !== 'select') return;
-        const productCard = event.currentTarget;
-        const productId = parseInt(productCard.getAttribute('data-product-id-main'));
-        productCard.classList.toggle('selected');
-        if (productCard.classList.contains('selected')) {
-            if (!selectedProducts.includes(productId)) {
-                selectedProducts.push(productId);
-            }
-        } else {
-            const index = selectedProducts.indexOf(productId);
-            if (index > -1) {
-                selectedProducts.splice(index, 1);
-            }
-        }
-        
-        // Toggle the visibility of the Print button container
-        const buttonContainer = document.getElementById('selectedProductsButtonContainer');
-
-        if (selectedProducts.length > 0) {
-            buttonContainer.style.display = 'block';
-            updateButtonContainerWidth();
-        } else {
-            buttonContainer.style.display = 'none';
-        }
-    }
-
-    function foo(event){ 
-        var gatheredProductIds = selectedProducts.join(',');
-        // event.preventDefault(); // Prevent the default action of the link
-        if (gatheredProductIds.length === 0) {
-            return; // Stop execution if no products are selected
-        }
-        window.location = `${window.base_url}admin/printproduct/print_selected_products?products=` + encodeURIComponent(gatheredProductIds);
-    }
-
-
-    function makeRequestToBackEnd(products){
-        // Convert products array to a comma-separated string if it's not already
-        if (Array.isArray(products)) {
-            products = products.join(',');
-        }
-
-        var form = document.createElement('form');
-        form.setAttribute('method', 'get');
-        form.setAttribute('action', `${window.base_url}admin/printproduct/print_selected_products`);
-
-        // Create a hidden input to hold the products query parameter
-        var hiddenField = document.createElement('input');
-        hiddenField.setAttribute('type', 'hidden');
-        hiddenField.setAttribute('name', 'products');
-        hiddenField.setAttribute('value', products);
-
-        form.appendChild(hiddenField);
-        form.style.display = 'none';
-        document.body.appendChild(form);
-
-        form.submit();
-        
-    }
-
-    document.getElementById('gatherSelectedProductsBtn').addEventListener('click', function() {
-        var gatheredProductIds = selectedProducts.join(',');
-        event.preventDefault(); // Prevent the default action of the link
-        var gatheredProductIds = selectedProducts.join(',');
-        makeRequestToBackEnd(gatheredProductIds);
-    });
-
-    // Attach event listeners initially
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', handleProductCardClick);
-    });   
-    
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var searchContainer = document.getElementById('searchContainer');
-        var searchInput = document.getElementById('searchInput');
-        var searchIcon = document.getElementById('searchIcon');
-
-        searchInput.addEventListener('focus', function() {
-        searchContainer.classList.add('focused');
-        });
-
-        searchInput.addEventListener('blur', function() {
-        searchContainer.classList.remove('focused');
-        });
-
-        searchIcon.addEventListener('focus', function() {
-        searchContainer.classList.add('focused');
-        });
-
-        searchIcon.addEventListener('blur', function() {
-        searchContainer.classList.remove('focused');
-        });
-    });
 </script>

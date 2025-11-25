@@ -46,10 +46,10 @@ class Dashboard extends CI_Controller {
         $data = array();
         $view_category = $this->session->userdata('view_category');
         if ($view_category[0] == 0) {
-            $products = $this->db->select('products.id,products.name,products.category_id,products.image,products.code,products.price,products.is_deleted')->from('products')->where('is_deleted',0)->limit(10)->order_by('RAND()')->get()->result_array();
+            $products = $this->db->select('products.id,products.name,products.category_id,products.image,products.code,products.price,products.is_deleted')->from('products')->where('is_deleted',0)->limit(10)->order_by('id','DESC')->get()->result_array();
             $categories =$this->db->select()->from('category')->get()->result_array();
         } else {
-            $products = $this->db->select('products.id,products.name,,products.category_id,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->limit(10)->where('is_deleted',0)->order_by('RAND()')->get()->result_array();
+            $products = $this->db->select('products.id,products.name,,products.category_id,products.image,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->limit(10)->where('is_deleted',0)->order_by('id','DESC')->get()->result_array();
             $categories = $this->db->select()->from('category')->where_in('id',$view_category)->get()->result_array();
         }
 
@@ -124,9 +124,9 @@ class Dashboard extends CI_Controller {
         $limit = 20;
         if($_GET['query'] == ''){
             if ($view_category[0] == 0) {
-                $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where('is_deleted',0)->order_by('RAND()')->limit(10)->get()->result_array();
+                $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where('is_deleted',0)->order_by('id','DESC')->limit(10)->get()->result_array();
             } else {
-                $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->where('is_deleted',0)->order_by('RAND()')->limit(10)->get()->result_array();
+                $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->where('is_deleted',0)->order_by('id','DESC')->limit(10)->get()->result_array();
             }
         }else{
             if ($view_category[0] == 0) {

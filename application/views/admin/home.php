@@ -319,309 +319,347 @@
     </div>
 
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            history.scrollRestoration = "manual";
-                setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 10);
-            var role = "<?php echo $_SESSION['role']; ?>";
-            const searchInput = document.getElementById("searchInput");
-            const searchIcon = document.getElementById("searchIcon");
-            const productListing = document.getElementById("productListing");
-            window.base_url = <?php echo json_encode(base_url()); ?>;
-            const url = window.base_url;
-            
-            function onCtrlB(e) {
-                if (e.ctrlKey && (e.key === 'b' || e.key === 'B')) {
-                e.preventDefault();        // stop browser default (bold, bookmarks, etc.)
-                e.stopPropagation();       // stop other handlers
-                document.body.classList.toggle('show-admin-actions');
-                }
-            }
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    history.scrollRestoration = "manual";
+    setTimeout(() => window.scrollTo(0, 0), 10);
 
-            // Capture-phase listener so it runs even when inputs have focus
-            document.addEventListener('keydown', onCtrlB, true);
+    // ===== server vars =====
+    const role = "<?php echo $_SESSION['role']; ?>";
+    const priceStatus = "<?php echo $_SESSION['price_status']; ?>";
 
-            // (Optional) belt-and-suspenders: also bind directly to the input
-            if (searchInput) {
-                searchInput.addEventListener('keydown', onCtrlB);
-            }
-            let loadingIndicator = document.getElementById("loadingIndicator");
-            let isLoading = false; // Prevent multiple simultaneous requests
-            let offset = 0; // Start after the initially loaded products
-            const limit = 20; // Number of products to load per request
-            let getSearchResult;
-            let searchInProgress = false;
+    window.base_url = <?php echo json_encode(base_url()); ?>;
+    const url = window.base_url;
 
+    // ===== DOM =====
+    const searchInput = document.getElementById("searchInput");
+    const searchIcon  = document.getElementById("searchIcon");
+    const productListing = document.getElementById("productListing");
+    const loadingIndicator = document.getElementById("loadingIndicator");
 
-            // Attach click event listener to the search icon
-            searchIcon.addEventListener("click", performSearch);
-
-            // Attach keydown event listener to the search input
-            searchInput.addEventListener("keydown", function(event) {
-                if (event.key === "Enter") {
-                    performSearch();
-                }
-            });
-
-            function checkScrollLoadMore() {
-                const scrollTop = $(window).scrollTop();
-                const windowHeight = $(window).height();
-                const documentHeight = $(document).height();
-
-                if (
-                    !isLoading &&
-                    !searchInProgress &&
-                    (scrollTop + windowHeight >= documentHeight - 100)
-                ) {
-                    isLoading = true;
-                    offset += limit;
-                    if(getSearchResult > offset){
-                        showLoadingIndicator();
-                        searchProducts(searchInput.value).finally(() => hideLoadingIndicator());
-                    }
-                }
-            }
-
-            function showLoadingIndicator() {
-                loadingIndicator.style.display = "block";
-            }
-
-            function hideLoadingIndicator() {
-                loadingIndicator.style.display = "none";
-                isLoading = false; // Reset loading state
-            }
-
-            function performSearch() {
-                const searchQuery = searchInput.value;
-                if (searchQuery.trim() === "") {
-                    window.location.href = url + `admin/dashboard/`;
-                } else {
-                     // Reset scroll position to top
-                    window.scrollTo(0, 0);
-
-                    // Temporarily disable scroll event listener
-                    $(window).off("scroll", checkScrollLoadMore);
-
-                    // Reset all variables and state for a fresh search
-                    resetSearchState();
-
-                    // Set searching flag and initiate search
-                    isSearching = true;
-                    searchInProgress = true;
-                    searchProducts(searchQuery).finally(() => {
-                        isSearching = false;
-                        searchInProgress = false;
-
-                        // Re-enable scroll event listener
-                        $(window).on("scroll", checkScrollLoadMore);
-                    });
-                    searchInput.focus();
-                    window.scrollTo(0, 0);
-                }
-            }
-
-            function resetSearchState() {
-                offset = 0;                    // Reset offset for fresh search
-                isLoading = false;              // Allow new requests
-                productListing.innerHTML = "";  // Clear displayed products
-            }
-
-            async function searchProducts(query) {
-                const encodedQuery = encodeURIComponent(query);
-                response = await makeAsyncRequest(url + `admin/dashboard/search_products?query=${encodedQuery}&offset=${offset}`);
-                getSearchResult = response.productsAll.length;
-                updateProductListing(response.products, query);
-            }
-            
-            function makeAsyncRequest(urlParam) {
-                return new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("GET", urlParam, true); // true makes it asynchronous
-
-                    xhr.onload = () => {
-                        if (xhr.readyState === 4 && xhr.status === 200) {
-                            if (xhr.responseText.length < 2) {
-                                window.location.href = url + `admin/dashboard/`;
-                            } else {
-                                resolve(JSON.parse(xhr.responseText));
-                            }
-                        } else {
-                            reject(`Error: ${xhr.status} - ${xhr.statusText}`);
-                        }
-                    };
-
-                    xhr.onerror = () => reject("Network error");
-
-                    xhr.send();
-                });
-            }
-
-            function updateProductListing(products, query) {
-                var priceStatus = "<?php echo $_SESSION['price_status']; ?>";
-                searchInput.value = query;
-                const productListing = document.getElementById("productListing");
-                // productListing.innerHTML = "";
-
-                if (products.length > 0) {
-                    console.log(products,'products')
-                    products.forEach(product => {
-                        const productCard = `
-                                            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="margin-bottom: 18px; padding-right: 10px;">
-                                                <div class="card" style="margin-bottom: 10px;">
-                                                    <img id="imageresource_${product.id}" imgId=${product.id} style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="${url}optimum/products_images/${product.image}" class="lazyload img-fluid" / >
-                                                        <div class="card-body">
-                                                            <div class="d-flex justify-content-between mb-3">
-                                                                <h5 class="mb-0">Kodi:</h5>
-                                                                <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between mb-3">
-                                                                <h5 class="mb-0">Përshkrimi:</h5>
-                                                                <h5 class="text-dark mb-0" style="margin-left:10px;"><b>${product.name}</b></h5>
-                                                            </div>
-                                                            ${priceStatus == 1 ? `
-                                                            <div class="d-flex justify-content-between mb-3">
-                                                                <h5 class="mb-0">Çmimi:</h5>
-                                                                <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
-                                                            </div>
-                                                            ` : ''}
-                                                        </div>
-                                                        
-                                                        ${role === 'admin' ? `
-                                                        <div class="mt-2 admin-actions">
-                                                            ${product.is_deleted == 0 ? `
-                                                                <a href="${url}admin/products/get_product/${product.id}"  target="_blank">
-                                                                    <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;" id="editButton_${product.id}">
-                                                                        <i class="fa fa-edit"></i> Ndrysho Produktin
-                                                                    </button>
-                                                                </a>
-                                                                <a href="${url}admin/products/delete_product/${product.category_id}/${product.id}" 
-                                                                    data-toggle="modal" data-target="#confirmDeleteModal" data-productid="${product.id}" data-categoryid="${product.category_id}">
-                                                                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
-                                                                        <i class="fa fa-trash"></i> Fshije Produktin
-                                                                    </button>
-                                                                </a>`
-                                                                :
-                                                                `<a href="${url}admin/products/delete_product/${product.category_id}/${product.id}" 
-                                                                    data-toggle="modal" data-target="#confirmUNDeleteModal" data-productid="${product.id}" data-categoryid="${product.category_id}">
-                                                                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;" id="deleteButton_${product.id}">
-                                                                        <i class="fa fa-angle-left"></i> Rikthe Produktin
-                                                                    </button>
-                                                                </a>`
-                                                            }
-                                                        </div>` : ''}
-                                                </div>
-                                            </div>
-                                            <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header border-0">
-                                                            <div class="modal-header d-flex justify-content-between align-items-center">
-                                                                <h4 class="modal-title" id="myModalLabel">${product.name}</h4>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <img data-src="${url}optimum/products_images/${product.image}" class="lazyload img-fluid" id="imagepreview_${product.id}" style="margin-left: auto;margin-right: auto;display: block;width:270px;height:220px;">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `;
-                        productListing.innerHTML += productCard;
-                        moveModalsOutside();
-                    });
-                } else {
-                    productListing.innerHTML = ""; 
-                    productListing.innerHTML += `<h4 class="page-title" style="color:#d9534f;font-weight:600; margin-left:26px;">Produkti nuk u gjend!</h4>`;
-                    window.scrollTo(0, 0);
-                    searchInput.focus();
-
-                }
-
-                productListing.innerHTML += `</div>`;
-            }
-        });
-
-        $(document).ready(function() {
-            // Listen for the modal's "Delete" button click event
-            $('#confirmDeleteModal').on('show.bs.modal', function(e) {
-            var productID = $(e.relatedTarget).data('productid'); // Get the product ID
-            var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
-            var deleteButton = $(this).find('#deleteProductLink'); // Get the "Delete" button in the modal
-
-            // Update the "Delete" button link with the appropriate product ID
-            deleteButton.attr('href', '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID + '/' + 'true');
-            });
-        });
-        
-        $(document).ready(function() {
-            // Listen for the modal's "Delete" button click event
-            $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
-            var productID = $(e.relatedTarget).data('productid'); // Get the product ID
-            var categoryID = $(e.relatedTarget).data('categoryid'); // Get the product ID
-            var undeleteButton = $(this).find('#UNdeleteProductLink'); // Get the "Delete" button in the modal
-
-            // Update the "Delete" button link with the appropriate product ID
-            undeleteButton.attr('href', '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID + '/'  + 'true');
-            });
-        });
-
-        function moveModalsOutside() {
-            $('#productListing .modal').each(function () {
-                $('body').append(this); // move modal to body
-            });
+    // ===== Ctrl+B toggles admin actions =====
+    function onCtrlB(e) {
+        if (e.ctrlKey && (e.key === 'b' || e.key === 'B')) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.body.classList.toggle('show-admin-actions');
         }
-        
+    }
+    document.addEventListener('keydown', onCtrlB, true);
+    if (searchInput) searchInput.addEventListener('keydown', onCtrlB);
 
-        function cacheBust(url) {
-            if (!url) return url;
-            const sep = url.includes('?') ? '&' : '?';
-            return url + sep + 'cb=' + Date.now();
+    // ===== state =====
+    let productsList = <?php echo json_encode($products); ?> || [];
+    const limit = 20;
+
+    let offset = productsList.length;  // start after SSR products
+    let isLoading = false;
+    let isSearching = false;           // IMPORTANT: scroll load works ONLY when true
+    let searchInProgress = false;
+    let hasMore = true;               // hard stop at end
+    let getSearchResult = 0;          // total matches returned by backend
+    let searchAbort = null;           // abort old searches
+
+    function showLoadingIndicator() {
+        loadingIndicator.style.display = "block";
+    }
+    function hideLoadingIndicator() {
+        loadingIndicator.style.display = "none";
+        isLoading = false;
+    }
+
+    async function makeAsyncRequest(urlParam) {
+        if (searchAbort) searchAbort.abort();
+        searchAbort = new AbortController();
+
+        const res = await fetch(urlParam, { signal: searchAbort.signal });
+        if (!res.ok) throw new Error(res.statusText);
+        return await res.json();
+    }
+
+    function resetSearchState() {
+        offset = 0;
+        isLoading = false;
+        hasMore = true;
+        getSearchResult = 0;
+        productsList.length = 0;
+        productListing.innerHTML = "";
+        hideLoadingIndicator(); // ensure spinner hidden
+    }
+
+    function showNotFound() {
+        productListing.innerHTML =
+            `<h4 class="page-title" style="color:#d9534f;font-weight:600; margin-left:26px;">
+                PRODUKTI NUK U GJEND!
+             </h4>`;
+        window.scrollTo(0,0);
+        searchInput.focus();
+    }
+
+    async function searchProducts(query) {
+        const encodedQuery = encodeURIComponent(query);
+        const response = await makeAsyncRequest(
+            url + `admin/dashboard/search_products?query=${encodedQuery}&offset=${offset}`
+        );
+
+        // backend gives productsAll to compute total
+        getSearchResult = (response.productsAll && response.productsAll.length)
+            ? response.productsAll.length
+            : 0;
+
+        const batch = response.products || [];
+
+        if (batch.length === 0) {
+            hasMore = false;
+            hideLoadingIndicator(); // kill spinner immediately
+
+            // show "not found" only on FIRST search page
+            if (query.trim() !== "" && offset === 0) showNotFound();
+            return;
         }
 
-        document.getElementById("productListing").addEventListener("click", function(event) {
-            // only react when a product image is clicked
-            const el = event.target;
-            if (!el.classList.contains("img-fluid")) return;
+        // move offset ONLY after we got items
+        offset += limit;
 
-            const fullid = el.getAttribute('imgId');
-            // prefer src if present; otherwise fall back to data-src (lazyload)
-            const listImg = document.getElementById('imageresource_' + fullid);
-            const currentListUrl = listImg.getAttribute('src') || listImg.getAttribute('data-src');
+        productsList.push(...batch);
+        updateProductListing(batch, query);
+    }
 
-            // set the MODAL preview src to the *current* list image url with cache-buster
-            const modalImg = document.getElementById('imagepreview_' + fullid);
-            modalImg.removeAttribute('data-src');     // ensure lazyload won’t interfere
-            modalImg.classList.remove('lazyload');    // modal should load immediately
-            modalImg.setAttribute('src', cacheBust(currentListUrl));
+    function updateProductListing(products, query) {
+        searchInput.value = query;
+        if (!products || products.length === 0) return;
 
-            // show the modal
-            $('#imagemodal_' + fullid).modal('show');
+        const html = products.map(product => `
+            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="margin-bottom: 18px; padding-right: 10px;">
+                <div class="card" style="margin-bottom: 10px;">
+                    <img id="imageresource_${product.id}"
+                         imgId="${product.id}"
+                         style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
+                         data-src="${url}optimum/products_images/${product.image}"
+                         class="lazyload img-fluid" />
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5 class="mb-0">Kodi:</h5>
+                            <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5 class="mb-0">Përshkrimi:</h5>
+                            <h5 class="text-dark mb-0" style="margin-left:10px;"><b>${product.name}</b></h5>
+                        </div>
+
+                        ${priceStatus == 1 ? `
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5 class="mb-0">Çmimi:</h5>
+                            <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
+                        </div>` : ''}
+                    </div>
+
+                    ${role === 'admin' ? `
+                    <div class="mt-2 admin-actions">
+                        ${product.is_deleted == 0 ? `
+                            <a href="${url}admin/products/get_product/${product.id}" target="_blank">
+                                <button class="btn btn-block" style="background:#53d1b2; font-size:14px;" id="editButton_${product.id}">
+                                    <i class="fa fa-edit"></i> Ndrysho Produktin
+                                </button>
+                            </a>
+                            <a href="${url}admin/products/delete_product/${product.category_id}/${product.id}"
+                               data-toggle="modal" data-target="#confirmDeleteModal"
+                               data-productid="${product.id}" data-categoryid="${product.category_id}">
+                                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_${product.id}">
+                                    <i class="fa fa-trash"></i> Fshije Produktin
+                                </button>
+                            </a>
+                        ` : `
+                            <a href="${url}admin/products/delete_product/${product.category_id}/${product.id}"
+                               data-toggle="modal" data-target="#confirmUNDeleteModal"
+                               data-productid="${product.id}" data-categoryid="${product.category_id}">
+                                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_${product.id}">
+                                    <i class="fa fa-angle-left"></i> Rikthe Produktin
+                                </button>
+                            </a>
+                        `}
+                    </div>` : ''}
+                </div>
+            </div>
+
+            <div class="modal" id="imagemodal_${product.id}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header border-0">
+                            <div class="modal-header d-flex justify-content-between align-items-center">
+                                <h4 class="modal-title">${product.name}</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <img data-src="${url}optimum/products_images/${product.image}"
+                                 class="lazyload img-fluid"
+                                 id="imagepreview_${product.id}"
+                                 style="margin-left:auto;margin-right:auto;display:block;width:270px;height:220px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+
+        productListing.insertAdjacentHTML("beforeend", html);
+        moveModalsOutside();
+    }
+
+    function performSearch() {
+        const searchQuery = searchInput.value.trim();
+
+        if (searchQuery === "") {
+            window.location.href = url + `admin/dashboard/`;
+            return;
+        }
+
+        resetSearchState();
+
+        isSearching = true;       // enable infinite scroll only now
+        searchInProgress = true;
+
+        window.scrollTo(0, 0);
+        $(window).off("scroll", throttledScroll);
+
+        searchProducts(searchQuery)
+            .catch(console.error)
+            .finally(() => {
+                searchInProgress = false;
+                $(window).on("scroll", throttledScroll);
+            });
+    }
+
+    // Search triggers ONLY Enter / click (no live search)
+    searchIcon.addEventListener("click", performSearch);
+    searchInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") performSearch();
+    });
+
+    // ===== infinite scroll (SEARCH-ONLY) =====
+    function checkScrollLoadMore() {
+        if (!isSearching) return; // NO search => NO loader
+        if (isLoading || searchInProgress || !hasMore) return;
+
+        // stop if we know total and loaded all
+        if (getSearchResult > 0 && offset >= getSearchResult) {
+            hasMore = false;
+            hideLoadingIndicator();
+            return;
+        }
+
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+
+        if (scrollTop + windowHeight >= documentHeight - 120) {
+            isLoading = true;
+            showLoadingIndicator();
+
+            searchProducts(searchInput.value.trim())
+                .catch(console.error)
+                .finally(hideLoadingIndicator);
+        }
+    }
+
+    // rAF throttle
+    let scrollTick = false;
+    function throttledScroll() {
+        if (scrollTick) return;
+        scrollTick = true;
+        requestAnimationFrame(() => {
+            checkScrollLoadMore();
+            scrollTick = false;
         });
-    </script>
+    }
+    $(window).on("scroll", throttledScroll);
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var searchContainer = document.getElementById('searchContainer');
-            var searchInput = document.getElementById('searchInput');
-            var searchIcon = document.getElementById('searchIcon');
-
-            searchInput.addEventListener('focus', function() {
-            searchContainer.classList.add('focused');
-            });
-
-            searchInput.addEventListener('blur', function() {
-            searchContainer.classList.remove('focused');
-            });
-
-            searchIcon.addEventListener('focus', function() {
-            searchContainer.classList.add('focused');
-            });
-
-            searchIcon.addEventListener('blur', function() {
-            searchContainer.classList.remove('focused');
-            });
+    // ===== move appended modals to body =====
+    function moveModalsOutside() {
+        $('#productListing .modal').each(function () {
+            $('body').append(this);
         });
-    </script>
+    }
+
+    // ===== image modal opener (works for initial $key IDs + appended product.id IDs) =====
+    function cacheBust(u) {
+        if (!u) return u;
+        const sep = u.includes('?') ? '&' : '?';
+        return u + sep + 'cb=' + Date.now();
+    }
+
+    document.getElementById("productListing").addEventListener("click", function (event) {
+        const el = event.target;
+        if (!el.classList.contains("img-fluid")) return;
+
+        // try imgId first (exists on both old+new)
+        const rawId = el.getAttribute("imgId");
+        let modalEl = rawId ? document.getElementById("imagemodal_" + rawId) : null;
+
+        if (!modalEl) {
+            // fallback: infer from id="imageresource_{id}"
+            const inferred = (el.id || "").split("_").pop();
+            modalEl = inferred ? document.getElementById("imagemodal_" + inferred) : null;
+        }
+
+        if (!modalEl) return;
+
+        const listUrl = el.getAttribute("src") || el.getAttribute("data-src");
+        const modalImg = modalEl.querySelector("img");
+        if (modalImg) {
+            modalImg.removeAttribute("data-src");
+            modalImg.classList.remove("lazyload");
+            modalImg.setAttribute("src", cacheBust(listUrl));
+        }
+
+        const modalId = modalEl.getAttribute("id");
+        $("#" + modalId).modal("show");
+    });
+});
+</script>
+
+<script>
+/* delete / undelete modal link binding (same as before) */
+$(document).ready(function() {
+    $('#confirmDeleteModal').on('show.bs.modal', function(e) {
+        var productID = $(e.relatedTarget).data('productid');
+        var categoryID = $(e.relatedTarget).data('categoryid');
+        var deleteButton = $(this).find('#deleteProductLink');
+        deleteButton.attr(
+            'href',
+            '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID + '/' + 'true'
+        );
+    });
+});
+
+$(document).ready(function() {
+    $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
+        var productID = $(e.relatedTarget).data('productid');
+        var categoryID = $(e.relatedTarget).data('categoryid');
+        var undeleteButton = $(this).find('#UNdeleteProductLink');
+        undeleteButton.attr(
+            'href',
+            '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID + '/' + 'true'
+        );
+    });
+});
+</script>
+
+<script>
+/* focus glow for search bar (unchanged) */
+document.addEventListener('DOMContentLoaded', function() {
+    var searchContainer = document.getElementById('searchContainer');
+    var searchInput = document.getElementById('searchInput');
+    var searchIcon = document.getElementById('searchIcon');
+
+    function addFocus(){ searchContainer.classList.add('focused'); }
+    function removeFocus(){ searchContainer.classList.remove('focused'); }
+
+    searchInput.addEventListener('focus', addFocus);
+    searchInput.addEventListener('blur', removeFocus);
+    searchIcon.addEventListener('focus', addFocus);
+    searchIcon.addEventListener('blur', removeFocus);
+});
+</script>
+

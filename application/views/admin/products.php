@@ -301,28 +301,28 @@
 </div>
 
 <!-- DELETE MODALS -->
-<div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog"
-     aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header border-0">
+    <div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-0">
                 <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmo</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-            </div>
-            <div class="modal-body">A jeni i sigurt qe deshironi te fshini kete produkt?</div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
-                <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
+                </div>
+                <div class="modal-body">
+                    A jeni i sigurt qe deshironi te fshini kete produkt?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                    <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog"
-     aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header border-0">
                 <h5 class="modal-title" id="confirmUNDeleteModalLabel">Konfirmo</h5>
@@ -330,14 +330,16 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">A jeni i sigurt qe deshironi te riktheni kete produkt?</div>
+            <div class="modal-body">
+                A jeni i sigurt qe deshironi te riktheni kete produkt?
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
                 <a id="UNdeleteProductLink" href="#" class="btn btn-danger">Rikthe</a>
             </div>
         </div>
+        </div>
     </div>
-</div>
 
 <div id="loadingIndicator" style="display:none;text-align:center;padding:10px;">
     <div class="spinner"></div><br>
@@ -747,6 +749,31 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!ids) return;
     makeRequestToBackEnd(ids);
   });
+});
+
+/* delete / undelete modal link binding (same as before) */
+$(document).ready(function() {
+    $('#confirmDeleteModal').on('show.bs.modal', function(e) {
+        var productID = $(e.relatedTarget).data('productid');
+        var categoryID = $(e.relatedTarget).data('categoryid');
+        var deleteButton = $(this).find('#deleteProductLink');
+        deleteButton.attr(
+            'href',
+            '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID + '/'
+        );
+    });
+});
+
+$(document).ready(function() {
+    $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
+        var productID = $(e.relatedTarget).data('productid');
+        var categoryID = $(e.relatedTarget).data('categoryid');
+        var undeleteButton = $(this).find('#UNdeleteProductLink');
+        undeleteButton.attr(
+            'href',
+            '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID + '/'
+        );
+    });
 });
 
 // ===== focus glow for search bar =====

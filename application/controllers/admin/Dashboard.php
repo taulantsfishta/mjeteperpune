@@ -147,7 +147,7 @@ class Dashboard extends CI_Controller {
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('price', $query)->where('is_deleted',0)->group_end()->get()->result_array();
                 }else{
                     if(strpos($_GET['query'], "DELETE") !== false){
-                        $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',1)->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',1)->order_by('category_id','ASC')->limit($limit,$_GET['offset'])->order_by('id','ASC')->group_end()->get()->result_array();
                         $productsAll = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',1)->group_end()->get()->result_array();
                     }else{
                         $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
@@ -171,7 +171,7 @@ class Dashboard extends CI_Controller {
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('price', $query)->where('is_deleted',0)->group_end()->get()->result_array();
                 } else {
                     if(strpos($_GET['query'], "DELETE") !== false){
-                        $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',1)->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',1)->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
                         $productsAll = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',1)->group_end()->get()->result_array();
                     }else{
                         $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where_in('category_id', $view_category)->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->order_by('category_id','ASC')->order_by('id','ASC')->group_end()->get()->result_array();
@@ -210,7 +210,7 @@ class Dashboard extends CI_Controller {
                     $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->group_start()->where('price', $query)->where('is_deleted',0)->group_end()->get()->result_array();
                 }else {
                     if(strpos($_GET['query'], "DELETE") !== false){
-                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->group_start()->where('is_deleted',1)->group_end()->get()->result_array();
+                        $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->group_start()->where('is_deleted',1)->limit($limit,$_GET['offset'])->group_end()->get()->result_array();
                         $productsAll = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->group_start()->where('is_deleted',1)->group_end()->get()->result_array();
                     }else{
                         $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->group_start()->where('is_deleted',0)->like('name', $_GET['query'])->limit($limit,$_GET['offset'])->group_end()->get()->result_array();

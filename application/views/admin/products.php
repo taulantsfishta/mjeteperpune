@@ -127,8 +127,7 @@
 
     .navbar .dropdown-menu {
         width: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
+        /* keep scroll behavior from index.php: do NOT override max-height / overflow here */
         z-index: 1200 !important;
         border: 1px solid #e3e7eb;
         border-radius: 4px;

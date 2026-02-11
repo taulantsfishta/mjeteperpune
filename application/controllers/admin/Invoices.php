@@ -184,110 +184,58 @@ class Invoices extends CI_Controller {
                     $clientInvoice = $this->saveClientInvoice($_POST);
                 }
 
-                if($_POST['submit_type'] == 'printo_faturen'){
-                        // Set some content to display
-                    $html = '
-                    <h1>FATURA: '.$adminName.'-'.$clientInvoice['id'].'</h1>
-                    <p><strong>KLIENTI:</strong> ' . strtoupper(($client_name)) . '</p>
-                    <p><strong>ADRESA:</strong> ' . strtoupper(($address)) . '</p>
-                    <p><strong>DATA:</strong> ' . htmlspecialchars($date) . '</p>
-                    ';
-            
-                    $html .= '
-                            <style>
-                                table {
-                                    width: 100%;
-                                }
-                                th, td {
-                                    border: 1px solid black;
-                                    line-height: 30px;                   
-                                th {
-                                    background-color: #f2f2f2;
-                                }
+if ($_POST['submit_type'] == 'printo_faturen') {
 
-                                .comment{
-                                    
-                                }
-                                .total_sum{
-                                    font-size:14px;
-                                }
-                            </style>
-                    <table >
-                        <thead>
-                            <tr style="height:100%;">
-                                <th style="width:8%;"> #</th>
-                                <th style="width:10%;"> KODI</th>
-                                <th style="width:47%;"> EMRI I PRODUKTIT</th>
-                                <th style="width:10%;"> SASIA</th>
-                                <th style="width:10%;"> ÇMIMI</th>
-                                <th style="width:15%;"> TOTALI</th>
-                            </tr>
-                        </thead>
-                        <tbody style="border-right:none;">
-                    ';
+    // KETU VECSE E KE KALLXUAR:
+    // if(isset($_POST['id'])) updateClientInvoice
+    // else saveClientInvoice
+    // dhe ke $clientInvoice['id']
 
-                    // Add table rows with data
-                    $rowCount = count($product_names);
-                    for ($i = 0; $i < $rowCount; $i++) {
-                        $html .= '
-                        <tr style="height:100%;">
-                            <td style="width:8%;">' . ($i + 1) . '.</td>
-                            <td style="width:10%;"> ' . ($codes[$i]) . '</td>
-                            <td style="width:47%;"> ' . strtoupper($product_names[$i]) . '</td>
-                            <td style="width:10%;"> ' . ($quantities[$i]) . '</td>
-                            <td style="width:10%;"> ' . ($prices[$i]) . '</td>
-                            <td style="width:15%;"> ' . ($total_product_prices[$i]) . '</td>
-                        </tr>
-                        ';
-                    }
-            
-                    // Close the table and add total sum row
-                    $html .= '
-                    </tbody>
-                    <br/>
-                    <tfoot>
-                        <tr class="total_sum">
-                            <td colspan="5">TOTALI</td>
-                            <td><b> ' . htmlspecialchars($total_sum) . '</b></td>
-                        </tr>
-                    <tfoot>
-                    ';
-                    if($prepayment>0){
-                    $html .= '
-                        <tfoot>
-                        <tr class="total_sum">
-                            <td colspan="5">PARAPAGESË</td>
-                        <td><b> ' . htmlspecialchars($prepayment) . '</b></td>
-                        </tr>
-                        </tfoot>
-                        <tfoot>
-                        <tr class="total_sum">
-                            <td colspan="5">SHUMA E MBETUR</td>
-                            <td><b> ' . htmlspecialchars($final_sum_to_pay) . '</b></td>
-                        </tr>
-                        </tfoot>';
-                    }
+    $invoiceId = $clientInvoice['id'];
 
-                    // $html .= '</tfoot>';
+    // pastro output-in nëse ka diçka
+    if (ob_get_length()) { ob_end_clean(); }
 
-                    if (!empty($comment)) {
-                        $comment = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
-                    $html .= '
-                            <p>Koment: </p><br><span class="comment">' . $comment . '<hr></span>';
-                    }
+    $printUrl = base_url('admin/invoices/print_pdf?id=' . $invoiceId);
 
-                    $html .= '
-                                </table>';
+    echo '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Printo Faturen</title>
+    <style>
+        html, body {
+            margin:0;
+            padding:0;
+            height:100%;
+        }
+        iframe {
+            width:100%;
+            height:100%;
+            border:none;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="pdfFrame" src="'.htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8").'"></iframe>
 
-                    // Output the HTML content
-                    $pdf->writeHTML($html, true, false, true, false, '');
-            
-                    // Close and output PDF document
-                    $pdf->Output($client_name.'-'.'FATURA-'.$clientInvoice['id'].'.pdf', 'I');
-                    
-                    redirect(base_url(). 'admin/invoices/created');
+    <script>
+        const iframe = document.getElementById("pdfFrame");
+        iframe.addEventListener("load", function() {
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    </script>
+</body>
+</html>';
 
-                }else if($_POST['submit_type'] == 'printo_faturen_excel'){
+    exit;
+}
+else if($_POST['submit_type'] == 'printo_faturen_excel'){
                     $spreadsheet = new Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
 
@@ -644,5 +592,159 @@ class Invoices extends CI_Controller {
                 $this->common_model->edit_option(['row_data'=>json_encode($row_data_1)], $value['id'], 'invoices');
             }
     }
+
+
+    public function print_pdf()
+        {
+            if ($this->session->userdata('role') != 'admin') {
+                show_404();
+            }
+
+            $id = $this->input->get('id');
+            if (!$id) {
+                show_404();
+            }
+
+            $invoice = $this->db->select('*')
+                ->from('invoices')
+                ->where('id', $id)
+                ->get()
+                ->row_array();
+
+            if (!$invoice) {
+                show_404();
+            }
+
+            // dekodo rreshtat
+            $rows = json_decode($invoice['row_data'], true) ?: [];
+
+            // emrat nga DB
+            $client_name = $invoice['client_name'];
+            $address     = $invoice['address'];
+            $date        = $invoice['date'];
+            $comment     = $invoice['comment'];
+            $total_sum   = $invoice['total_price_invoice'];
+            $prepayment  = $invoice['prepayment_price_invoice'];
+            $final_sum_to_pay = $invoice['total_price_left_invoice'];
+
+            // admin short code
+            if($this->session->userdata('name') == 'Admin'){
+                $adminName = 'FK';
+            } else if($this->session->userdata('name') == 'Adminpz'){
+                $adminName = 'TR';
+            } else {
+                $adminName = '';
+            }
+
+            // TCPDF setup (njësoj si tek sheet_invoice më herët)
+            $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+            $pdf->SetCreator(PDF_CREATOR);
+            $pdf->SetAuthor('MJETEPERPUNE');
+            $pdf->SetTitle('FATURA');
+            $pdf->SetSubject('FATURA');
+            $pdf->SetKeywords('FATURA, PDF');
+
+            $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+            $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+            $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+            $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+            $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+            $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+            $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+            $pdf->SetFont('dejavusans', '', 10);
+
+            $pdf->AddPage();
+
+            // nderto HTML nga te dhenat ne DB
+            $html = '
+                <h1>FATURA: '.$adminName.'-'.$invoice['id'].'</h1>
+                <p><strong>KLIENTI:</strong> ' . strtoupper($client_name) . '</p>
+                <p><strong>ADRESA:</strong> ' . strtoupper($address) . '</p>
+                <p><strong>DATA:</strong> ' . htmlspecialchars($date) . '</p>
+                <style>
+                    table {
+                        width: 100%;
+                    }
+                    th, td {
+                        border: 1px solid black;
+                        line-height: 30px;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    .total_sum{
+                        font-size:14px;
+                    }
+                </style>
+                <table>
+                    <thead>
+                        <tr style="height:100%;">
+                            <th style="width:8%;"> #</th>
+                            <th style="width:10%;"> KODI</th>
+                            <th style="width:47%;"> EMRI I PRODUKTIT</th>
+                            <th style="width:10%;"> SASIA</th>
+                            <th style="width:10%;"> ÇMIMI</th>
+                            <th style="width:15%;"> TOTALI</th>
+                        </tr>
+                    </thead>
+                    <tbody style="border-right:none;">
+            ';
+
+            foreach ($rows as $i => $r) {
+                $html .= '
+                    <tr style="height:100%;">
+                        <td style="width:8%;">' . ($i + 1) . '.</td>
+                        <td style="width:10%;"> ' . ($r['code']) . '</td>
+                        <td style="width:47%;"> ' . strtoupper($r['product_name']) . '</td>
+                        <td style="width:10%;"> ' . ($r['quantity']) . '</td>
+                        <td style="width:10%;"> ' . ($r['price']) . '</td>
+                        <td style="width:15%;"> ' . ($r['total_product_price']) . '</td>
+                    </tr>
+                ';
+            }
+
+            $html .= '
+                </tbody>
+                <br/>
+                <tfoot>
+                    <tr class="total_sum">
+                        <td colspan="5">TOTALI</td>
+                        <td><b> ' . htmlspecialchars($total_sum) . '</b></td>
+                    </tr>
+                </tfoot>
+            ';
+
+            if ($prepayment > 0) {
+                $html .= '
+                <tfoot>
+                    <tr class="total_sum">
+                        <td colspan="5">PARAPAGESË</td>
+                        <td><b> ' . htmlspecialchars($prepayment) . '</b></td>
+                    </tr>
+                </tfoot>
+                <tfoot>
+                    <tr class="total_sum">
+                        <td colspan="5">SHUMA E MBETUR</td>
+                        <td><b> ' . htmlspecialchars($final_sum_to_pay) . '</b></td>
+                    </tr>
+                </tfoot>';
+            }
+
+            if (!empty($comment)) {
+                $commentClean = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
+                $html .= '
+                    <p>Koment: </p><br><span class="comment">' . $commentClean . '<hr></span>';
+            }
+
+            $html .= '</table>';
+
+            $pdf->writeHTML($html, true, false, true, false, '');
+
+            // Jep PDF direkt, pa ruajtje ne disk
+            $pdf->Output($client_name.'-FATURA-'.$invoice['id'].'.pdf', 'I');
+    }
+
 
 }

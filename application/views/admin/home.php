@@ -248,6 +248,11 @@
                                     <i class="fa fa-trash"></i> Fshije Produktin
                                 </button>
                             </a>
+                            <a href="<?php echo base_url('admin/invoices/print_product_invoice/' . $value['id']); ?>"  target="_blank">
+                                <button class="btn btn-block mt-2" style="background:#85b3f7; font-size: 14px;" id="invoiceButton_<?php echo $value['id']; ?>">
+                                    <i class="fa fa-plus me-2"></i> Printo Faturen
+                                </button>
+                            </a>
                         </div>
                     <?php endif ?>
                 </div>
@@ -468,6 +473,11 @@ document.addEventListener("DOMContentLoaded", function () {
                                data-productid="${product.id}" data-categoryid="${product.category_id}">
                                 <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_${product.id}">
                                     <i class="fa fa-trash"></i> Fshije Produktin
+                                </button>
+                            </a>
+                            <a href="${url}admin/invoices/print_product_invoice/${product.id}" target="_blank">
+                                <button class="btn btn-block mt-2" style="background:#85b3f7; font-size:14px;" id="invoiceButton_${product.id}">
+                                    <i class="fa fa-edit"></i> Printo Faturen
                                 </button>
                             </a>
                         ` : `

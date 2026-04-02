@@ -183,59 +183,55 @@ class Invoices extends CI_Controller {
                 }else{
                     $clientInvoice = $this->saveClientInvoice($_POST);
                 }
+                
 
-if ($_POST['submit_type'] == 'printo_faturen') {
+                if ($_POST['submit_type'] == 'printo_faturen') {
 
-    // KETU VECSE E KE KALLXUAR:
-    // if(isset($_POST['id'])) updateClientInvoice
-    // else saveClientInvoice
-    // dhe ke $clientInvoice['id']
+                    $invoiceId = $clientInvoice['id'];
 
-    $invoiceId = $clientInvoice['id'];
+                    // pastro output-in nëse ka diçka
+                    if (ob_get_length()) { ob_end_clean(); }
 
-    // pastro output-in nëse ka diçka
-    if (ob_get_length()) { ob_end_clean(); }
+                    $printUrl = base_url('admin/invoices/print_pdf?id=' . $invoiceId);
 
-    $printUrl = base_url('admin/invoices/print_pdf?id=' . $invoiceId);
+                    echo '<!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>Printo Faturen</title>
+                        <style>
+                            html, body {
+                                margin:0;
+                                padding:0;
+                                height:100%;
+                            }
+                            iframe {
+                                width:100%;
+                                height:100%;
+                                border:none;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <iframe id="pdfFrame" src="'.htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8").'"></iframe>
 
-    echo '<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Printo Faturen</title>
-    <style>
-        html, body {
-            margin:0;
-            padding:0;
-            height:100%;
-        }
-        iframe {
-            width:100%;
-            height:100%;
-            border:none;
-        }
-    </style>
-</head>
-<body>
-    <iframe id="pdfFrame" src="'.htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8").'"></iframe>
+                        <script>
+                            const iframe = document.getElementById("pdfFrame");
+                            iframe.addEventListener("load", function() {
+                                try {
+                                    iframe.contentWindow.focus();
+                                    iframe.contentWindow.print();
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            });
+                        </script>
+                    </body>
+                    </html>';
 
-    <script>
-        const iframe = document.getElementById("pdfFrame");
-        iframe.addEventListener("load", function() {
-            try {
-                iframe.contentWindow.focus();
-                iframe.contentWindow.print();
-            } catch (e) {
-                console.error(e);
-            }
-        });
-    </script>
-</body>
-</html>';
-
-    exit;
-}
-else if($_POST['submit_type'] == 'printo_faturen_excel'){
+                    exit;
+                }
+                else if($_POST['submit_type'] == 'printo_faturen_excel'){
                     $spreadsheet = new Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
 
@@ -454,9 +450,10 @@ else if($_POST['submit_type'] == 'printo_faturen_excel'){
         $data['adminID'] = $dataClientInvoice['adminID'];
         $data['prepayment_price_invoice'] = $dataClientInvoice['prepayment_price_invoice'];
         $data['total_price_left_invoice'] = $dataClientInvoice['total_price_left_invoice'];
-        
+        $data['total_product_price'] = $dataClientInvoice['total_product_price'];
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
+            log_message('error', 'newRowData1111: '.$value);
             $newRowData[] = ['product_name' => strtoupper($value),'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image'=>$dataClientInvoice['image'][$key]];
         }
 
@@ -746,5 +743,123 @@ else if($_POST['submit_type'] == 'printo_faturen_excel'){
             $pdf->Output($client_name.'-FATURA-'.$invoice['id'].'.pdf', 'I');
     }
 
+    public function print_product_invoice($productId)
+    {
+        if ($this->session->userdata('role') == 'admin') {
+            $product = $this->db->select('id, name, code, price, image')->from('products')->where('id', $productId)->get()->row_array();
+            if (!$product) {
+                show_404();
+            }
 
+                $products['client_name'] = 'QYTETAR';
+                $products['address'] = 'KOSOVE';
+                $products['date'] = current_datetime();
+                $products['comment'] = '';
+                $products['product_name'][] = $product['name'];
+                $products['code'][] = $product['code'];
+                $products['quantity'][] = '1';
+                $products['price'][] = $product['price'];
+                $products['image'][]   = $product['image'];
+                $products['total_product_price'][]= $product['price'];
+                $products['total_sum'] = $product['price'];
+                $products['prepayment'] = '0.00';
+                $products['final_sum_to_pay'] = '0.00';
+                $products['total_price_invoice'] = $product['price'];
+
+                $products['prepayment_price_invoice'] = $products['prepayment_price_invoice'] != '' ? number_format($products['prepayment_price_invoice'],2, '.', '') : '0.00';
+                $products['total_price_left_invoice'] = $products['total_price_left_invoice'] != '' ? number_format($products['total_price_left_invoice'],2, '.', '') : '0.00';
+
+                $products['adminID'] = $this->session->userdata('id');
+
+                if($this->session->userdata('name') == 'Admin'){
+                    $adminName = 'FK';
+                }else if($this->session->userdata('name') == 'Adminpz'){
+                    $adminName = 'TR';
+                }
+                // Create new PDF document
+                $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+                $drawing = new Drawing();
+
+                // Set document information
+                $pdf->SetCreator(PDF_CREATOR);
+                $pdf->SetAuthor('MJETEPERPUNE');
+                $pdf->SetTitle('FATURA');
+                $pdf->SetSubject('FATURA');
+                $pdf->SetKeywords('FATURA, PDF, Example');
+        
+                // Set default header data
+        
+                // Set header and footer fonts
+                $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+                $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+        
+                // Set default monospaced font
+                $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+        
+                // Set margins
+                $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+                $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+                $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        
+                // Set auto page breaks
+                $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        
+                // Set image scale factor
+                $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+        
+                // Set font
+                $pdf->SetFont('dejavusans', '', 10);
+        
+                // Add a page
+                $pdf->AddPage();
+
+                $clientInvoice = $this->saveClientInvoice($products);
+
+                $invoiceId = $clientInvoice['id'];
+
+                    // pastro output-in nëse ka diçka
+                if (ob_get_length()) { ob_end_clean(); }
+
+                $printUrl = base_url('admin/invoices/print_pdf?id=' . $invoiceId);
+
+                echo '<!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>Printo Faturen</title>
+                    <style>
+                        html, body {
+                            margin:0;
+                            padding:0;
+                            height:100%;
+                        }
+                        iframe {
+                            width:100%;
+                            height:100%;
+                            border:none;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <iframe id="pdfFrame" src="'.htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8").'"></iframe>
+
+                    <script>
+                        const iframe = document.getElementById("pdfFrame");
+                        iframe.addEventListener("load", function() {
+                            try {
+                                iframe.contentWindow.focus();
+                                iframe.contentWindow.print();
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        });
+                    </script>
+                </body>
+                </html>';
+
+                exit;
+        
+
+        }   
+    }
 }

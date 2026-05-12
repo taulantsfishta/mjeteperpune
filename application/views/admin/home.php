@@ -212,7 +212,7 @@
     <!-- /.usercard -->
     <div class="row el-element-overlay m-b-40 background-blur" id="productListing">
         <?php foreach ($products as $key => $value) { ?>
-            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0">
+            <div class="col-md-12 col-lg-3 mb-4 mb-lg-0">
                 <div class="card" style="margin-bottom: 10px;">
                     <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="lazyload img-fluid" />
                     <div class="card-body">
@@ -435,7 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!products || products.length === 0) return;
 
         const html = products.map(product => `
-            <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="margin-bottom: 18px; padding-right: 10px;">
+            <div class="col-md-12 col-lg-3 mb-4 mb-lg-0" style="margin-bottom: 18px; padding-right: 10px;">
                 <div class="card" style="margin-bottom: 10px;">
                     <img id="imageresource_${product.id}"
                          imgId="${product.id}"

@@ -207,7 +207,7 @@
 <!-- PRODUCT LIST -->
 <div class="row el-element-overlay background-blur" id="productListing">
     <?php foreach ($products as $key => $value) { ?>
-        <div class="col-md-12 col-lg-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+        <div class="col-md-12 col-lg-3 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
             <div class="card product-card d-flex flex-column h-100"
                  data-product-id-main="<?php echo $value['id']; ?>"
                  data-product-name="<?php echo htmlspecialchars($value['name']); ?>">
@@ -277,7 +277,7 @@
 </div>
 
 <!-- Print selected container OUTSIDE listing so it's never deleted -->
-<div class="col-md-12 col-lg-4 mb-lg-0" id="selectedProductsButtonContainer">
+<div class="col-md-12 col-lg-3 mb-lg-0" id="selectedProductsButtonContainer">
     <button id="gatherSelectedProductsBtn" class="btn" style="background:#7396CE;">
         <span><i class="fa fa-print" aria-hidden="true"></i> PRINTO PRODUKTET</span>
     </button>

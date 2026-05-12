@@ -187,6 +187,10 @@
         .admin-actions { display: none; }
         .show-admin-actions .admin-actions { display: block; }
 
+        .modal-body img {
+            transition: opacity 0.15s ease;
+        }
+
     </style>
 
     <?php if ($this->session->userdata('role') == 'admin') : ?>
@@ -617,14 +621,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const listUrl = el.getAttribute("src") || el.getAttribute("data-src");
         const modalImg = modalEl.querySelector("img");
-        if (modalImg) {
+
+        if (!modalImg) return;
+
+        const freshUrl = cacheBust(listUrl);
+
+        // fshehe derisa te ngarkohet
+        modalImg.style.opacity = "0";
+
+        const preloadImg = new Image();
+
+        preloadImg.onload = function () {
+
             modalImg.removeAttribute("data-src");
             modalImg.classList.remove("lazyload");
-            modalImg.setAttribute("src", cacheBust(listUrl));
-        }
 
-        const modalId = modalEl.getAttribute("id");
-        $("#" + modalId).modal("show");
+            modalImg.src = freshUrl;
+
+            // shfaqe pasi u ngarkua
+            modalImg.style.opacity = "1";
+
+            const modalId = modalEl.getAttribute("id");
+            $("#" + modalId).modal("show");
+        };
+
+        preloadImg.src = freshUrl;
     });
 });
 </script>

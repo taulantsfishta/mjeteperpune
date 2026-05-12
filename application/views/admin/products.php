@@ -158,6 +158,10 @@
     #searchContainer.focused { box-shadow: 0 0 10px #67b2f08c; }
 
     .background-blur { overflow: visible; }
+
+    #imagemodal_img{
+      transition: opacity .15s ease;
+    }
 </style>
 
 <?php if ($this->session->userdata('role') == 'admin') : ?>
@@ -622,20 +626,44 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   productListing.addEventListener("click", function (e) {
-    const el = e.target;
-    if (!el.classList.contains("img-fluid")) return;
 
-    const id = el.getAttribute("imgId");
-    const listImg = document.getElementById("imageresource_" + id);
-    const src = listImg.getAttribute("src") || listImg.getAttribute("data-src");
+      const el = e.target;
 
-    document.getElementById("imagemodal_img").src = cacheBust(src);
+      if (!el.classList.contains("img-fluid")) return;
 
-    const card = el.closest(".product-card");
-    document.getElementById("imagemodal_title").textContent =
-      card?.getAttribute("data-product-name") || "";
+      const id = el.getAttribute("imgId");
 
-    $("#imagemodal").modal("show");
+      const listImg = document.getElementById("imageresource_" + id);
+
+      const src =
+          listImg.getAttribute("src") ||
+          listImg.getAttribute("data-src");
+
+      const modalImg = document.getElementById("imagemodal_img");
+
+      const freshUrl = cacheBust(src);
+
+      // fshehe imazhin derisa te ngarkohet
+      modalImg.style.opacity = "0";
+
+      const preloadImg = new Image();
+
+      preloadImg.onload = function () {
+
+          modalImg.src = freshUrl;
+
+          // shfaqe pasi u ngarkua
+          modalImg.style.opacity = "1";
+
+          const card = el.closest(".product-card");
+
+          document.getElementById("imagemodal_title").textContent =
+              card?.getAttribute("data-product-name") || "";
+
+          $("#imagemodal").modal("show");
+      };
+
+      preloadImg.src = freshUrl;
   });
 
   // ===== print/select dropdown =====

@@ -476,7 +476,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (products.length === 0) return;
 
     const html = products.map(product => `
-      <div class="col-md-12 col-lg-4 mb-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+      <div class="col-md-12 col-lg-3 mb-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
         <div class="card product-card d-flex flex-column h-100"
              data-product-id-main="${product.id}"
              data-product-name="${product.name}">

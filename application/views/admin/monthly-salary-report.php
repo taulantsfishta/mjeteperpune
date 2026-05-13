@@ -116,7 +116,7 @@
                                     <td><?php echo number_format($row['monthly_loans_total'], 2); ?> €</td>
                                     <td><?php echo number_format($row['total_installment_loans'], 2); ?> €</td>
                                     <td><?php echo number_format($row['total_loans'], 2); ?> €</td>
-                                    <td><?php echo number_format($row['carried_balance'], 2); ?> €</td>
+                                    <td><?php echo number_format($row['carry_forward'], 2); ?> €</td>
                                     <td><?php echo number_format($row['total_paid'], 2); ?> €</td>
                                     <td><?php echo number_format($row['final_salary'], 2); ?> €</td>
                                     <td><strong><?php echo number_format($row['remaining_salary'], 2); ?> €</strong></td>

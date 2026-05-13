@@ -162,6 +162,10 @@
     #imagemodal_img{
       transition: opacity .15s ease;
     }
+
+            .product-col{
+            padding-bottom: 10px;
+        }
 </style>
 
 <?php if ($this->session->userdata('role') == 'admin') : ?>
@@ -211,7 +215,7 @@
 <!-- PRODUCT LIST -->
 <div class="row el-element-overlay background-blur" id="productListing">
     <?php foreach ($products as $key => $value) { ?>
-        <div class="col-md-12 col-lg-3 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+        <div class="col-md-12 col-lg-3 product-col" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
             <div class="card product-card d-flex flex-column h-100"
                  data-product-id-main="<?php echo $value['id']; ?>"
                  data-product-name="<?php echo htmlspecialchars($value['name']); ?>">
@@ -480,7 +484,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (products.length === 0) return;
 
     const html = products.map(product => `
-      <div class="col-md-12 col-lg-3 mb-4 mb-lg-0" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+      <div class="col-md-12 col-lg-3 product-col" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
         <div class="card product-card d-flex flex-column h-100"
              data-product-id-main="${product.id}"
              data-product-name="${product.name}">

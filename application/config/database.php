@@ -74,11 +74,10 @@ $active_group = 'default';
 $query_builder = TRUE;
 
 $db['default'] = array(
-	'dsn'	=> 'mysql:host=127.0.0.1:3307;dbname=mjettjtg_mjete_per_pune',
-	'hostname' => "127.0.0.1",
-	'username' => "root",
-	'password' => "",
-	'port'	   =>"3307",
+	'dsn'	=> 'mysql:host=localhost;dbname=mjettjtg_mjete_per_pune',
+	'hostname' => "localhost",
+	'username' => "mjettjtg_root",
+	'password' => "zt9c2oRgXvA1-Kce",
 	'database' => "mjettjtg_mjete_per_pune",
 	'dbdriver' => 'pdo',
 	'dbprefix' => '',

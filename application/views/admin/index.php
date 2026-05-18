@@ -491,7 +491,7 @@ button i {
           </li> -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span class="glyphicon glyphicon-user"></span> 
+              <span class="glyphicon glyphicon-user me-2"></span> 
                PUNËTORËT
               <span class="ms-2 nav-badge nav-badge-danger">1</span>
             </a>

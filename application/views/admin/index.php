@@ -469,7 +469,7 @@ button i {
               <span class="ms-2 nav-badge nav-badge-danger">4</span>
             </a>
             <ul class="dropdown-menu" aria-labelledby="navCreate">
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/workers'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PUNTORËVE</a></li>
+              <!-- <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/workers'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PUNTORËVE</a></li> -->
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user'); ?>"><i class="fa fa-plus me-2"></i> PËRDORUES I RI</a></li>
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/all_user_list'); ?>"><i class="fa fa-list me-2"></i> LISTA E TË GJITHË PËRDORUESVE</a></li>
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/categories'); ?>"><i class="fa fa-list me-2"></i> KATEGORIT</a></li>

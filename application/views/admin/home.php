@@ -449,7 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
                          imgId="${product.id}"
                          style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
                          data-src="${url}optimum/products_images/${product.image}"
-                         class="lazyload img-fluid" />
+                         class="img-fluid" />
 
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3">
@@ -512,7 +512,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         </div>
                         <div class="modal-body">
                             <img data-src="${url}optimum/products_images/${product.image}"
-                                 class="lazyload img-fluid"
+                                 class="img-fluid"
                                  id="imagepreview_${product.id}"
                                  style="margin-left:auto;margin-right:auto;display:block;width:270px;height:220px;">
                         </div>
@@ -600,56 +600,40 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ===== image modal opener (works for initial $key IDs + appended product.id IDs) =====
-    function cacheBust(u) {
-        if (!u) return u;
-        const sep = u.includes('?') ? '&' : '?';
-        return u + sep + 'cb=' + Date.now();
-    }
+
 
     document.getElementById("productListing").addEventListener("click", function (event) {
+
         const el = event.target;
+
         if (!el.classList.contains("img-fluid")) return;
 
-        // try imgId first (exists on both old+new)
         const rawId = el.getAttribute("imgId");
-        let modalEl = rawId ? document.getElementById("imagemodal_" + rawId) : null;
+
+        let modalEl = rawId
+            ? document.getElementById("imagemodal_" + rawId)
+            : null;
 
         if (!modalEl) {
-            // fallback: infer from id="imageresource_{id}"
             const inferred = (el.id || "").split("_").pop();
-            modalEl = inferred ? document.getElementById("imagemodal_" + inferred) : null;
+            modalEl = inferred
+                ? document.getElementById("imagemodal_" + inferred)
+                : null;
         }
 
         if (!modalEl) return;
 
         const listUrl = el.getAttribute("src") || el.getAttribute("data-src");
+
         const modalImg = modalEl.querySelector("img");
 
         if (!modalImg) return;
 
-        const freshUrl = cacheBust(listUrl);
+        // vendose direkt src
+        modalImg.src = listUrl;
 
-        // fshehe derisa te ngarkohet
-        modalImg.style.opacity = "0";
-
-        const preloadImg = new Image();
-
-        preloadImg.onload = function () {
-
-            modalImg.removeAttribute("data-src");
-            modalImg.classList.remove("lazyload");
-
-            modalImg.src = freshUrl;
-
-            // shfaqe pasi u ngarkua
-            modalImg.style.opacity = "1";
-
-            const modalId = modalEl.getAttribute("id");
-            $("#" + modalId).modal("show");
-        };
-
-        preloadImg.src = freshUrl;
+        // hape modalin MENJEHERE
+        $("#" + modalEl.id).modal("show");
     });
 });
 </script>

@@ -81,6 +81,25 @@ class Products extends CI_Controller
                     $newProduct = $this->common_model->insert($data, 'products');
                     if ($newProduct) {
                         $this->session->set_flashdata('msg', 'Produkti eshte ruajtur me sukses');
+                        log_message('error','DATA'.json_encode($_POST));
+                        if (isset($_POST['shop_name']) && isset($_POST['product_buying_price']) && isset($_POST['product_quantity'])) {
+
+                            $last_id = $this->db->insert_id();
+                            $product = $this->db->select('*')->from('products')->where('id',$last_id)->get()->row_array();
+                                                    log_message('error','WHATT'.json_encode($product['id']));
+
+                            $data_product_information = array(
+                                'product_id' => $product['id'],
+                                'shop_name' => strtoupper($_POST['shop_name']),
+                                'product_buying_price' => $_POST['product_buying_price'],
+                                'product_quantity' => $_POST['product_quantity'],
+                                'invoice_number' => $_POST['invoice_number'],
+                                'created_at' => current_datetime(),
+                                'updated_at' => current_datetime()
+                            );
+                            $data_ProductInformation = $this->security->xss_clean($data_product_information);
+                            $newProduct_information = $this->common_model->insert($data_ProductInformation, 'product_information');
+                        }
                         redirect(base_url() .'admin/dashboard/get_category/' . $category_id);
                     } else {
                         $this->session->set_flashdata('error_msg', 'Ka ndodhur nje gabim ne sistem');
@@ -234,4 +253,105 @@ class Products extends CI_Controller
         }
         return $data;
     }
+
+    public function product_information($product_id)
+    {
+        $product_id = (int)$product_id;
+
+        // Informata bazë të produktit
+        $product = $this->db
+            ->select('id, name, code')
+            ->from('products')
+            ->where('id', $product_id)
+            ->get()
+            ->row_array();
+
+        if (!$product) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Produkti nuk u gjet.'
+            ]);
+            return;
+        }
+
+        // Të gjitha blerjet e këtij produkti
+        $purchases = $this->db
+            ->select('
+                shop_name,
+                product_quantity,
+                product_buying_price,
+                invoice_number,
+                created_at
+            ')
+            ->from('product_information')
+            ->where('product_id', $product_id)
+            ->order_by('created_at', 'DESC')
+            ->get()
+            ->result_array();
+
+        echo json_encode([
+            'status' => true,
+            'data' => [
+                'product_info' => $product,
+                'purchases'   => $purchases
+            ]
+        ]);
+    }
+
+    
+    public function add_product_information()
+{
+    $product_id = (int)$this->input->post('product_id');
+
+    $shop_name = trim($this->input->post('shop_name'));
+    $product_quantity = trim($this->input->post('product_quantity'));
+    $product_buying_price = trim($this->input->post('product_buying_price'));
+    $invoice_number = trim($this->input->post('invoice_number'));
+
+    if (
+        !$product_id ||
+        $shop_name == '' ||
+        $product_quantity == '' ||
+        $product_buying_price == '' 
+    ) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Të gjitha fushat janë obligative.'
+        ]);
+        return;
+    }
+
+    $product = $this->db
+        ->select('id')
+        ->from('products')
+        ->where('id', $product_id)
+        ->get()
+        ->row_array();
+
+    if (!$product) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Produkti nuk ekziston.'
+        ]);
+        return;
+    }
+
+    $data = [
+        'product_id' => $product_id,
+        'shop_name' => $shop_name,
+        'product_quantity' => $product_quantity,
+        'product_buying_price' => $product_buying_price,
+        'invoice_number' => $invoice_number,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->insert('product_information', $data);
+
+    echo json_encode([
+        'status' => true,
+        'message' => 'Porosia u shtua me sukses.',
+        'id' => $this->db->insert_id()
+    ]);
+}
+    
 }

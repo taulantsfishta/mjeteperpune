@@ -444,6 +444,58 @@
                         <i class="fa fa-save"></i> Ruaj
                     </button>
                 </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="editProductInfoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <form id="editProductInfoForm">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Edito porosinë</h5>
+
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" id="edit_product_info_id" name="id">
+
+                    <div class="form-group">
+                        <label>Emri i Dyqanit</label>
+                        <input type="text" class="form-control" id="edit_shop_name" name="shop_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sasia</label>
+                        <input type="number" step="any" class="form-control" id="edit_product_quantity" name="product_quantity" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Çmimi i Blerjes</label>
+                        <input type="number" step="any" class="form-control" id="edit_product_buying_price" name="product_buying_price" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Numri i Faturës</label>
+                        <input type="text" class="form-control" id="edit_invoice_number" name="invoice_number">
+                    </div>
+
+                    <div id="editProductInfoError" class="alert alert-danger d-none"></div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fa fa-save"></i> Përditëso
+                    </button>
+                </div>
 
             </div>
         </form>
@@ -759,7 +811,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!productId) return;
         $('#productInfoContent').html('<div class="py-3">Duke ngarkuar...</div>');
         $('#productInfoModal').modal('show');
-
+               
         $.ajax({
             url: url + 'admin/products/product_information/' + productId,
             type: 'GET',
@@ -783,30 +835,47 @@ document.addEventListener("DOMContentLoaded", function () {
                 let rowsHtml = '';
 
                 if (Array.isArray(purchases) && purchases.length > 0) {
+
                     rowsHtml = purchases.map(function (item, index) {
-                                            console.log(item,'item')
                                             
-                        const qtyRaw = item.product_quantity || 0;
-                        const priceRaw = item.product_buying_price || 0;
+                    const qtyRaw = item.product_quantity || 0;
+                    const priceRaw = item.product_buying_price || 0;
 
-                        const qty = parseFloat(qtyRaw) || 0;
-                        const price = parseFloat(priceRaw) || 0;
-                        const rowTotal = qty * price;
+                    const qty = parseFloat(qtyRaw) || 0;
+                    const price = parseFloat(priceRaw) || 0;
+                    const rowTotal = qty * price;
+                    const date = item.created_at.split(' ')[0];
 
-                        totalQuantity += qty;
-                        totalValue += rowTotal;
+                    totalQuantity += qty;
+                    totalValue += rowTotal;
+                    return `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${escapeHtml(item.shop_name)}</td>
+                            <td>${escapeHtml(qtyRaw)}</td>
+                            <td>${money(priceRaw)}</td>
+                            <td>${rowTotal ? money(rowTotal.toFixed(2)) : '-'}</td>
+                            <td>${escapeHtml(item.invoice_number)}</td>
+                            <td>${escapeHtml(item.created_at.split(' ')[0])}</td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-warning btn-xs edit-product-info-row"
+                                        data-id="${item.id}"
+                                        data-shop="${escapeHtml(item.shop_name)}"
+                                        data-quantity="${escapeHtml(qtyRaw)}"
+                                        data-price="${escapeHtml(priceRaw)}"
+                                        data-invoice="${escapeHtml(item.invoice_number)}">
+                                    <i class="fa fa-edit"></i>
+                                </button>
 
-                        return `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${escapeHtml(item.shop_name)}</td>
-                                <td>${escapeHtml(qtyRaw)}</td>
-                                <td>${money(priceRaw)}</td>
-                                <td>${rowTotal ? money(rowTotal.toFixed(2)) : '-'}</td>
-                                <td>${escapeHtml(item.invoice_number)}</td>
-                                <td>${escapeHtml(item.created_at)}</td>
-                            </tr>
-                        `;
+                                <button type="button"
+                                        class="btn btn-danger btn-xs delete-product-info-row"
+                                        data-id="${item.id}">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
                     }).join('');
                 } else {
                     // fallback për endpoint të vjetër që kthen vetëm një objekt
@@ -820,17 +889,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     totalQuantity = qty;
                     totalValue = rowTotal;
 
-                    rowsHtml = `
-                        <tr>
-                            <td>1</td>
-                            <td>${escapeHtml(product.shop_name)}</td>
-                            <td>${escapeHtml(qtyRaw)}</td>
-                            <td>${money(priceRaw)}</td>
-                            <td>${rowTotal ? money(rowTotal.toFixed(2)) : '-'}</td>
-                            <td>${escapeHtml(product.invoice_number)}</td>
-                            <td>${escapeHtml(product.created_at)}</td>
-                        </tr>
-                    `;
+                    // rowsHtml = `
+                    //     <tr>
+                    //         <td>1</td>
+                    //         <td>${escapeHtml(product.shop_name)}</td>
+                    //         <td>${escapeHtml(qtyRaw)}</td>
+                    //         <td>${money(priceRaw)}</td>
+                    //         <td>${rowTotal ? money(rowTotal.toFixed(2)) : '-'}</td>
+                    //         <td>${escapeHtml(product.invoice_number)}</td>
+                    //         <td>${escapeHtml(product.created_at)}</td>
+                    //     </tr>
+                    // `;
                 }
 
                 $('#productInfoContent').html(`
@@ -867,6 +936,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                         <th>Totali</th>
                                         <th>Fatura</th>
                                         <th>Data</th>
+                                        <th>Veprimi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -958,6 +1028,103 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    $(document).on('click', '.edit-product-info-row', function () {
+
+        $('#edit_product_info_id').val($(this).data('id'));
+        $('#edit_shop_name').val($(this).data('shop'));
+        $('#edit_product_quantity').val($(this).data('quantity'));
+        $('#edit_product_buying_price').val($(this).data('price'));
+        $('#edit_invoice_number').val($(this).data('invoice'));
+
+        $('#editProductInfoError').addClass('d-none').html('');
+
+        $('#editProductInfoModal').modal('show');
+    });
+
+
+    $(document).on('submit', '#editProductInfoForm', function (e) {
+        e.preventDefault();
+
+        const id = $('#edit_product_info_id').val();
+        const shopName = $('#edit_shop_name').val().trim();
+        const quantity = $('#edit_product_quantity').val().trim();
+        const buyingPrice = $('#edit_product_buying_price').val().trim();
+        const invoiceNumber = $('#edit_invoice_number').val().trim();
+
+        if (!id || !shopName || !quantity || !buyingPrice) {
+            $('#editProductInfoError')
+                .removeClass('d-none')
+                .html('Ju lutem plotësoni fushat obligative.');
+            return;
+        }
+
+        $.ajax({
+            url: url + 'admin/products/update_product_information',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                id: id,
+                shop_name: shopName,
+                product_quantity: quantity,
+                product_buying_price: buyingPrice,
+                invoice_number: invoiceNumber
+            },
+            success: function (res) {
+                if (!res || res.status === false) {
+                    $('#editProductInfoError')
+                        .removeClass('d-none')
+                        .html(res.message || 'Rreshti nuk u përditësua.');
+                    return;
+                }
+
+                $('#editProductInfoModal').modal('hide');
+
+                $('.product-info-btn[data-productid="' + currentProductInfoId + '"]').trigger('click');
+            },
+            error: function () {
+                $('#editProductInfoError')
+                    .removeClass('d-none')
+                    .html('Gabim gjatë përditësimit.');
+            }
+        });
+    });
+
+
+    $(document).on('click', '.delete-product-info-row', function () {
+
+        const id = $(this).data('id');
+
+        if (!id) {
+            alert('Rreshti nuk u gjet.');
+            return;
+        }
+
+        if (!confirm('A jeni i sigurt që dëshironi ta fshini këtë rresht?')) {
+            return;
+        }
+
+        $.ajax({
+            url: url + 'admin/products/delete_product_information',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                id: id
+            },
+            success: function (res) {
+                if (!res || res.status === false) {
+                    alert(res.message || 'Rreshti nuk u fshi.');
+                    return;
+                }
+
+                $('.product-info-btn[data-productid="' + currentProductInfoId + '"]').trigger('click');
+            },
+            error: function () {
+                alert('Gabim gjatë fshirjes.');
+            }
+        });
+    });
+
+    
 
   productListing.addEventListener("click", function (e) {
 

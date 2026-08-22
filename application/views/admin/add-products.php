@@ -79,7 +79,7 @@
 
                         <div class="form-group">
                         <h3 class="box-title">Ngarko Imazhin</h3>
-                        <input type="file" id="input-file-now" name="product_image" class="dropify" / required>
+                        <input type="file" id="input-file-now" name="product_image" class="dropify">
                         </div>
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
                         <div class="form-group">

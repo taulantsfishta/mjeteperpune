@@ -1,27 +1,5 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-
-// *************************************************************************
-// *                                                                       *
-// * Optimum LinkupComputers                              *
-// * Copyright (c) Optimum LinkupComputers. All Rights Reserved                     *
-// *                                                                       *
-// *************************************************************************
-// *                                                                       *
-// * Email: info@optimumlinkupsoftware.com                                 *
-// * Website: https://optimumlinkup.com.ng								   *
-// * 		  https://optimumlinkupsoftware.com							   *
-// *                                                                       *
-// *************************************************************************
-// *                                                                       *
-// * This software is furnished under a license and may be used and copied *
-// * only  in  accordance  with  the  terms  of such  license and with the *
-// * inclusion of the above copyright notice.                              *
-// *                                                                       *
-// *************************************************************************
-
-//LOCATION : application - controller - Dashboard.php
-
 class Products extends CI_Controller
 {
 
@@ -33,16 +11,6 @@ class Products extends CI_Controller
         $db = $this->load->database();
         $this->load->helper(array('form', 'url'));
     }
-
-    /****************Function login**********************************
-     * @type            : Function
-     * @function name   : index
-     * @description     : This redirect to dashboard automatically 
-     *                    
-     *                       
-     * @param           : null 
-     * @return          : null 
-     * ********************************************************** */
 
     public function get_product($id)
     {
@@ -56,71 +24,134 @@ class Products extends CI_Controller
 
     public function add($category_id)
     {
-        if ($this->session->userdata('role') == 'admin') {
-            $lastUsedCode = $this->db->select('code')->from('products')->where('category_id', $category_id)->order_by('id', 'desc')->limit(1)->get()->row_array();
-            if (isset($lastUsedCode['code']) && ($lastUsedCode['code'] != null)) {
-                $code = substr($lastUsedCode['code'], strlen($category_id) + 1, strlen($lastUsedCode['code']));
-                $newCode = $code + 1;
-                $nextCode = $category_id . '-' . $newCode;
-            } else {
-                $nextCode = $category_id . '-' . '1';
-            }
-            if (isset($_POST['name']) && isset($_POST['price']) && isset($_FILES['product_image']['name'])) {
-                $uploadImageOfNewProduct = $this->uploadImageOfNewProduct($category_id);
-                if ($uploadImageOfNewProduct['status']) {
-                    $data = array(
-                        'name' => strtoupper($_POST['name']),
-                        'category_id' => $category_id,
-                        'price' => $_POST['price'],
-                        'code' => $nextCode,
-                        'image' => $uploadImageOfNewProduct['image'],
-                        'created_at' => current_datetime()
+        // Vetem admin
+        if ($this->session->userdata('role') != 'admin') {
+            $data = [
+                'heading' => 'Mesazhi',
+                'message' => 'Nuk keni qasje ne kete faqe'
+            ];
 
-                    );
-                    $data = $this->security->xss_clean($data);
-                    $newProduct = $this->common_model->insert($data, 'products');
-                    if ($newProduct) {
-                        $this->session->set_flashdata('msg', 'Produkti eshte ruajtur me sukses');
-                        
-                        if ((isset($_POST['shop_name']) && $_POST['shop_name'] != '' ) && (isset($_POST['product_buying_price']) && $_POST['product_buying_price'] != '' ) && (isset($_POST['product_quantity']) && $_POST['product_quantity'] != ''  )) {
-                            log_message('error',json_encode('HINI123123'));
-                            $last_id = $this->db->insert_id();
-                            $product = $this->db->select('*')->from('products')->where('id',$last_id)->get()->row_array();
-
-                            $data_product_information = array(
-                                'product_id' => $product['id'],
-                                'shop_name' => strtoupper($_POST['shop_name']),
-                                'product_buying_price' => $_POST['product_buying_price'],
-                                'product_quantity' => $_POST['product_quantity'],
-                                'invoice_number' => $_POST['invoice_number'],
-                                'created_at' => current_datetime(),
-                                'updated_at' => current_datetime()
-                            );
-                            $data_ProductInformation = $this->security->xss_clean($data_product_information);
-                            $newProduct_information = $this->common_model->insert($data_ProductInformation, 'product_information');
-                        }
-                        redirect(base_url() .'admin/dashboard/get_category/' . $category_id);
-                    } else {
-                        $this->session->set_flashdata('error_msg', 'Ka ndodhur nje gabim ne sistem');
-                        redirect(base_url() . 'admin/products/add/' . $category_id);
-                    }
-                } else {
-                    $this->session->set_flashdata('error_msg', $uploadImageOfNewProduct['message']);
-                    redirect(base_url().'admin/products/add/' . $category_id);
-                }
-            }
-            $data = array();
-            $data['codeId'] = $nextCode;
-            $data['category_id'] = $category_id;
-            $data['page_title'] = 'Shto Produktin';
-            $data['main_content'] = $this->load->view('admin/add-products', $data, TRUE);
-            $this->load->view('admin/index', $data);
-        } else {
-            $data = array();
-            $data['heading'] = 'Mesazhi';
-            $data['message'] = "Nuk keni qasje ne kete faqe";
             $this->load->view('errors/html/error_404', $data);
+            return;
         }
+
+        $lastUsedCode = $this->db->select('code')->from('products')->where('category_id', $category_id)->order_by('id', 'DESC')->limit(1)->get()->row_array();
+
+        if (!empty($lastUsedCode['code'])) {
+
+            $codeNumber = substr($lastUsedCode['code'],strlen($category_id) + 1);
+            $nextCode = $category_id . '-' . (((int)$codeNumber) + 1);
+        } else {
+            $nextCode = $category_id . '-1';
+        }
+
+        if (!isset($_POST['name']) || !isset($_POST['price'])) {
+            $data = [
+                'codeId' => $nextCode,
+                'category_id' => $category_id,
+                'page_title' => 'Shto Produktin'
+            ];
+
+            $data['main_content'] = $this->load->view('admin/add-products',$data,TRUE);
+            $this->load->view('admin/index', $data);
+            return;
+        }
+
+
+        $productData = [
+            'name' => strtoupper(trim($this->input->post('name'))),
+            'category_id' => $category_id,
+            'price' => $this->input->post('price'),
+            'code' => $nextCode,
+            'created_at' => current_datetime()
+        ];
+
+        $productData = $this->security->xss_clean($productData);
+
+        $newProduct = $this->common_model->insert($productData,'products');
+
+        if (!$newProduct) {$this->session->set_flashdata(    'error_msg',    'Ka ndodhur nje gabim gjate ruajtjes se produktit.');
+            redirect(
+                base_url() . 'admin/products/add/' . $category_id
+            );
+            return;
+        }
+
+        $productId = $this->db->insert_id();
+
+        $shopName = trim((string)$this->input->post('shop_name'));
+        $quantity = trim((string)$this->input->post('product_quantity'));
+        $buyingPrice = trim((string)$this->input->post('product_buying_price'));
+        $invoiceNumber = trim((string)$this->input->post('invoice_number'));
+
+        $hasProductInformation = $shopName !== '' && $quantity !== '' && $buyingPrice !== '';
+
+        if ($hasProductInformation) {
+            $productInformationData = [
+                'product_id' => $productId,
+                'shop_name' => strtoupper($shopName),
+                'product_quantity' => $quantity,
+                'product_buying_price' => $buyingPrice,
+                'invoice_number' => $invoiceNumber,
+                'created_at' => current_datetime(),
+                'updated_at' => current_datetime()
+            ];
+
+            $productInformationData =$this->security->xss_clean(    $productInformationData);
+            $this->common_model->insert($productInformationData,'product_information');
+        }
+
+        if ( !isset($_FILES['product_image']) || empty($_FILES['product_image']['name'])) {
+            $this->session->set_flashdata(
+                'error_msg',
+                'Produkti u ruajt, por nuk ka imazh. Ju lutem shtoni imazhin.'
+            );
+            redirect(
+                base_url() . 'admin/products/get_product/' . $productId
+            );
+            return;
+        }
+
+        $uploadResult = $this->uploadImageOfNewProduct($category_id);
+
+        if (!$uploadResult['status']) {
+
+            $message = 'Produkti u ruajt me sukses, por imazhi nuk u ngarkua.';
+
+            if (!empty($uploadResult['message'])) {
+                $message .= ' ' . $uploadResult['message'];
+            }
+
+            $message .= ' Ju lutem rregulloni imazhin dhe provoni perseri.';
+
+            $this->session->set_flashdata( 'error_msg', $message);
+
+            redirect(
+                base_url() . 'admin/products/get_product/' . $productId
+            );
+
+            return;
+        }
+
+        $imageData = [
+            'image' => $uploadResult['image']
+        ];
+
+        $this->common_model->edit_option(
+            $imageData,
+            $productId,
+            'products'
+        );
+
+
+        $this->session->set_flashdata(
+            'msg',
+            'Produkti eshte ruajtur me sukses.'
+        );
+
+        redirect(
+            base_url() . 'admin/dashboard/get_category/' . $category_id
+        );
     }
 
     public function edit()
@@ -165,12 +196,10 @@ class Products extends CI_Controller
     public function delete_product($category_id,$product_id,$is_main_page = false)
     {
         if ($this->session->userdata('role') == 'admin') {
-            // $product = $this->db->select('products.image')->from('products')->where('id', $product_id)->get()->row_array();
             $data = array('is_deleted' => 1);
             $data = $this->security->xss_clean($data);
             $this->common_model->edit_option($data, $product_id, 'products');
-            // unlink('optimum/products_images/' . $product['image']);
-            // $this->common_model->delete($product_id, 'products');
+
             if($is_main_page){
                 redirect(base_url(). 'admin/dashboard');
             }else{
@@ -187,12 +216,10 @@ class Products extends CI_Controller
     public function un_delete_product($category_id,$product_id,$is_main_page = false)
     {
         if ($this->session->userdata('role') == 'admin') {
-            // $product = $this->db->select('products.image')->from('products')->where('id', $product_id)->get()->row_array();
             $data = array('is_deleted' => 0);
             $data = $this->security->xss_clean($data);
             $this->common_model->edit_option($data, $product_id, 'products');
-            // unlink('optimum/products_images/' . $product['image']);
-            // $this->common_model->delete($product_id, 'products');
+
             if($is_main_page){
                 redirect(base_url(). 'admin/dashboard');
             }else{

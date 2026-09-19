@@ -101,6 +101,8 @@
                 <td data-label="Roli">
                   <?php if ($user['role'] == 'admin') : ?>
                     <div class="label label-table label-info"><i class="fa fa-user"></i> admin</div>
+                  <?php elseif ($user['role'] == 'sales') : ?>
+                    <div class="label label-table label-primary"><i class="fa fa-usd"></i> sales</div>
                   <?php else : ?>
                     <div class="label label-table label-success">user</div>
                   <?php endif ?>

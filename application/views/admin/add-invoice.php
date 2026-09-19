@@ -27,7 +27,7 @@
 /* Top form */
 .form-grid{
   display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap:20px;
   align-items:end;
 }
@@ -241,6 +241,12 @@
 }
 
 
+
+.debt-client-suggestions{position:absolute;z-index:9999;background:#fff;border:1px solid #ddd;max-height:240px;overflow-y:auto;min-width:320px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.debt-client-suggestion{padding:9px 12px;cursor:pointer;border-bottom:1px solid #eee}
+.debt-client-suggestion:hover,
+.debt-client-suggestion.active{background:#dbeafe;color:#111827}
+.debt-client-suggestion small{display:block;color:#777;margin-top:2px}
 </style>
 
 <div class="row" id="mainDiv">
@@ -253,10 +259,16 @@
           <div>
             <label for="client_name">Emri I Klientit:</label>
             <input type="text" id="client_name" name="client_name" value="QYTETAR" required>
+            <input type="hidden" id="debt_client_id" name="debt_client_id" value="">
+            <div id="debtClientSuggestions" class="debt-client-suggestions" style="display:none;"></div>
           </div>
           <div>
             <label for="address">Adresa:</label>
             <input type="text" id="address" name="address" value="KOSOVE" required>
+          </div>
+          <div>
+            <label for="phone_number">Numri I Telefonit:</label>
+            <input type="text" id="phone_number" name="phone" value="">
           </div>
           <div>
             <label for="date">Data:</label>
@@ -292,15 +304,164 @@
                   </tr>
                 </thead>
                 <tbody id="product_rows">
-                  <tr>
-                    <td>1</td>
-                    <td><input type="text" class="product_name" name="product_name[]" autocomplete="off"></td>
-                    <td><input class="code" name="code[]" readonly></td>
-                    <td><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
-                    <td><input type="text" class="price" name="price[]" autocomplete="off"></td>
-                    <td><input class="total_product_price" name="total_product_price[]" readonly></td>
-                    <td hidden><input type="text" class="image" name="image[]" hidden></td>
-                  </tr>
+
+                <?php if (!empty($cart_products)) : ?>
+
+                    <?php foreach ($cart_products as $index => $item) : ?>
+
+                        <tr>
+
+                            <td>
+                                <?php echo $index + 1; ?>
+                            </td>
+
+
+                            <td>
+
+                                <input type="text"
+                                    class="product_name"
+                                    name="product_name[]"
+                                    autocomplete="off"
+                                    value="<?php echo htmlspecialchars(
+                                        $item['name'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ); ?>">
+
+                            </td>
+
+
+                            <td>
+
+                                <input class="code"
+                                    name="code[]"
+                                    readonly
+                                    value="<?php echo htmlspecialchars(
+                                        $item['code'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ); ?>">
+
+                            </td>
+
+
+                            <td>
+
+                                <input type="text"
+                                    class="quantity"
+                                    name="quantity[]"
+                                    autocomplete="off"
+                                    value="<?php echo htmlspecialchars(
+                                        $item['quantity'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ); ?>">
+
+                            </td>
+
+
+                            <td>
+
+                                <input type="text"
+                                    class="price"
+                                    name="price[]"
+                                    autocomplete="off"
+                                    value="<?php echo number_format(
+                                        (float)$item['price'],
+                                        2,
+                                        '.',
+                                        ''
+                                    ); ?>">
+
+                            </td>
+
+
+                            <td>
+
+                                <input class="total_product_price"
+                                    name="total_product_price[]"
+                                    readonly
+                                    value="<?php echo number_format(
+                                        (float)$item['total'],
+                                        2,
+                                        '.',
+                                        ''
+                                    ); ?>">
+
+                            </td>
+
+
+                            <td hidden>
+
+                                <input type="text"
+                                    class="image"
+                                    name="image[]"
+                                    hidden
+                                    value="<?php echo htmlspecialchars(
+                                        $item['image'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ); ?>">
+
+                            </td>
+
+                        </tr>
+
+                    <?php endforeach; ?>
+
+
+                <?php else : ?>
+
+
+                    <tr>
+
+                        <td>1</td>
+
+                        <td>
+                            <input type="text"
+                                class="product_name"
+                                name="product_name[]"
+                                autocomplete="off">
+                        </td>
+
+                        <td>
+                            <input class="code"
+                                name="code[]"
+                                readonly>
+                        </td>
+
+                        <td>
+                            <input type="text"
+                                class="quantity"
+                                name="quantity[]"
+                                autocomplete="off">
+                        </td>
+
+                        <td>
+                            <input type="text"
+                                class="price"
+                                name="price[]"
+                                autocomplete="off">
+                        </td>
+
+                        <td>
+                            <input class="total_product_price"
+                                name="total_product_price[]"
+                                readonly>
+                        </td>
+
+                        <td hidden>
+                            <input type="text"
+                                class="image"
+                                name="image[]"
+                                hidden>
+                        </td>
+
+                    </tr>
+
+
+                <?php endif; ?>
+
                 </tbody>
               </table>
             </div>
@@ -366,6 +527,7 @@
             <button type="submit" id="saveBtn" class="btn" name="submit_type" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
             <button type="submit" id="printBtn" class="btn" name="submit_type" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
             <button type="submit" id="downloadBtn" class="btn" name="submit_type" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
+            <button type="button" id="debtBtn" class="btn" style="background:#d9534f;color:#fff;"><i class="fa fa-money"></i> DETYRIM NGA KLIENTI</button>
             <button type="button" id="delete_row" class="btn" style="display:none;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
           </div>
         </div>
@@ -375,6 +537,36 @@
   </div>
 </div>
 
+
+
+<!-- Konfirmimi i detyrimit -->
+<div class="modal" id="confirmDebtModal" tabindex="-1" role="dialog" aria-labelledby="confirmDebtModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="confirmDebtModalLabel">Konfirmo detyrimin</h5>
+      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="modal-body" id="confirmDebtModalMessage">A dëshironi ta regjistroni ose përditësoni shumën e mbetur si detyrim?</div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Jo</button>
+      <button type="button" class="btn btn-danger" id="confirmDebtAction">Po, konfirmo</button></div>
+  </div></div>
+</div>
+<!-- Njoftimet e detyrimit -->
+<div class="modal" id="debtNotificationModal" tabindex="-1" role="dialog" aria-labelledby="debtNotificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="debtNotificationModalLabel">Njoftim</h5>
+      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="modal-body" id="debtNotificationMessage"></div>
+    <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Në rregull</button></div>
+  </div></div>
+</div>
+<script>
+function showDebtNotification(message, title) {
+    $('#debtNotificationModalLabel').text(title || 'Njoftim');
+    $('#debtNotificationMessage').text(message);
+    $('#debtNotificationModal').modal('show');
+}
+</script>
 
 <!-- Image preview modal (required by the hover on NR) -->
 <div class="modal" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
@@ -411,10 +603,14 @@
 <script>
     window.base_url = <?php echo json_encode(base_url()); ?>;   
     $(document).ready(function() {
-        var rowIdx = 1;
+        var rowIdx = $('#product_rows tr').length;
         var lastClickedRow = null;
         var prepayment;
         var totalSum;
+
+        updateRowNumbers();
+
+        updateTotalSum(true);
         
         $(document).on('blur', '.product_name, .quantity, .price', function() {
             const row = $(this).closest('tr');
@@ -878,7 +1074,6 @@
             if (price === '' || isNaN(priceNum)) {
                 errors.push(`Rreshti ${rowIndex}: Çmimi duhet të jete i mbushur dhe numër i vlefshëm.`);
             }
-            console.log('123')
             return errors;
         }
 
@@ -1004,7 +1199,8 @@
                       input.value = res.id;
                       input.id = "id";
 
-                      document.getElementById("sales_form").appendChild(input);
+                      $('#sales_form > #id').remove();
+                       document.getElementById("sales_form").appendChild(input);
 
                       if (typeof callback === 'function') {
                           callback(); // Printo ose Excel
@@ -1016,7 +1212,8 @@
                       // Nëse nuk është valid JSON
                       console.error("Nuk është JSON valid:", response);
 
-                      alert("Gabim gjatë ruajtjes: " + response);
+                      showDebtNotification('Gabim gjatë ruajtjes së faturës.', 'Gabim');
+                       $(document).trigger('invoiceSaveFailed');
 
                       // Nëse të gjithë rreshtat janë fshirë, shto një të ri bosh
                       if ($('#product_rows tr').length === 0) {
@@ -1038,6 +1235,7 @@
                      error: function (xhr, status, error) {
                          console.error('Error saving:', error);
                          $('#errorModal').modal('show');
+                          $(document).trigger('invoiceSaveFailed');
                      }
                  });
              } else {
@@ -1046,6 +1244,9 @@
                  $('#sales_form')[0].submit();
              }
          }
+
+         // Bëje funksionin të qasshëm edhe nga skripti i butonit DETYRIM NGA KLIENTI.
+         window.validateAndSubmitForm = validateAndSubmitForm;
 
          $('#saveBtn').on('click', function (e) {
             const rows = $('#sales_table tbody tr');
@@ -1131,3 +1332,167 @@
     });
 
 </script>
+
+<script>
+$(document).ready(function () {
+    var debtSearchTimer = null;
+    var debtSearchRequest = null;
+    var activeDebtClientIndex = -1;
+
+    function selectDebtClient($item) {
+        if (!$item.length) return;
+        $('#debt_client_id').val($item.attr('data-id'));
+        $('#client_name').val($item.attr('data-name'));
+        if ($item.attr('data-address')) $('#address').val($item.attr('data-address'));
+        if ($item.attr('data-phone')) $('#phone_number').val($item.attr('data-phone'));
+        activeDebtClientIndex = -1;
+        $('#debtClientSuggestions').hide().empty();
+        $('#client_name').focus();
+    }
+
+    $('#client_name').on('input', function () {
+        $('#debt_client_id').val('');
+        activeDebtClientIndex = -1;
+        clearTimeout(debtSearchTimer);
+        if (debtSearchRequest) debtSearchRequest.abort();
+        var q = $.trim($(this).val());
+        if (q.length < 2) {
+            $('#debtClientSuggestions').hide().empty();
+            return;
+        }
+        debtSearchTimer = setTimeout(function () {
+            debtSearchRequest = $.ajax({
+                url: '<?php echo base_url("admin/invoices/search_debt_clients_invoice"); ?>',
+                type: 'GET',
+                dataType: 'json',
+                data: {search: q},
+                success: function (res) {
+                    // Mos shfaq rezultate të vjetra nëse emri ndërkohë ka ndryshuar.
+                    if ($.trim($('#client_name').val()) !== q) return;
+                    var box = $('#debtClientSuggestions').empty();
+                    activeDebtClientIndex = -1;
+                    if (!res || !res.length) { box.hide(); return; }
+                    $.each(res, function (_, c) {
+                        $('<div class="debt-client-suggestion" role="option"></div>')
+                            .attr('data-id', c.id)
+                            .attr('data-name', c.name || '')
+                            .attr('data-address', c.address || '')
+                            .attr('data-phone', c.phone || '')
+                            .html('<strong>' + $('<div>').text(c.name || '').html() + '</strong>' +
+                                  '<small>' + $('<div>').text((c.address || '') + ((c.phone || '') ? ' | ' + c.phone : '')).html() + '</small>')
+                            .appendTo(box);
+                    });
+                    box.show();
+                }
+            });
+        }, 250);
+    });
+
+    $('#client_name').on('keydown', function (e) {
+        var $box = $('#debtClientSuggestions');
+        var $items = $box.find('.debt-client-suggestion');
+        if (!$box.is(':visible') || !$items.length) return;
+
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (e.key === 'ArrowDown') {
+                activeDebtClientIndex = Math.min(activeDebtClientIndex + 1, $items.length - 1);
+            } else {
+                activeDebtClientIndex = activeDebtClientIndex <= 0 ? $items.length - 1 : activeDebtClientIndex - 1;
+            }
+            $items.removeClass('active').attr('aria-selected', 'false');
+            var $active = $items.eq(activeDebtClientIndex).addClass('active').attr('aria-selected', 'true');
+            $active[0].scrollIntoView({block: 'nearest'});
+        } else if (e.key === 'Enter') {
+            e.preventDefault(); // Mos e dërgo formularin kur zgjedhim klientin.
+            selectDebtClient($items.eq(activeDebtClientIndex < 0 ? 0 : activeDebtClientIndex));
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            $box.hide();
+            activeDebtClientIndex = -1;
+        }
+    });
+
+    $(document).on('click', '.debt-client-suggestion', function () {
+        selectDebtClient($(this));
+    });
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#client_name,#debtClientSuggestions').length) {
+            $('#debtClientSuggestions').hide();
+            activeDebtClientIndex = -1;
+        }
+    });
+
+    // Hap konfirmimin para ruajtjes dhe regjistrimit të detyrimit.
+    $('#debtBtn').on('click', function (e) {
+        e.preventDefault();
+        $('#confirmDebtModalMessage').text(
+            'A dëshironi ta ruani faturën dhe ta regjistroni ose përditësoni shumën e mbetur si detyrim?'
+        );
+        $('#confirmDebtModal').modal('show');
+    });
+
+    $('#confirmDebtAction').on('click', function () {
+        var $confirmButton = $(this);
+        var $debtButton = $('#debtBtn');
+        var clientId = $('#debt_client_id').val();
+        var invoiceId = $('#sales_form > #id').val();
+
+        // Klienti kërkohet vetëm kur detyrimi regjistrohet për herë të parë.
+        // Për faturën ekzistuese, controller-i e gjen klientin nga transaksioni i lidhur.
+        if (!invoiceId && !clientId) {
+            $('#confirmDebtModal').modal('hide');
+            $('#confirmDebtModal').one('hidden.bs.modal', function () {
+                showDebtNotification('Zgjidhni klientin ekzistues nga lista e borxheve.', 'Vërejtje');
+            });
+            return;
+        }
+
+        $confirmButton.prop('disabled', true).text('Duke ruajtur...');
+        $debtButton.prop('disabled', true);
+        $('#confirmDebtModal').modal('hide');
+
+        function unlock() {
+            $confirmButton.prop('disabled', false).text('Po, konfirmo');
+            $debtButton.prop('disabled', false);
+        }
+
+        // Ruaje gjithmonë faturën e ndryshuar përpara sinkronizimit të borxhit.
+        window.validateAndSubmitForm('ruaj_faturen', true, function () {
+            var savedInvoiceId = $('#sales_form > #id').val();
+            if (!savedInvoiceId) {
+                unlock();
+                showDebtNotification('Fatura nuk u ruajt. Detyrimi nuk u ndryshua.', 'Gabim');
+                return;
+            }
+            $confirmButton.text('Duke regjistruar...');
+            $.ajax({
+                url: window.base_url + 'admin/invoices/invoice_to_debt',
+                type: 'POST',
+                dataType: 'json',
+                data: {invoice_id: savedInvoiceId, debt_client_id: clientId},
+                success: function (res) {
+                    if (res && res.status) {
+                        if (res.client_id) $('#debt_client_id').val(res.client_id);
+                        showDebtNotification(res.message || 'Detyrimi u regjistrua me sukses.', 'Sukses');
+                    } else {
+                        showDebtNotification((res && res.message) || 'Detyrimi nuk u regjistrua.', 'Vërejtje');
+                    }
+                },
+                error: function (xhr) {
+                    var message = (xhr.responseJSON && xhr.responseJSON.message) ||
+                        'Ndodhi një gabim gjatë regjistrimit të detyrimit.';
+                    showDebtNotification(message, 'Gabim');
+                },
+                complete: unlock
+            });
+        });
+        // Nëse validimi/ruajtja dështon, nuk ekzekutohet callback-u.
+        // Riaktivizo butonat kur modali i validimit ose gabimit mbyllet.
+        $(document).one('invoiceSaveFailed', unlock);
+    });
+
+});
+</script>
+

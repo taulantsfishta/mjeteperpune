@@ -166,6 +166,15 @@ class Common_model extends CI_Model {
         return $query;
     }
 
+    function get_prefix_user($id){
+        $this->db->select('u.prefix_user');
+        $this->db->from('user u');
+        $this->db->where('u.id',$id);
+        $query = $this->db->get();
+        $query = $query->row();  
+        return $query;
+    }
+
 
     //-- get all users with type 2
     function get_all_user(){

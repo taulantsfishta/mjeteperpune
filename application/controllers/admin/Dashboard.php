@@ -226,4 +226,166 @@ class Dashboard extends CI_Controller {
         header('Content-Type: application/json');
         echo json_encode($data);
     }
+
+    /*
+    * VENDOSI KETO METODA BRENDA class Dashboard extends CI_Controller
+    * MOS e shto <?php perseri nese po i kopjon direkt brenda controller-it ekzistues.
+    */
+
+    private function cart_access_allowed()
+    {
+        return in_array($this->session->userdata('role'), ['admin', 'sales']);
+    }
+
+    private function cart_json($data, $statusCode = 200)
+    {
+        return $this->output
+            ->set_status_header($statusCode)
+            ->set_content_type('application/json', 'utf-8')
+            ->set_output(json_encode($data));
+    }
+
+    public function get_cart()
+    {
+        if (!$this->cart_access_allowed()) {
+            return $this->cart_json(['status' => false, 'message' => 'Nuk keni qasje.'], 403);
+        }
+
+        $cart = $this->session->userdata('shopping_cart');
+        if (!is_array($cart)) $cart = [];
+
+        return $this->cart_json([
+            'status' => true,
+            'cart'   => array_values($cart)
+        ]);
+    }
+
+    public function add_to_cart()
+    {
+        if (!$this->cart_access_allowed()) {
+            return $this->cart_json(['status' => false, 'message' => 'Nuk keni qasje.'], 403);
+        }
+
+        $productId = (int) $this->input->post('product_id');
+        $quantity  = (float) $this->input->post('quantity');
+        $price     = (float) $this->input->post('price');
+
+        if ($productId <= 0 || $quantity <= 0 || $price < 0) {
+            return $this->cart_json(['status' => false, 'message' => 'Të dhënat nuk janë valide.'], 422);
+        }
+
+        $product = $this->db
+            ->select('id, code, name, price')
+            ->from('products')
+            ->where('id', $productId)
+            ->limit(1)
+            ->get()
+            ->row_array();
+
+        if (!$product) {
+            return $this->cart_json(['status' => false, 'message' => 'Produkti nuk u gjet.'], 404);
+        }
+
+        $cart = $this->session->userdata('shopping_cart');
+        if (!is_array($cart)) $cart = [];
+
+        $found = false;
+        foreach ($cart as &$item) {
+            if ((string) $item['id'] === (string) $productId) {
+                $item['quantity'] = (float) $item['quantity'] + $quantity;
+                $item['price'] = $price;
+                $found = true;
+                break;
+            }
+        }
+        unset($item);
+
+        if (!$found) {
+            $cart[] = [
+                'id'       => (int) $product['id'],
+                'code'     => $product['code'],
+                'name'     => $product['name'],
+                'quantity' => $quantity,
+                'price'    => $price
+            ];
+        }
+
+        $cart = array_values($cart);
+        $this->session->set_userdata('shopping_cart', $cart);
+
+        return $this->cart_json(['status' => true, 'cart' => $cart]);
+    }
+
+    public function update_cart_product()
+    {
+        if (!$this->cart_access_allowed()) {
+            return $this->cart_json(['status' => false, 'message' => 'Nuk keni qasje.'], 403);
+        }
+
+        $productId = (int) $this->input->post('product_id');
+        $quantity  = (float) $this->input->post('quantity');
+        $price     = (float) $this->input->post('price');
+
+        if ($productId <= 0 || $quantity <= 0 || $price < 0) {
+            return $this->cart_json(['status' => false, 'message' => 'Të dhënat nuk janë valide.'], 422);
+        }
+
+        $cart = $this->session->userdata('shopping_cart');
+        if (!is_array($cart)) $cart = [];
+
+        $found = false;
+        foreach ($cart as &$item) {
+            if ((string) $item['id'] === (string) $productId) {
+                $item['quantity'] = $quantity;
+                $item['price'] = $price;
+                $found = true;
+                break;
+            }
+        }
+        unset($item);
+
+        if (!$found) {
+            return $this->cart_json(['status' => false, 'message' => 'Produkti nuk ekziston në shportë.'], 404);
+        }
+
+        $cart = array_values($cart);
+        $this->session->set_userdata('shopping_cart', $cart);
+
+        return $this->cart_json(['status' => true, 'cart' => $cart]);
+    }
+
+    public function delete_cart_product()
+    {
+        if (!$this->cart_access_allowed()) {
+            return $this->cart_json(['status' => false, 'message' => 'Nuk keni qasje.'], 403);
+        }
+
+        $productId = (int) $this->input->post('product_id');
+        if ($productId <= 0) {
+            return $this->cart_json(['status' => false, 'message' => 'Produkti nuk është valid.'], 422);
+        }
+
+        $cart = $this->session->userdata('shopping_cart');
+        if (!is_array($cart)) $cart = [];
+
+        $cart = array_values(array_filter($cart, function ($item) use ($productId) {
+            return (string) $item['id'] !== (string) $productId;
+        }));
+
+        $this->session->set_userdata('shopping_cart', $cart);
+
+        return $this->cart_json(['status' => true, 'cart' => $cart]);
+    }
+
+    public function clear_cart()
+    {
+        if (!$this->cart_access_allowed()) {
+            return $this->cart_json(['status' => false, 'message' => 'Nuk keni qasje.'], 403);
+        }
+
+        $this->session->unset_userdata('shopping_cart');
+
+        return $this->cart_json(['status' => true, 'cart' => []]);
+    }
+
 }

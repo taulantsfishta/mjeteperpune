@@ -27,7 +27,7 @@
 /* Top form */
 .form-grid{
   display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap:20px;
   align-items:end;
 }
@@ -345,11 +345,12 @@
   #invoiceData tbody td:nth-child(1)::before { content: "ID"; }
   #invoiceData tbody td:nth-child(2)::before { content: "Klienti"; }
   #invoiceData tbody td:nth-child(3)::before { content: "Adresa"; }
-  #invoiceData tbody td:nth-child(4)::before { content: "Totali"; }
-  #invoiceData tbody td:nth-child(5)::before { content: "Parapagesë"; }
-  #invoiceData tbody td:nth-child(6)::before { content: "Shuma e mbetur"; }
-  #invoiceData tbody td:nth-child(7)::before { content: "Data e krijimit"; }
-  #invoiceData tbody td:nth-child(8)::before { content: "Veprimi"; }
+  #invoiceData tbody td:nth-child(4)::before { content: "Telefoni"; }
+  #invoiceData tbody td:nth-child(5)::before { content: "Totali"; }
+  #invoiceData tbody td:nth-child(6)::before { content: "Parapagesë"; }
+  #invoiceData tbody td:nth-child(7)::before { content: "Shuma e mbetur"; }
+  #invoiceData tbody td:nth-child(8)::before { content: "Data e krijimit"; }
+  #invoiceData tbody td:nth-child(9)::before { content: "Veprimi"; }
 
   /* Stili i label-it */
   #invoiceData tbody td::before {
@@ -392,15 +393,34 @@
 }
 
 
+
+.debt-client-suggestions{position:absolute;z-index:9999;background:#fff;border:1px solid #ddd;max-height:240px;overflow-y:auto;min-width:320px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.debt-client-suggestion{padding:9px 12px;cursor:pointer;border-bottom:1px solid #eee}
+.debt-client-suggestion:hover,.debt-client-suggestion.keyboard-active{background:#dbeafe;outline:2px solid #93c5fd;outline-offset:-2px}
+.invoice-debt-client-option.keyboard-active{background:#dbeafe!important;outline:2px solid #93c5fd;outline-offset:-2px}
+.debt-client-suggestion small{display:block;color:#777;margin-top:2px}
 </style>
 <div class="row" id="invoicesStructure">
   <div class="col-lg-12">
     <div class="row">
-      <div class="col-lg-3 d-none d-lg-block"></div>
-      <div class="col-12 col-md-8 col-lg-6">
+      <?php if (!empty($invoiceIsAdmin)): ?>
+      <div class="col-md-2 col-lg-2">
+        <select id="invoiceUserFilter" class="form-control" aria-label="Faturat sipas përdoruesit">
+          <?php foreach ($invoiceUserOptions as $invoiceUser): ?>
+            <option value="<?php echo (int)$invoiceUser['id']; ?>" <?php echo (int)$invoiceUser['id'] === (int)$invoiceSelectedUserId ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($invoiceUser['display_name'], ENT_QUOTES, 'UTF-8'); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-10 col-lg-10">
         <input class="form-control" id="myInput" type="text" placeholder="Kerko...">
       </div>
+      <?php else: ?>
       <div class="col-lg-3 d-none d-lg-block"></div>
+      <div class="col-12 col-md-8 col-lg-6"><input class="form-control" id="myInput" type="text" placeholder="Kerko..."></div>
+      <div class="col-lg-3 d-none d-lg-block"></div>
+      <?php endif; ?>
     </div>
     <br>
 
@@ -415,6 +435,7 @@
             <th class="table-col-7">ID</th>
             <th class="table-col-10">KLIENTI</th>
             <th class="table-col-10">ADRESA</th>
+            <th class="table-col-10">TELEFONI</th>
             <th class="table-col-10">TOTALI</th>
             <th class="table-col-10">PARAPAGESË</th>
             <th class="table-col-10">SHUMA E MBETUR</th>
@@ -425,21 +446,26 @@
         <tbody id="invoicesStructureBody">
           <?php if(isset($invoicesCreated)) { ?>
             <?php foreach ($invoicesCreated as $key => $value) { ?>
-            <tr data-id="<?php echo $value['id']; ?>">
-              <td class="table-col-7"><?php echo $adminName.'-'.$value['id']; ?></td>
+            <tr data-id="<?php echo $value['id']; ?>" data-own="<?php echo (int)$value['user_id'] === (int)$invoiceOwnUserId ? 1 : 0; ?>">
+              <td class="table-col-7"><?php echo htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8').'-'.(int)$value['id']; ?></td>
               <td class="table-col-10"><?php echo htmlspecialchars($value['client_name']); ?></td>
               <td class="table-col-10"><?php echo htmlspecialchars($value['address']); ?></td>
+              <td class="table-col-10"><?php echo htmlspecialchars(isset($value['phone']) ? $value['phone'] : (isset($value['phone_number']) ? $value['phone_number'] : '')); ?></td>
               <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_invoice']); ?></td>
               <td class="table-col-10"><?php echo htmlspecialchars($value['prepayment_price_invoice']); ?></td>
               <td class="table-col-10"><?php echo htmlspecialchars($value['total_price_left_invoice']); ?></td>
               <td class="table-col-10"><?php echo htmlspecialchars($value['created_at']); ?></td>
               <td class="table-col-7">
+                <?php if ((int)$value['user_id'] === (int)$invoiceOwnUserId): ?>
                 <a href="<?php echo base_url('admin/invoices/delete_inovice/' . $value['id']); ?>"
                    data-toggle="modal"
                    data-target="#confirmDeleteModal"
                    data-invoiceid="<?php echo $value['id']; ?>">
                   <button type="button" class="btn btn-danger btn-circle btn-lg"><i class="icon-trash"></i></button>
                 </a>
+                <?php else: ?>
+                <a class="btn btn-info btn-sm" target="_blank" rel="noopener" href="<?php echo base_url('admin/invoices/print_pdf?id=' . (int)$value['id']); ?>">Shiko PDF</a>
+                <?php endif; ?>
               </td>
             </tr>
             <?php } ?>
@@ -456,7 +482,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmo</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -464,7 +490,7 @@
                 A jeni i sigurt qe deshironi te fshini kete fature?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Jo</button>
                 <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
             </div>
         </div>
@@ -487,10 +513,16 @@
             <div>
                 <label for="client_name">Emri I Klientit:</label>
                 <input type="text" id="client_name" name="client_name" value="QYTETAR" required>
+            <input type="hidden" id="debt_client_id" name="debt_client_id" value="">
+            <div id="debtClientSuggestions" class="debt-client-suggestions" style="display:none;"></div>
             </div>
             <div>
                 <label for="address">Adresa:</label>
                 <input type="text" id="address" name="address" value="KOSOVE" required>
+            </div>
+            <div>
+                <label for="phone_number">Numri I Telefonit:</label>
+                <input type="text" id="phone_number" name="phone" value="">
             </div>
             <div>
                 <label for="date">Data:</label>
@@ -592,6 +624,7 @@
                 <button type="submit" id="saveBtn" class="btn" name="submit_type" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
                 <button type="submit" id="printBtn" class="btn" name="submit_type" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
                 <button type="submit" id="downloadBtn" class="btn" name="submit_type" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
+            <button type="button" id="debtBtn" class="btn" style="background:#d9534f;color:#fff;"><i class="fa fa-money"></i> DETYRIM NGA KLIENTI</button>
                 <button type="button" id="delete_row" class="btn" style="display:none;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
             </div>
             </div>
@@ -601,6 +634,44 @@
     </div>
 </div>
 
+
+
+<!-- Konfirmimi i detyrimit nga lista e faturave -->
+<div class="modal" id="confirmListDebtModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Konfirmo detyrimin</h5><button type="button" class="close" data-bs-dismiss="modal">&times;</button></div>
+    <div class="modal-body" id="confirmListDebtMessage"></div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Jo</button><button type="button" class="btn btn-danger" id="confirmListDebtAction">Po, konfirmo</button></div>
+  </div></div>
+</div>
+<!-- Konfirmimi i detyrimit -->
+<div class="modal" id="confirmDebtModal" tabindex="-1" role="dialog" aria-labelledby="confirmDebtModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="confirmDebtModalLabel">Konfirmo detyrimin</h5>
+      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="modal-body" id="confirmDebtModalMessage">A dëshironi ta regjistroni ose përditësoni shumën e mbetur si detyrim?</div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Jo</button>
+      <button type="button" class="btn btn-danger" id="confirmDebtAction">Po, konfirmo</button></div>
+  </div></div>
+</div>
+<!-- Njoftimet e detyrimit -->
+<div class="modal" id="debtNotificationModal" tabindex="-1" role="dialog" aria-labelledby="debtNotificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="debtNotificationModalLabel">Njoftim</h5>
+      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="modal-body" id="debtNotificationMessage"></div>
+    <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Në rregull</button></div>
+  </div></div>
+</div>
+<script>
+function showDebtNotification(message, title) {
+    $('#debtNotificationModalLabel').text(title || 'Njoftim');
+    $('#debtNotificationMessage').text(message);
+    $('#debtNotificationModal').modal('show');
+}
+</script>
 
 <!-- Image preview modal (required by the hover on NR) -->
 <div class="modal" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
@@ -678,7 +749,7 @@ $(document).ready(function() {
                     <td class="table-col-12"><input type="text" class="quantity" name="quantity[]" autocomplete="off"></td>
                     <td class="table-col-12"><input type="text" class="price" name="price[]" autocomplete="off"></td>
                     <td class="table-col-12"><input class="total_product_price" name="total_product_price[]" readonly></td>
-                    <td style="display:none;"><input class="id" name="id" hidden></td>
+                    <td style="display:none;"><input class="id" hidden></td>
                     <td style="display:none;"><input class="image" name="image[]" hidden></td>
                 </tr>
             `);
@@ -1096,20 +1167,29 @@ $(document).ready(function(){
     });
   });
 
+  $(document).on('change', '#invoiceUserFilter', function() {
+    var url = new URL(window.location.href);
+    url.searchParams.set('invoice_user_id', this.value);
+    window.location.href = url.toString();
+  });
+
   $("#backButton").click(function() {
     $('#search_results_table').hide();
     $.ajax({
         url: window.base_url + 'admin/invoices/get_invoices', // Replace with your actual PHP script URL
         method: 'GET',
-        data: { id: invoiceId },
+        data: { invoice_user_id: <?php echo (int)$invoiceSelectedUserId; ?> },
         success: function(response) {
-            var res = JSON.parse(response);
+            var res = typeof response === 'string' ? JSON.parse(response) : response;
             let html = `<div class="row" id='invoicesStructure'>
                         <div class="col-lg-12">
                             <div class="row">
-                                <div class="col-lg-3"></div>
-                                <div class="col-lg-6"><input class="form-control" id="myInput" type="text" placeholder="Kerko..."></div>
-                                <div class="col-lg-3"></div>
+                                <?php if (!empty($invoiceIsAdmin)): ?>
+                                <div class="col-lg-4"><select id="invoiceUserFilter" class="form-control" aria-label="Faturat sipas përdoruesit"><?php foreach ($invoiceUserOptions as $invoiceUser): ?><option value="<?php echo (int)$invoiceUser['id']; ?>" <?php echo (int)$invoiceUser['id'] === (int)$invoiceSelectedUserId ? 'selected' : ''; ?>><?php echo htmlspecialchars($invoiceUser['display_name'], ENT_QUOTES, 'UTF-8'); ?></option><?php endforeach; ?></select></div>
+                                <div class="col-lg-8"><input class="form-control" id="myInput" type="text" placeholder="Kerko..."></div>
+                                <?php else: ?>
+                                <div class="col-lg-3"></div><div class="col-lg-6"><input class="form-control" id="myInput" type="text" placeholder="Kerko..."></div><div class="col-lg-3"></div>
+                                <?php endif; ?>
                             </div>
                             <br>
                             <table class="table table-bordered table-striped table-hover" data-tablesaw-mode="columntoggle" id="invoiceData" style="font-size:15px;font-family: Arial, Helvetica, sans-serif;">
@@ -1118,6 +1198,7 @@ $(document).ready(function(){
                                     <th  class="table-col-7">ID</th>
                                     <th class="table-col-10">KLIENTI</th>
                                     <th class="table-col-10">ADRESA</th>
+                                    <th class="table-col-10">TELEFONI</th>
                                     <th class="table-col-10">TOTALI</th>
                                     <th class="table-col-10">PARAPAGESË</th>
                                     <th class="table-col-10">SHUMA E MBETUR</th>
@@ -1126,27 +1207,43 @@ $(document).ready(function(){
                                 </tr>
                                 </thead>
                             <tbody id="invoicesStructureBody">`;
+
                             res.forEach(function(value, index) {
-                            html += `
-                                        <tr data-id="${value.id}">
-                                        <td  class="table-col-7"><?php echo $adminName ?> - ${value.id}</td>
+                                html += `
+                                    <tr data-id="${value.id}" data-own="${Number(value.user_id) === <?php echo (int)$invoiceOwnUserId; ?> ? 1 : 0}">
+                                        <td class="table-col-7"><?php echo htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8'); ?> - ${value.id}</td>
                                         <td class="table-col-10">${escapeHtml(value.client_name)}</td>
-                                        <td class="table-col-10">${escapeHtml(value.address)}</td>
+                                        <td class="table-col-10">${escapeHtml(value.address || '')}</td>
+                                        <td class="table-col-10">${escapeHtml(value.phone || value.phone_number || '')}</td>
                                         <td class="table-col-10">${escapeHtml(value.total_price_invoice)}</td>
                                         <td class="table-col-10">${escapeHtml(value.prepayment_price_invoice)}</td>
                                         <td class="table-col-10">${escapeHtml(value.total_price_left_invoice)}</td>
                                         <td class="table-col-12">${escapeHtml(value.created_at)}</td>
                                         <td>
-                                            <a href="${window.base_url}admin/invoices/delete_inovice/${value.id}" data-toggle="modal" data-target="#confirmDeleteModal" data-invoiceid="${value.id}">
-                                                <button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button>
-                                            </a>
+                                            ${Number(value.user_id) === <?php echo (int)$invoiceOwnUserId; ?>
+                                                ? `<a href="${window.base_url}admin/invoices/delete_inovice/${value.id}"
+                                                    data-toggle="modal"
+                                                    data-target="#confirmDeleteModal"
+                                                    data-invoiceid="${value.id}">
+                                                    <button type="button" class="btn btn-danger btn-circle btn-xs">
+                                                        <i class="icon-trash"></i>
+                                                    </button>
+                                                </a>`
+                                                : `<a class="btn btn-info btn-sm"
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    href="${window.base_url}admin/invoices/print_pdf?id=${value.id}">
+                                                    Shiko PDF
+                                                </a>`
+                                            }
                                         </td>
-                                        </tr>`
+                                    </tr>`;
                             });
+
                             html += `</tbody>
                                     </table>
-                                </div>
-                            </div>`;
+                                    </div>
+                                    </div>`;
             $("#invoicesStructure").html(html);
             $("#mainDiv").hide();
             jumpToTopImmediate();
@@ -1178,6 +1275,7 @@ $(document).ready(function(){
   // Event listener for clicking on a row to load invoice details
     $(document).on("click", "#invoiceData tbody tr", function(e) {
         if (e.target.tagName === 'TD' || e.target.tagName === 'TR') {
+            if (String($(this).data('own')) === '0') return;
             invoiceId = $(this).data("id");
             loadDetailsTable(invoiceId);
         }
@@ -1194,8 +1292,13 @@ function loadDetailsTable(invoiceId) {
             $("#mainDiv").show();
             var res = JSON.parse(response);
 
+            // Kur hapet faturë tjetër, mos përdor ID-në e faturës së mëparshme.
+            $('#sales_form input#id').remove();
+            $('#sales_form').append($('<input>', {type:'hidden', id:'id', name:'id', value:res.id || invoiceId}));
+            $('#debt_client_id').val('');
             $("#client_name").val(res.client_name);
             $("#address").val(res.address);
+            $("#phone_number").val(res.phone || res.phone_number || '');
             $("#date").val(res.date);
             $("#comment").val(res.comment);
   jumpToTopImmediate();
@@ -1213,7 +1316,7 @@ function loadDetailsTable(invoiceId) {
                     <td><input type="text" class="quantity" name="quantity[]" value="${product.quantity}"></td>
                     <td><input type="text" class="price" name="price[]" value="${product.price}"></td>
                     <td><input type="text" class="total_product_price" name="total_product_price[]" value="${product.total_product_price}"></td>
-                    <td style="display:none;"><input type="text" class="id" name="id" value="${invoiceId}" hidden></td>
+                    <td style="display:none;"><input type="text" class="id" value="${invoiceId}" hidden></td>
                     <td style="display:none;"><input type="text" class="image" name="image[]" value="${product.image}" hidden></td>
                 </tr>`;
                 $("#product_rows").append(row);
@@ -1316,6 +1419,8 @@ $(document).ready(function() {
         }
 
 
+        window.validateAndSubmitForm = validateAndSubmitForm;
+
         function validateAndSubmitForm(submitType, isAjax = false, callback = null) {
              if (!isAjax && $('#id').length) {
                  // Veçse është ruajtur njëherë, thjesht printo/eksporto
@@ -1403,6 +1508,7 @@ $(document).ready(function() {
                       input.value = res.id;
                       input.id = "id";
 
+                      $('#sales_form > #id').remove();
                       document.getElementById("sales_form").appendChild(input);
 
                       if (typeof callback === 'function') {
@@ -1529,4 +1635,257 @@ $(document).ready(function() {
 
 });
 
+</script>
+
+<script>
+$(document).ready(function () {
+    var debtSearchTimer = null;
+    var debtSearchRequest = null;
+    var debtSearchSequence = 0;
+    var debtActiveIndex = -1;
+    function highlightDebtSuggestion(index) {
+        var items = $('#debtClientSuggestions .debt-client-suggestion');
+        if (!items.length) return;
+        debtActiveIndex = Math.max(0, Math.min(index, items.length - 1));
+        items.removeClass('keyboard-active').attr('aria-selected', 'false');
+        var active = items.eq(debtActiveIndex).addClass('keyboard-active').attr('aria-selected', 'true');
+        active[0].scrollIntoView({block: 'nearest'});
+    }
+    $('#client_name').on('keydown', function (e) {
+        var box = $('#debtClientSuggestions');
+        var items = box.find('.debt-client-suggestion');
+        if (e.key === 'Escape') { box.hide(); debtActiveIndex = -1; return; }
+        if (!box.is(':visible') || !items.length) return;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            highlightDebtSuggestion(e.key === 'ArrowDown' ?
+                (debtActiveIndex + 1) % items.length :
+                (debtActiveIndex < 0 ? items.length - 1 : (debtActiveIndex - 1 + items.length) % items.length));
+        } else if (e.key === 'Enter' && debtActiveIndex >= 0) {
+            e.preventDefault();
+            items.eq(debtActiveIndex).trigger('click');
+        }
+    });
+
+    $('#client_name').on('input', function () {
+        $('#debt_client_id').val('');
+        clearTimeout(debtSearchTimer);
+        debtSearchSequence++;
+        if (debtSearchRequest) debtSearchRequest.abort();
+        debtActiveIndex = -1;
+        var requestSequence = debtSearchSequence;
+        var q = $.trim($(this).val());
+        if (q.length < 2) {
+            $('#debtClientSuggestions').hide().empty();
+            return;
+        }
+        debtSearchTimer = setTimeout(function () {
+            debtSearchRequest = $.ajax({
+                url: '<?php echo base_url("admin/invoices/search_debt_clients_invoice"); ?>',
+                type: 'GET',
+                dataType: 'json',
+                data: {search: q},
+                success: function (res) {
+                    if (requestSequence !== debtSearchSequence) return;
+                    debtActiveIndex = -1;
+                    var box = $('#debtClientSuggestions').empty();
+                    if (!res || !res.length) { box.hide(); return; }
+                    $.each(res, function (_, c) {
+                        $('<div class="debt-client-suggestion"></div>')
+                            .attr('data-id', c.id)
+                            .attr('data-name', c.name || '')
+                            .attr('data-address', c.address || '')
+                            .attr('data-phone', c.phone || '')
+                            .html('<strong>' + $('<div>').text(c.name || '').html() + '</strong>' +
+                                  '<small>' + $('<div>').text((c.address || '') + ((c.phone || '') ? ' | ' + c.phone : '')).html() + '</small>')
+                            .appendTo(box);
+                    });
+                    box.show();
+                }
+            });
+        }, 250);
+    });
+
+    $(document).on('click', '.debt-client-suggestion', function () {
+        $('#debt_client_id').val($(this).data('id'));
+        $('#client_name').val($(this).attr('data-name'));
+        if ($(this).attr('data-address')) $('#address').val($(this).attr('data-address'));
+        if ($(this).attr('data-phone')) $('#phone_number').val($(this).attr('data-phone'));
+        debtActiveIndex = -1;
+        $('#debtClientSuggestions').hide().empty();
+    });
+
+    $(document).on('click', function(e){
+        if (!$(e.target).closest('#client_name,#debtClientSuggestions').length) {
+            $('#debtClientSuggestions').hide();
+        }
+    });
+
+    // Konfirmimi i detyrimit në faturën e hapur.
+    $('#debtBtn').on('click', function(e) {
+        e.preventDefault();
+        $('#confirmDebtModalMessage').text('A dëshironi ta ruani faturën dhe ta regjistroni ose përditësoni shumën e mbetur si detyrim?');
+        $('#confirmDebtModal').modal('show');
+    });
+
+    $('#confirmDebtAction').on('click', function() {
+        var $confirm = $(this), $debt = $('#debtBtn');
+        var clientId = $('#debt_client_id').val();
+        var existingId = $('#sales_form > #id').val();
+        if (!existingId && !clientId) {
+            $('#confirmDebtModal').modal('hide');
+            $('#confirmDebtModal').one('hidden.bs.modal', function() {
+                showDebtNotification('Zgjidhni klientin ekzistues nga lista e borxheve.', 'Vërejtje');
+            });
+            return;
+        }
+        $confirm.prop('disabled', true).text('Duke ruajtur...');
+        $debt.prop('disabled', true);
+        $('#confirmDebtModal').modal('hide');
+        function unlock() {
+            $confirm.prop('disabled', false).text('Po, konfirmo');
+            $debt.prop('disabled', false);
+        }
+        $(document).one('invoiceSaveFailed', unlock);
+        window.validateAndSubmitForm('ruaj_faturen', true, function() {
+            $(document).off('invoiceSaveFailed', unlock);
+            var savedId = $('#sales_form > #id').val();
+            if (!savedId) {
+                unlock();
+                showDebtNotification('Fatura nuk u ruajt. Detyrimi nuk u ndryshua.', 'Gabim');
+                return;
+            }
+            $confirm.text('Duke regjistruar...');
+            $.ajax({
+                url: window.base_url + 'admin/invoices/invoice_to_debt',
+                type: 'POST', dataType: 'json',
+                data: {invoice_id: savedId, debt_client_id: clientId},
+                success: function(res) {
+                    if (res && res.status) {
+                        if (res.client_id) $('#debt_client_id').val(res.client_id);
+                        showDebtNotification(res.message || 'Detyrimi u regjistrua me sukses.', 'Sukses');
+                    } else {
+                        showDebtNotification((res && res.message) || 'Detyrimi nuk u regjistrua.', 'Vërejtje');
+                    }
+                },
+                error: function(xhr) {
+                    showDebtNotification((xhr.responseJSON && xhr.responseJSON.message) || 'Gabim gjatë regjistrimit të detyrimit.', 'Gabim');
+                }, complete: unlock
+            });
+        });
+    });
+});
+</script>
+
+
+<div class="modal" id="invoiceDebtClientModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header"><h4 class="modal-title">Zgjidh klientin nga lista e borxheve</h4><button type="button" class="close" data-bs-dismiss="modal">&times;</button></div>
+    <div class="modal-body">
+      <p>Fatura: <strong id="debtInvoiceLabel"></strong></p>
+      <input type="text" id="invoiceDebtClientSearch" class="form-control" placeholder="Kërko emrin, adresën ose telefonin" autocomplete="off">
+      <input type="hidden" id="invoiceDebtSelectedClient" value="">
+      <div id="invoiceDebtClientResults" style="max-height:260px;overflow:auto;margin-top:10px"></div>
+      <p id="invoiceDebtSelectedLabel" style="margin-top:10px"></p>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">ANULO</button><button type="button" id="confirmInvoiceDebt" class="btn btn-danger" disabled>KONFIRMO DETYRIMIN</button></div>
+  </div></div>
+</div>
+<script>
+$(function(){
+  var pendingInvoiceId = 0, pendingInvoiceName = '', searchTimer = null;
+  var modalSearchRequest = null, modalSearchSequence = 0, modalActiveIndex = -1;
+  function highlightModalClient(index) {
+    var items = $('#invoiceDebtClientResults .invoice-debt-client-option');
+    if (!items.length) return;
+    modalActiveIndex = Math.max(0, Math.min(index, items.length - 1));
+    items.removeClass('keyboard-active').attr('aria-selected', 'false');
+    var active = items.eq(modalActiveIndex).addClass('keyboard-active').attr('aria-selected', 'true');
+    active[0].scrollIntoView({block:'nearest'});
+  }
+  $('#invoiceDebtClientSearch').on('keydown', function(e) {
+    var items = $('#invoiceDebtClientResults .invoice-debt-client-option');
+    if (e.key === 'Escape') { $('#invoiceDebtClientResults').empty(); modalActiveIndex = -1; return; }
+    if (!items.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      highlightModalClient(e.key === 'ArrowDown' ?
+        (modalActiveIndex + 1) % items.length :
+        (modalActiveIndex < 0 ? items.length - 1 : (modalActiveIndex - 1 + items.length) % items.length));
+    } else if (e.key === 'Enter' && modalActiveIndex >= 0) {
+      e.preventDefault(); items.eq(modalActiveIndex).trigger('click');
+    }
+  });
+  function safeText(v){ return $('<div>').text(v == null ? '' : String(v)).html(); }
+  $(document).on('click', '.invoice-debt-action', function(e){
+    e.preventDefault(); e.stopPropagation();
+    pendingInvoiceId = parseInt($(this).attr('data-invoiceid'), 10) || 0;
+    pendingInvoiceName = $(this).attr('data-clientname') || '';
+    $('#debtInvoiceLabel').text('#' + pendingInvoiceId + ' — ' + pendingInvoiceName);
+    $('#invoiceDebtSelectedClient').val(''); $('#invoiceDebtSelectedLabel').text('');
+    $('#confirmInvoiceDebt').prop('disabled', true);
+    $('#invoiceDebtClientSearch').val(pendingInvoiceName);
+    modalActiveIndex = -1;
+    $('#invoiceDebtClientResults').empty();
+    $('#invoiceDebtClientModal').modal('show');
+    $('#invoiceDebtClientSearch').trigger('input');
+  });
+  $('#invoiceDebtClientSearch').on('input', function(){
+    clearTimeout(searchTimer);
+    modalSearchSequence++;
+    if (modalSearchRequest) modalSearchRequest.abort();
+    modalActiveIndex = -1;
+    var requestSequence = modalSearchSequence;
+    $('#invoiceDebtSelectedClient').val(''); $('#confirmInvoiceDebt').prop('disabled', true);
+    $('#invoiceDebtSelectedLabel').text('');
+    var q = $.trim($(this).val());
+    if(q.length < 2){ $('#invoiceDebtClientResults').empty(); return; }
+    searchTimer = setTimeout(function(){
+      modalSearchRequest = $.getJSON(window.base_url + 'admin/invoices/search_debt_clients_invoice', {search:q}, function(clients){
+        if (requestSequence !== modalSearchSequence) return;
+        modalActiveIndex = -1;
+        var box = $('#invoiceDebtClientResults').empty();
+        if(!clients || !clients.length){ box.text('Nuk u gjet klient. Regjistroje fillimisht te Borxhet e Klientëve.'); return; }
+        $.each(clients, function(i, client){
+          $('<button type="button" class="btn btn-default btn-block invoice-debt-client-option"></button>')
+            .attr('data-clientid', client.id).attr('data-clientname', client.name || '')
+            .html('<strong>'+safeText(client.name)+'</strong><br><small>'+safeText(client.address)+' | '+safeText(client.phone)+'</small>')
+            .appendTo(box);
+        });
+      }).fail(function(xhr, status){ if (status !== 'abort' && requestSequence === modalSearchSequence) $('#invoiceDebtClientResults').text('Gabim gjatë kërkimit të klientëve.'); });
+    }, 250);
+  });
+  $(document).on('click', '.invoice-debt-client-option', function(){
+    var name = $(this).attr('data-clientname') || '';
+    if(name.trim().toLocaleUpperCase() !== pendingInvoiceName.trim().toLocaleUpperCase()){
+      showDebtNotification('Emri i klientit në faturë nuk përputhet me klientin e zgjedhur.', 'Vërejtje'); return;
+    }
+    $('#invoiceDebtSelectedClient').val($(this).attr('data-clientid'));
+    $('#invoiceDebtSelectedLabel').text('Klienti i zgjedhur: '+name);
+    $('#confirmInvoiceDebt').prop('disabled', false);
+    $('#invoiceDebtClientResults .invoice-debt-client-option').removeClass('keyboard-active');
+    modalActiveIndex = -1;
+  });
+  $('#confirmInvoiceDebt').on('click', function(){
+    var clientId = parseInt($('#invoiceDebtSelectedClient').val(),10) || 0;
+    if(!pendingInvoiceId || !clientId) return;
+    $('#invoiceDebtClientModal').modal('hide');
+    $('#confirmListDebtMessage').text('Konfirmon regjistrimin ose përditësimin e shumës së mbetur për faturën #' + pendingInvoiceId + '?');
+    $('#confirmListDebtModal').modal('show');
+  });
+  $('#confirmListDebtAction').on('click', function(){
+    var clientId = parseInt($('#invoiceDebtSelectedClient').val(),10) || 0;
+    if(!pendingInvoiceId || !clientId) return;
+    var button = $(this).prop('disabled', true);
+    $('#confirmListDebtModal').modal('hide');
+    $.ajax({url:window.base_url+'admin/invoices/invoice_to_debt',type:'POST',dataType:'json',
+      data:{invoice_id:pendingInvoiceId,debt_client_id:clientId},
+      success:function(res){
+        if(res && res.status){ showDebtNotification(res.message || 'Detyrimi u regjistrua.', 'Sukses'); }
+        else showDebtNotification(res && res.message ? res.message : 'Detyrimi nuk u regjistrua.', 'Vërejtje');
+      },error:function(xhr){showDebtNotification((xhr.responseJSON && xhr.responseJSON.message) || 'Gabim gjatë regjistrimit të detyrimit.', 'Gabim');},
+      complete:function(){button.prop('disabled', false);}
+    });
+  });
+});
 </script>

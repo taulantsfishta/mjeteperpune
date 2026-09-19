@@ -51,10 +51,11 @@ class User extends CI_Controller
                         $data = array(
                             'first_name' => $_POST['first_name'],
                             'password' => $this->safe_b64encode($_POST['password']),
-                            'view_category' => $_POST['role'] == 'admin' ? json_encode(["0"]) : json_encode($_POST['role_action']),
+                            'view_category' => in_array($_POST['role'], ['admin', 'sales']) ? json_encode(["0"]) : json_encode($_POST['role_action']),
                             'status' => 1,
                             'price_status' => $priceStatus,
                             'role' => $_POST['role'],
+                            'prefix_user' =>$_POST['prefix_user'],
                             'created_at' => current_datetime()
                         );
 
@@ -86,12 +87,12 @@ class User extends CI_Controller
     public function all_user_list()
     {
         if ($this->session->userdata('role') == 'admin') {
-        $_SESSION['title_name'] = 'LISTA E TË GJITHË PËRDORUESVE';
-        $data['page_title'] = 'Te gjithe perdoruesit e regjistruar';
-        $data['users'] = $this->common_model->get_all_user();
-        $data['count'] = $this->common_model->get_user_total();
-        $data['main_content'] = $this->load->view('admin/user/users', $data, TRUE);
-        $this->load->view('admin/index', $data);
+            $_SESSION['title_name'] = 'LISTA E TË GJITHË PËRDORUESVE';
+            $data['page_title'] = 'Te gjithe perdoruesit e regjistruar';
+            $data['users'] = $this->common_model->get_all_user();
+            $data['count'] = $this->common_model->get_user_total();
+            $data['main_content'] = $this->load->view('admin/user/users', $data, TRUE);
+            $this->load->view('admin/index', $data);
         }else{
             $data = array();
             $data['heading'] = 'Mesazhi';
@@ -120,6 +121,7 @@ class User extends CI_Controller
                     'view_category' => $_POST['role'] == 'admin' ? json_encode(["0"]) : json_encode($_POST['role_action']),
                     'price_status' => $priceStatus,
                     'role' => $_POST['role'],
+                    'prefix_user' => $_POST['prefix_user'],
                     'created_at' => current_datetime()
                 );
 
@@ -132,6 +134,8 @@ class User extends CI_Controller
 
             $data['user'] = $this->common_model->get_single_user_info($id);
             $data['user']->password = $this->safe_b64decode($data['user']->password);
+            $data['prefix_user'] = $this->common_model->get_prefix_user($id);
+                        log_message('error','prefix'.json_encode($data['prefix_user']));
             $data['view_category'] = json_decode($data['user']->view_category, 1);
             $data['user_role'] = $this->common_model->get_user_role($id);
             $data['power'] = $this->common_model->select('user_power');

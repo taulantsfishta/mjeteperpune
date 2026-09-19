@@ -44,80 +44,261 @@ class Invoices extends CI_Controller {
 
     }
 	 
-     public function index(){
-        if ($this->session->userdata('role') == 'admin') {
+    public function index()
+    {
+        if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
+
             $data = array();
+
             $_SESSION['title_name'] = 'KRIJO FATUREN';
             $data['page_title'] = 'KRIJO FATUREN';
-    
-        if (isset($_GET['product_name'])) {
-            $searchTerm = trim($_GET['product_name']);
 
-            if ($searchTerm === '') {
-                echo json_encode(['products' => []]);
+
+            // =====================================================
+            // KËRKIMI I PRODUKTEVE
+            // =====================================================
+            if (isset($_GET['product_name'])) {
+
+                $searchTerm = trim($_GET['product_name']);
+
+                if ($searchTerm === '') {
+                    echo json_encode(['products' => []]);
+                    return;
+                }
+
+
+                // 1) CODE ONLY
+                if (preg_match('/^[0-9\-]+$/', $searchTerm)) {
+
+                    $products = $this->db
+                        ->select('products.id,products.name,products.code,products.price,products.image')
+                        ->from('products')
+                        ->where('code', $searchTerm)
+                        ->where('is_deleted', 0)
+                        ->get()
+                        ->result_array();
+
+                }
+
+                // 2) WILDCARD
+                else if (
+                    strpos($searchTerm, '%') !== false ||
+                    strpos($searchTerm, '_') !== false
+                ) {
+
+                    $like = $searchTerm;
+
+                    if ($like[0] !== '%') {
+                        $like = '%' . $like;
+                    }
+
+                    if (substr($like, -1) !== '%') {
+                        $like = $like . '%';
+                    }
+
+
+                    $products = $this->db
+                        ->select('products.id,products.name,products.code,products.price,products.image')
+                        ->from('products')
+                        ->where(
+                            "name LIKE " . $this->db->escape($like),
+                            null,
+                            false
+                        )
+                        ->where('is_deleted', 0)
+                        ->order_by('category_id', 'ASC')
+                        ->get()
+                        ->result_array();
+
+                }
+
+                // 3) TEXT
+                else {
+
+                    $term = $searchTerm;
+
+                    $regex =
+                        '[[:<:]]' .
+                        preg_quote($term, '/') .
+                        '[[:>:]]';
+
+                    $likePrefix = $term . '%';
+
+
+                    $products = $this->db
+                        ->select('products.id,products.name,products.code,products.price,products.image')
+                        ->from('products')
+                        ->group_start()
+                            ->like('name', $term, 'after')
+                            ->or_where(
+                                "name REGEXP " .
+                                $this->db->escape($regex),
+                                null,
+                                false
+                            )
+                        ->group_end()
+                        ->where('is_deleted', 0)
+                        ->order_by(
+                            "(name LIKE " .
+                            $this->db->escape($likePrefix) .
+                            ") DESC",
+                            null,
+                            false
+                        )
+                        ->order_by(
+                            "(name REGEXP " .
+                            $this->db->escape($regex) .
+                            ") DESC",
+                            null,
+                            false
+                        )
+                        ->order_by('category_id', 'ASC')
+                        ->get()
+                        ->result_array();
+
+                }
+
+
+                echo json_encode([
+                    'products' => $products
+                ]);
+
                 return;
             }
 
-            // 1) CODE-ONLY (digits and dashes) → exact code
-            if (preg_match('/^[0-9\-]+$/', $searchTerm)) {
-                $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')
-                    ->from('products')
-                    ->where('code', $searchTerm)
-                    ->where('is_deleted', 0)
-                    ->get()->result_array();
 
-            // 2) USER PROVIDED WILDCARD (% or _) → use LIKE (REPLACE YOUR OLD REGEXP BLOCK WITH THIS)
-            } else if (strpos($searchTerm, '%') !== false || strpos($searchTerm, '_') !== false) {
-                $like = $searchTerm;
+            // =====================================================
+            // PRODUKTET QË VIJNË NGA SHPORTA
+            // =====================================================
 
-                // normalize so "%set" / "set%" behave like "contains" unless user explicitly set both
-                if ($like[0] !== '%')                $like = '%' . $like;
-                if (substr($like, -1) !== '%')       $like = $like . '%';
+            $data['cart_products'] = [];
 
-                $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')
-                    ->from('products')
-                    ->where("name LIKE " . $this->db->escape($like), null, false)
-                    ->where('is_deleted', 0)
-                    ->order_by('category_id', 'ASC')
-                    ->get()->result_array();
 
-            // 3) PLAIN TEXT → start-with OR whole-word anywhere
-            } else {
-                $term  = $searchTerm;
-                $regex = '[[:<:]]' . preg_quote($term, '/') . '[[:>:]]'; // word boundary
-                $likePrefix = $term . '%';
+            if ($this->input->get('from_cart') == '1') {
 
-                $products = $this->db->select('products.id,products.name,products.code,products.price,products.image')
-                    ->from('products')
-                    ->group_start()
-                        ->like('name', $term, 'after') // starts with
-                        ->or_where("name REGEXP " . $this->db->escape($regex), null, false) // whole word anywhere
-                    ->group_end()
-                    ->where('is_deleted', 0)
-                    // rank: prefix first, then whole-word, then shorter names, then name asc
-                    ->order_by("(name LIKE " . $this->db->escape($likePrefix) . ") DESC", null, false)
-                    ->order_by("(name REGEXP " . $this->db->escape($regex) . ") DESC", null, false)
-                    ->order_by('category_id', 'ASC')
-                    ->get()->result_array();
+                $cart = $this->session->userdata('shopping_cart');
+
+
+                if (is_array($cart) && !empty($cart)) {
+
+                    foreach ($cart as $item) {
+
+                        $productId = isset($item['id'])
+                            ? $item['id']
+                            : null;
+
+
+                        // Merre fotografinë nga DB
+                        $product = null;
+
+                        if ($productId) {
+
+                            $product = $this->db
+                                ->select('image')
+                                ->from('products')
+                                ->where('id', $productId)
+                                ->get()
+                                ->row_array();
+
+                        }
+
+
+                        $quantity =
+                            isset($item['quantity'])
+                            ? (float)$item['quantity']
+                            : 0;
+
+
+                        $price =
+                            isset($item['price'])
+                            ? (float)$item['price']
+                            : 0;
+
+
+                        $data['cart_products'][] = [
+
+                            'id' => $productId,
+
+                            'name' =>
+                                isset($item['name'])
+                                ? $item['name']
+                                : '',
+
+                            'code' =>
+                                isset($item['code'])
+                                ? $item['code']
+                                : '',
+
+                            'quantity' => $quantity,
+
+                            'price' => $price,
+
+                            'total' =>
+                                $quantity * $price,
+
+                            'image' =>
+                                isset($product['image'])
+                                ? $product['image']
+                                : ''
+
+                        ];
+
+                    }
+
+                }
+
+
+                // =================================================
+                // SHPORTA KA MBËRRITUR TE FATURA
+                // TANI MUND TA FSHIJMË NGA SESSION
+                // =================================================
+
+                $this->session->unset_userdata(
+                    'shopping_cart'
+                );
+
             }
 
-            echo json_encode(['products' => $products]);
-            return;
+
+            // =====================================================
+            // LOAD VIEW
+            // =====================================================
+
+            $data['main_content'] =
+                $this->load->view(
+                    'admin/add-invoice',
+                    $data,
+                    TRUE
+                );
+
+
+            $this->load->view(
+                'admin/index',
+                $data
+            );
+
         }
 
-    
-            $data['main_content'] = $this->load->view('admin/add-invoice', $data, TRUE);
-            $this->load->view('admin/index', $data);
-        } else {
+        else {
+
             $data = array();
+
             $data['heading'] = 'Mesazhi';
-            $data['message'] = "Nuk keni qasje ne kete faqe";
-            $this->load->view('errors/html/error_404', $data);
+
+            $data['message'] =
+                'Nuk keni qasje ne kete faqe';
+
+
+            $this->load->view(
+                'errors/html/error_404',
+                $data
+            );
+
         }
     }
 
     public function sheet_invoice(){
-        if ($this->session->userdata('role') == 'admin') {
+        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
             // Validate POST data existence
             if (isset($_POST['date'], $_POST['product_name'], $_POST['code'], $_POST['quantity'], $_POST['price'], $_POST['total_product_price'], $_POST['total_price_invoice'])) {
                 // Get form data
@@ -125,6 +306,7 @@ class Invoices extends CI_Controller {
                 $address = $_POST['address'];
                 $date = $_POST['date'];
                 $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
+                $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
                 $product_names = $_POST['product_name'];
                 $codes = $_POST['code'];
                 $quantities = $_POST['quantity'];
@@ -136,11 +318,7 @@ class Invoices extends CI_Controller {
                 $final_sum_to_pay = $_POST['total_price_left_invoice'] != '' ? number_format($_POST['total_price_left_invoice'],2, '.', '') : '0.00';
 
                 $_POST['adminID'] = $this->session->userdata('id');
-                if($this->session->userdata('name') == 'Admin'){
-                    $adminName = 'FK';
-                }else if($this->session->userdata('name') == 'Adminpz'){
-                    $adminName = 'TR';
-                }
+                $adminName = $this->session->userdata('prefix_user');
                 // Create new PDF document
                 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
                 $drawing = new Drawing();
@@ -235,21 +413,24 @@ class Invoices extends CI_Controller {
                     $spreadsheet = new Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
 
-                    // === HEADER INFO ===
                     $sheet->setCellValue('A1', 'FATURA:');
                     $sheet->setCellValue('B1', $adminName . '-' . $clientInvoice['id']);
+
                     $sheet->setCellValue('A2', 'KLIENTI:');
                     $sheet->setCellValue('B2', $client_name);
+
                     $sheet->setCellValue('A3', 'ADRESA:');
                     $sheet->setCellValue('B3', $address);
-                    $sheet->setCellValue('A4', 'DATA:');
-                    $sheet->setCellValue('B4', $date);
 
-                    // Bold header labels
-                    $sheet->getStyle('A1:A4')->getFont()->setBold(true);
+                    $sheet->setCellValue('A4', 'TELEFONI:');
+                    $sheet->setCellValue('B4', $phone);
 
-                    // === TABLE HEADER ===
-                    $headerRow = 6;
+                    $sheet->setCellValue('A5', 'DATA:');
+                    $sheet->setCellValue('B5', $date);
+
+                    $sheet->getStyle('A1:A5')->getFont()->setBold(true);
+
+                    $headerRow = 7;
                     $sheet->fromArray(
                         ['#', 'KODI', 'EMRI I PRODUKTIT', 'SASIA', 'ÇMIMI', 'TOTALI'],
                         null,
@@ -444,6 +625,7 @@ class Invoices extends CI_Controller {
         $newRowData = [];
         $data['client_name'] = strtoupper($dataClientInvoice['client_name']);
         $data['address'] = strtoupper($dataClientInvoice['address']);
+        $data['phone'] = isset($dataClientInvoice['phone'])? trim($dataClientInvoice['phone']): '';
         $data['date'] = $dataClientInvoice['date'];
         $data['comment'] = $dataClientInvoice['comment'];
         $data['total_price_invoice'] = $dataClientInvoice['total_price_invoice'];
@@ -453,21 +635,21 @@ class Invoices extends CI_Controller {
         $data['total_product_price'] = $dataClientInvoice['total_product_price'];
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
-            log_message('error', 'newRowData1111: '.$value);
             $newRowData[] = ['product_name' => strtoupper($value),'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image'=>$dataClientInvoice['image'][$key]];
         }
 
         $insertData = [
-                'user_id' => $data['adminID'],
-                'client_name' => $data['client_name'],
-                'address' => $data['address'],
-                'date' => $data['date'],
-                'total_price_invoice' => $data['total_price_invoice'],
-                'prepayment_price_invoice' => $data['prepayment_price_invoice'],
-                'total_price_left_invoice' => $data['total_price_left_invoice'],
-                'row_data' => json_encode($newRowData),
-                'comment' => $data['comment'],
-                'created_at' => current_datetime(),
+            'user_id' => $data['adminID'],
+            'client_name' => $data['client_name'],
+            'address' => $data['address'],
+            'phone' => $data['phone'],
+            'date' => $data['date'],
+            'total_price_invoice' => $data['total_price_invoice'],
+            'prepayment_price_invoice' => $data['prepayment_price_invoice'],
+            'total_price_left_invoice' => $data['total_price_left_invoice'],
+            'row_data' => json_encode($newRowData),
+            'comment' => $data['comment'],
+            'created_at' => current_datetime(),
         ];
         $this->common_model->insert($insertData, 'invoices');
         $lastIdOfInvoice = $this->db->select('id')->from('invoices')->order_by('id', 'desc')->limit(1)->get()->row_array();
@@ -479,6 +661,7 @@ class Invoices extends CI_Controller {
         $newRowData = [];
         $data['client_name'] = strtoupper($dataClientInvoice['client_name']);
         $data['address'] = strtoupper($dataClientInvoice['address']);
+        $data['phone'] = isset($dataClientInvoice['phone'])? trim($dataClientInvoice['phone']) : '';
         $data['date'] = $dataClientInvoice['date'];
         $data['total_price_invoice'] = $dataClientInvoice['total_price_invoice'];
         $data['comment'] = $dataClientInvoice['comment'];
@@ -491,34 +674,87 @@ class Invoices extends CI_Controller {
         }
 
         $updateData = [
-                'user_id' => $data['adminID'],
-                'client_name' => $data['client_name'],
-                'address' => $data['address'],
-                'date' => $data['date'],
-                'total_price_invoice' => $data['total_price_invoice'],
-                'prepayment_price_invoice' => $data['prepayment_price_invoice'],
-                'total_price_left_invoice' => $data['total_price_left_invoice'],
-                'row_data' => json_encode($newRowData),
-                'comment' => $data['comment'],
-                'created_at' => current_datetime(),
+            'user_id' => $data['adminID'],
+            'client_name' => $data['client_name'],
+            'address' => $data['address'],
+            'phone' => $data['phone'],
+            'date' => $data['date'],
+            'total_price_invoice' => $data['total_price_invoice'],
+            'prepayment_price_invoice' => $data['prepayment_price_invoice'],
+            'total_price_left_invoice' => $data['total_price_left_invoice'],
+            'row_data' => json_encode($newRowData),
+            'comment' => $data['comment'],
+            'created_at' => current_datetime(),
         ];
         $data = $this->security->xss_clean($data);
+        $original = $this->db->where('id', (int)$dataClientInvoice['id'])->get('invoices')->row_array();
+        if (!$original || (int)$original['user_id'] !== (int)$this->session->userdata('id')) { show_error('Nuk keni qasje për të ndryshuar këtë faturë.', 403); return []; }
+        $updateData['user_id'] = $original['user_id'];
         $this->common_model->edit_option($updateData, $dataClientInvoice['id'], 'invoices');
         return ['id' => $dataClientInvoice['id']];
     }
 
+    private function attach_invoice_debt_status($invoices)
+    {
+        if (!$invoices) return $invoices;
+        $ids = array_map('intval', array_column($invoices, 'id'));
+        $linked = [];
+        if ($this->db->field_exists('invoice_id', 'debt_transactions')) {
+            $rows = $this->db->select('invoice_id')->where_in('invoice_id', $ids)
+                ->where('type', 'debt')->get('debt_transactions')->result_array();
+            foreach ($rows as $row) $linked[(int)$row['invoice_id']] = true;
+        }
+        // Për instalimet e vjetra pa kolonën invoice_id, përdor shënuesin e saktë.
+        $rows = $this->db->select('description')->where('type', 'debt')
+            ->like('description', 'FATURA_ID:', 'after')->get('debt_transactions')->result_array();
+        foreach ($rows as $row) {
+            if (preg_match('/^FATURA_ID:(\d+)(?!\d)/', (string)$row['description'], $m)) {
+                $linked[(int)$m[1]] = true;
+            }
+        }
+        foreach ($invoices as &$invoice) {
+            $invoice['is_debt'] = isset($linked[(int)$invoice['id']]) ? 1 : 0;
+        }
+        unset($invoice);
+        return $invoices;
+    }
+
+    // Filtri i faturave sipas përdoruesit: vetëm administratori mund të zgjedhë admin/sales.
+    private function invoice_selected_user()
+    {
+        $ownId = (int) $this->session->userdata('id');
+        if ($this->session->userdata('role') !== 'admin') return $ownId;
+        $requested = (int) $this->input->get('invoice_user_id');
+        if ($requested <= 0 || $requested === $ownId) return $ownId;
+        $table = 'user';
+        $account = $this->db->select('id')->where('id', $requested)
+            ->where_in('role', ['admin', 'sales'])->get($table)->row_array();
+        return $account ? $requested : $ownId;
+    }
+
+    private function invoice_user_options()
+    {
+        // Emri i përdoruesit ruhet në user.first_name.
+        return $this->db->select('id, first_name AS display_name')
+            ->from('user')
+            ->where_in('role', ['admin', 'sales'])
+            ->order_by('first_name', 'ASC')
+            ->get()->result_array();
+    }
+
     public function created(){
-        if ($this->session->userdata('role') == 'admin') {
+        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
             $_SESSION['title_name'] = 'FATURAT E KRIJUARA';
             $data['page_title'] = 'FATURAT E KRIJUARA';
-            $invoicesCreated = $this->db->select('*')->from('invoices')->where('user_id',$this->session->userdata('id'))->order_by('created_at', 'desc')->get()->result_array();
-            if($this->session->userdata('name') == 'Admin'){
-                $adminName = 'FK';
-            }else if($this->session->userdata('name') == 'Adminpz'){
-                $adminName = 'TR';
-            }
-            $data['adminName'] = $adminName;
-            $data['invoicesCreated'] = $invoicesCreated;
+            $selectedUserId = $this->invoice_selected_user();
+            $invoicesCreated = $this->db->select('*')->from('invoices')->where('user_id', $selectedUserId)->order_by('created_at', 'desc')->get()->result_array();
+            $data['invoiceSelectedUserId'] = $selectedUserId;
+            $data['invoiceOwnUserId'] = (int) $this->session->userdata('id');
+            $data['invoiceUserOptions'] = $this->session->userdata('role') === 'admin' ? $this->invoice_user_options() : [];
+            $data['invoiceIsAdmin'] = $this->session->userdata('role') === 'admin';
+
+            $data['adminName'] = $this->session->userdata('prefix_user');
+            $data['invoicesCreated'] = $this->attach_invoice_debt_status($invoicesCreated);
             $data['main_content'] = $this->load->view('admin/invoices', $data, TRUE);
             $this->load->view('admin/index', $data);
         } else {
@@ -530,11 +766,13 @@ class Invoices extends CI_Controller {
     }
 
     public function get_invoice_data(){
-        if ($this->session->userdata('role') == 'admin') {
+        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
                 $data = array();
                 $_SESSION['title_name'] = 'FATURA';
                 $data['page_title'] = 'FATURA';
-                $invoiceData = $this->db->select('*')->from('invoices')->where('id', $_GET['id'])->get()->row_array();  
+                $query = $this->db->select('*')->from('invoices')->where('id', (int)$this->input->get('id'));
+                if ($this->session->userdata('role') !== 'admin') $query->where('user_id', (int)$this->session->userdata('id'));
+                $invoiceData = $query->get()->row_array();  
                 echo json_encode($invoiceData);  
                 return;
         } else {
@@ -547,10 +785,10 @@ class Invoices extends CI_Controller {
 
 
     public function get_invoices(){
-        if ($this->session->userdata('role') == 'admin') {
+        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
                 $data = array();
-                $invoiceData = $this->db->select('*')->from('invoices')->where('user_id',$this->session->userdata('id'))->order_by('created_at', 'desc')->get()->result_array();
-                echo json_encode($invoiceData);  
+                $invoiceData = $this->db->select('*')->from('invoices')->where('user_id', $this->invoice_selected_user())->order_by('created_at', 'desc')->get()->result_array();
+                echo json_encode($this->attach_invoice_debt_status($invoiceData));  
                 return;
         } else {
             $data = array();
@@ -563,7 +801,9 @@ class Invoices extends CI_Controller {
     
     public function delete_invoice($invoiceId)
     {
-        if ($this->session->userdata('role') == 'admin') {
+        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
+            $invoiceToDelete = $this->db->where('id', (int)$invoiceId)->get('invoices')->row_array();
+            if (!$invoiceToDelete || ($this->session->userdata('role') !== 'admin' && (int)$invoiceToDelete['user_id'] !== (int)$this->session->userdata('id'))) { show_404(); return; }
             $this->common_model->delete($invoiceId, 'invoices');
             $categories = $this->db->select()->from('invoices')->get()->result_array();
             $_SESSION['invoices'] = $categories;
@@ -593,7 +833,7 @@ class Invoices extends CI_Controller {
 
     public function print_pdf()
         {
-            if ($this->session->userdata('role') != 'admin') {
+            if (in_array($this->session->userdata('role'), ['user'])) {
                 show_404();
             }
 
@@ -608,8 +848,8 @@ class Invoices extends CI_Controller {
                 ->get()
                 ->row_array();
 
-            if (!$invoice) {
-                show_404();
+            if (!$invoice || ($this->session->userdata('role') !== 'admin' && (int)$invoice['user_id'] !== (int)$this->session->userdata('id'))) {
+                show_404(); return;
             }
 
             // dekodo rreshtat
@@ -618,20 +858,16 @@ class Invoices extends CI_Controller {
             // emrat nga DB
             $client_name = $invoice['client_name'];
             $address     = $invoice['address'];
+            $phone     = $invoice['phone'];
             $date        = $invoice['date'];
             $comment     = $invoice['comment'];
+            $phone       = isset($invoice['phone']) ? $invoice['phone'] : '';
             $total_sum   = $invoice['total_price_invoice'];
             $prepayment  = $invoice['prepayment_price_invoice'];
             $final_sum_to_pay = $invoice['total_price_left_invoice'];
 
             // admin short code
-            if($this->session->userdata('name') == 'Admin'){
-                $adminName = 'FK';
-            } else if($this->session->userdata('name') == 'Adminpz'){
-                $adminName = 'TR';
-            } else {
-                $adminName = '';
-            }
+            $adminName = $this->session->userdata('prefix_user');
 
             // TCPDF setup (njësoj si tek sheet_invoice më herët)
             $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -654,12 +890,18 @@ class Invoices extends CI_Controller {
 
             $pdf->AddPage();
 
-            // nderto HTML nga te dhenat ne DB
             $html = '
                 <h1>FATURA: '.$adminName.'-'.$invoice['id'].'</h1>
                 <p><strong>KLIENTI:</strong> ' . strtoupper($client_name) . '</p>
-                <p><strong>ADRESA:</strong> ' . strtoupper($address) . '</p>
+                <p><strong>ADRESA:</strong> ' . strtoupper($address) . '</p>';
+
+            if (!empty($phone)) {
+                $html .= '<p><strong>TELEFONI:</strong> ' . htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') . '</p>';
+            }
+
+            $html .= '
                 <p><strong>DATA:</strong> ' . htmlspecialchars($date) . '</p>
+                <style>
                 <style>
                     table {
                         width: 100%;
@@ -745,7 +987,7 @@ class Invoices extends CI_Controller {
 
     public function print_product_invoice($productId)
     {
-        if ($this->session->userdata('role') == 'admin') {
+        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
             $product = $this->db->select('id, name, code, price, image')->from('products')->where('id', $productId)->get()->row_array();
             if (!$product) {
                 show_404();
@@ -753,6 +995,7 @@ class Invoices extends CI_Controller {
 
                 $products['client_name'] = 'QYTETAR';
                 $products['address'] = 'KOSOVE';
+                $products['phone'] = '';
                 $products['date'] = current_datetime();
                 $products['comment'] = '';
                 $products['product_name'][] = $product['name'];
@@ -771,11 +1014,7 @@ class Invoices extends CI_Controller {
 
                 $products['adminID'] = $this->session->userdata('id');
 
-                if($this->session->userdata('name') == 'Admin'){
-                    $adminName = 'FK';
-                }else if($this->session->userdata('name') == 'Adminpz'){
-                    $adminName = 'TR';
-                }
+                $adminName = $this->session->userdata('prefix_user');
                 // Create new PDF document
                 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
                 $drawing = new Drawing();
@@ -862,4 +1101,1329 @@ class Invoices extends CI_Controller {
 
         }   
     }
+
+    public function debt_invoices()
+    {
+        if ($this->session->userdata('role') != 'admin') {
+
+            $data['heading'] = 'Mesazhi';
+            $data['message'] = 'Nuk keni qasje ne kete faqe';
+
+            $this->load->view(
+                'errors/html/error_404',
+                $data
+            );
+
+            return;
+        }
+
+
+        $_SESSION['title_name'] = 'DETYRIMET E KLIENTEVE';
+
+
+        /*
+        * SEARCH
+        */
+        $search = trim(
+            $this->input->get('search', true)
+        );
+
+
+        $this->db->select("
+            debt_clients.*,
+
+            COALESCE(
+                SUM(
+                    CASE
+
+                        WHEN debt_transactions.type = 'debt'
+                        THEN debt_transactions.amount
+
+                        WHEN debt_transactions.type = 'payment'
+                        THEN -debt_transactions.amount
+
+                        ELSE 0
+
+                    END
+                ),
+                0
+            ) AS total_debt
+        ");
+
+
+        $this->db->from('debt_clients');
+
+
+        $this->db->join(
+            'debt_transactions',
+            'debt_transactions.client_id = debt_clients.id',
+            'left'
+        );
+
+
+        /*
+        * Kërko sipas emrit ose adresës
+        */
+        if ($search != '') {
+
+            $this->db->group_start();
+
+            $this->db->like(
+                'debt_clients.name',
+                $search
+            );
+
+            $this->db->or_like(
+                'debt_clients.address',
+                $search
+            );
+
+            $this->db->group_end();
+        }
+
+
+        $this->db->group_by(
+            'debt_clients.id'
+        );
+
+
+        $this->db->order_by(
+            'debt_clients.name',
+            'ASC'
+        );
+
+
+        $data['clients'] = $this->db
+            ->get()
+            ->result_array();
+
+
+        $data['search'] = $search;
+
+        $data['page_title'] =
+            'LISTA E KLIENTEVE';
+
+
+        $data['main_content'] =
+            $this->load->view(
+                'admin/debt-invoices',
+                $data,
+                TRUE
+            );
+
+
+        $this->load->view(
+            'admin/index',
+            $data
+        );
+    }
+
+    public function add_debt_client()
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        if ($this->input->post()) {
+
+            $name = trim($this->input->post('name'));
+            $address = trim($this->input->post('address'));
+            $phone = trim($this->input->post('phone'));
+            $initialDebt = (float) $this->input->post('initial_debt');
+
+            if ($name == '') {
+                $this->session->set_flashdata(
+                    'error',
+                    'Emri i klientit është i obligueshëm.'
+                );
+
+                redirect('admin/invoices/add_debt_client');
+                return;
+            }
+
+            $clientData = [
+                'name' => strtoupper($name),
+                'address' => $address ?: null,
+                'phone' => $phone ?: null
+            ];
+
+            $this->db->insert('debt_clients', $clientData);
+
+            $clientId = $this->db->insert_id();
+
+            if ($initialDebt > 0) {
+
+                $this->db->insert('debt_transactions', [
+                    'client_id' => $clientId,
+                    'type' => 'debt',
+                    'amount' => $initialDebt,
+                    'description' => 'Detyrim fillestar'
+                ]);
+            }
+
+            redirect('admin/invoices/debt_client/' . $clientId);
+            return;
+        }
+
+        $data['page_title'] = 'SHTO KLIENT';
+
+        $data['main_content'] = $this->load->view(
+            'admin/add-debt-client',
+            $data,
+            TRUE
+        );
+
+        $this->load->view('admin/index', $data);
+    }
+
+    public function debt_client($clientId)
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        // Klienti
+        $client = $this->db
+            ->where('id', $clientId)
+            ->get('debt_clients')
+            ->row_array();
+
+        if (!$client) {
+            show_404();
+            return;
+        }
+
+        // Merr vetëm 10 transaksionet e para
+        $transactions = $this->db
+            ->where('client_id', $clientId)
+            ->order_by('id', 'DESC')
+            ->limit(10)
+            ->get('debt_transactions')
+            ->result_array();
+
+        // Numri total i transaksioneve
+        $totalTransactions = $this->db
+            ->where('client_id', $clientId)
+            ->count_all_results('debt_transactions');
+
+        // Llogarit detyrimin total nga TË GJITHA transaksionet
+        $this->db->select("
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN type = 'debt'
+                        THEN amount
+
+                        WHEN type = 'payment'
+                        THEN -amount
+
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS total
+        ");
+
+        $total = $this->db
+            ->where('client_id', $clientId)
+            ->get('debt_transactions')
+            ->row_array();
+
+        // Data për view
+        $data['client'] = $client;
+        $data['transactions'] = $transactions;
+        $data['total_debt'] = $total['total'];
+        $data['total_transactions'] = $totalTransactions;
+        $data['per_page'] = 10;
+
+        $data['page_title'] = $client['name'];
+
+        $data['main_content'] = $this->load->view(
+            'admin/debt-client-details',
+            $data,
+            TRUE
+        );
+
+        $this->load->view(
+            'admin/index',
+            $data
+        );
+    }
+
+    public function add_debt_transaction($clientId)
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $type = $this->input->post('type');
+
+        $amount = (float) $this->input->post('amount');
+
+        $description = trim(
+            $this->input->post('description')
+        );
+
+
+        if (
+            !in_array($type, ['debt', 'payment']) ||
+            $amount <= 0
+        ) {
+
+            $this->session->set_flashdata(
+                'error',
+                'Të dhënat nuk janë valide.'
+            );
+
+            redirect(
+                'admin/invoices/debt_client/' . $clientId
+            );
+
+            return;
+        }
+
+
+        $this->db->insert(
+            'debt_transactions',
+            [
+                'client_id' => $clientId,
+                'type' => $type,
+                'amount' => $amount,
+                'description' => $description ?: null
+            ]
+        );
+
+
+        redirect(
+            'admin/invoices/debt_client/' . $clientId
+        );
+    }
+
+    public function delete_debt_client($clientId)
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $this->db
+            ->where('id', $clientId)
+            ->delete('debt_clients');
+
+        redirect('admin/invoices/debt_invoices');
+    }
+
+    public function search_debt_clients()
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+
+        $search = trim(
+            $this->input->get('search', true)
+        );
+
+
+        $this->db->select("
+            debt_clients.*,
+
+            COALESCE(
+                SUM(
+                    CASE
+
+                        WHEN debt_transactions.type = 'debt'
+                        THEN debt_transactions.amount
+
+                        WHEN debt_transactions.type = 'payment'
+                        THEN -debt_transactions.amount
+
+                        ELSE 0
+
+                    END
+                ),
+                0
+            ) AS total_debt
+        ");
+
+
+        $this->db->from('debt_clients');
+
+
+        $this->db->join(
+            'debt_transactions',
+            'debt_transactions.client_id = debt_clients.id',
+            'left'
+        );
+
+
+        if ($search != '') {
+
+            $this->db->group_start();
+
+            // Kërko sipas emrit
+            $this->db->like(
+                'debt_clients.name',
+                $search
+            );
+
+            // Kërko sipas adresës
+            $this->db->or_like(
+                'debt_clients.address',
+                $search
+            );
+
+            // Kërko sipas numrit të telefonit
+            $this->db->or_like(
+                'debt_clients.phone',
+                $search
+            );
+
+            $this->db->group_end();
+        }
+
+
+        $this->db->group_by(
+            'debt_clients.id'
+        );
+
+
+        $this->db->order_by(
+            'debt_clients.name',
+            'ASC'
+        );
+
+
+        $clients = $this->db
+            ->get()
+            ->result_array();
+
+
+        if (!empty($clients)) {
+
+            foreach ($clients as $client) {
+
+                ?>
+
+                <tr
+                    class="clickable-row"
+                    data-href="<?php echo base_url(
+                        'admin/invoices/debt_client/' . $client['id']
+                    ); ?>"
+                    style="cursor:pointer;"
+                >
+
+                    <td data-label="ID">
+
+                        <?php echo $client['id']; ?>
+
+                    </td>
+
+
+                    <td data-label="Emri i Klientit">
+
+                        <span class="client-name">
+
+                            <?php echo htmlspecialchars(
+                                $client['name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>
+
+                        </span>
+
+                    </td>
+
+
+                    <td data-label="Detyrimi Total">
+
+                        <span class="debt-amount">
+
+                            <?php echo number_format(
+                                (float)$client['total_debt'],
+                                2,
+                                '.',
+                                ','
+                            ); ?> €
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+                <?php
+            }
+
+        } else {
+
+            ?>
+
+            <tr>
+
+                <td
+                    colspan="3"
+                    class="text-center"
+                    style="padding:30px;"
+                >
+
+                    Nuk u gjet asnjë klient.
+
+                </td>
+
+            </tr>
+
+            <?php
+        }
+    }
+
+    public function print_debt_pdf($clientId)
+    {
+        if ($this->session->userdata('role') != 'admin') {
+
+            $data = array();
+
+            $data['heading'] = 'Mesazhi';
+
+            $data['message'] =
+                'Nuk keni qasje ne kete faqe';
+
+            $this->load->view(
+                'errors/html/error_404',
+                $data
+            );
+
+            return;
+        }
+
+
+        /*
+        * KLIENTI
+        */
+        $client = $this->db
+            ->where('id', $clientId)
+            ->get('debt_clients')
+            ->row_array();
+
+
+        if (!$client) {
+
+            show_404();
+
+            return;
+        }
+
+
+        /*
+        * TRANSAKSIONET
+        *
+        * ASC sepse në PDF historia lexohet
+        * nga transaksioni më i vjetër tek më i riu.
+        */
+        $transactions = $this->db
+            ->where('client_id', $clientId)
+            ->order_by('id', 'ASC')
+            ->get('debt_transactions')
+            ->result_array();
+
+
+        /*
+        * LLOGARIT DETYRIMI AKTUAL
+        */
+        $this->db->select("
+            COALESCE(
+                SUM(
+                    CASE
+
+                        WHEN type = 'debt'
+                        THEN amount
+
+                        WHEN type = 'payment'
+                        THEN -amount
+
+                        ELSE 0
+
+                    END
+                ),
+                0
+            ) AS total
+        ");
+
+
+        $totalData = $this->db
+            ->where('client_id', $clientId)
+            ->get('debt_transactions')
+            ->row_array();
+
+
+        $totalDebt = (float) $totalData['total'];
+
+
+        /*
+        * TCPDF
+        */
+        $pdf = new TCPDF(
+            PDF_PAGE_ORIENTATION,
+            PDF_UNIT,
+            PDF_PAGE_FORMAT,
+            true,
+            'UTF-8',
+            false
+        );
+
+
+        /*
+        * DOCUMENT INFO
+        */
+        $pdf->SetCreator(PDF_CREATOR);
+
+        $pdf->SetAuthor('MJETEPERPUNE');
+
+        $pdf->SetTitle(
+            'HISTORIA E DETYRIMIT - ' . $client['name']
+        );
+
+        $pdf->SetSubject(
+            'HISTORIA E DETYRIMIT'
+        );
+
+
+        /*
+        * HEADER / FOOTER
+        */
+        $pdf->setHeaderFont(
+            array(
+                PDF_FONT_NAME_MAIN,
+                '',
+                PDF_FONT_SIZE_MAIN
+            )
+        );
+
+
+        $pdf->setFooterFont(
+            array(
+                PDF_FONT_NAME_DATA,
+                '',
+                PDF_FONT_SIZE_DATA
+            )
+        );
+
+
+        /*
+        * FONT
+        */
+        $pdf->SetDefaultMonospacedFont(
+            PDF_FONT_MONOSPACED
+        );
+
+
+        /*
+        * MARGINS
+        */
+        $pdf->SetMargins(
+            PDF_MARGIN_LEFT,
+            PDF_MARGIN_TOP,
+            PDF_MARGIN_RIGHT
+        );
+
+
+        $pdf->SetHeaderMargin(
+            PDF_MARGIN_HEADER
+        );
+
+
+        $pdf->SetFooterMargin(
+            PDF_MARGIN_FOOTER
+        );
+
+
+        /*
+        * PAGE BREAK
+        */
+        $pdf->SetAutoPageBreak(
+            TRUE,
+            PDF_MARGIN_BOTTOM
+        );
+
+
+        /*
+        * IMAGE SCALE
+        */
+        $pdf->setImageScale(
+            PDF_IMAGE_SCALE_RATIO
+        );
+
+
+        /*
+        * FONT QË MBËSHTET Ë / Ç
+        */
+        $pdf->SetFont(
+            'dejavusans',
+            '',
+            10
+        );
+
+
+        /*
+        * ADD PAGE
+        */
+        $pdf->AddPage();
+
+
+        /*
+        * ESCAPE CLIENT DATA
+        */
+        $clientName = htmlspecialchars(
+            $client['name'],
+            ENT_QUOTES,
+            'UTF-8'
+        );
+
+
+        $address = !empty($client['address'])
+            ? htmlspecialchars(
+                $client['address'],
+                ENT_QUOTES,
+                'UTF-8'
+            )
+            : '-';
+
+
+        $phone = !empty($client['phone'])
+            ? htmlspecialchars(
+                $client['phone'],
+                ENT_QUOTES,
+                'UTF-8'
+            )
+            : '-';
+
+
+        /*
+        * HTML
+        */
+        $html = '
+
+            <h2 style="text-align:center;">
+                HISTORIA E DETYRIMIT
+            </h2>
+
+            <br>
+
+            <table cellpadding="5">
+
+                <tr>
+                    <td width="20%">
+                        <strong>KLIENTI:</strong>
+                    </td>
+
+                    <td width="80%">
+                        ' . $clientName . '
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>ADRESA:</strong>
+                    </td>
+
+                    <td>
+                        ' . $address . '
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>TELEFONI:</strong>
+                    </td>
+
+                    <td>
+                        ' . $phone . '
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>DATA:</strong>
+                    </td>
+
+                    <td>
+                        ' . date('d.m.Y') . '
+                    </td>
+                </tr>
+
+            </table>
+
+            <br><br>
+
+
+            <table
+                border="1"
+                cellpadding="6"
+                cellspacing="0"
+            >
+
+                <thead>
+
+                    <tr
+                        style="
+                            background-color:#eeeeee;
+                            font-weight:bold;
+                        "
+                    >
+
+                        <th width="7%" align="center">
+                            #
+                        </th>
+
+                        <th width="18%">
+                            DATA
+                        </th>
+
+                        <th width="15%">
+                            LLOJI
+                        </th>
+
+                        <th width="40%">
+                            PËRSHKRIMI
+                        </th>
+
+                        <th width="20%" align="right">
+                            SHUMA
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+        ';
+
+
+        /*
+        * TRANSAKSIONET
+        */
+        $nr = 1;
+
+        foreach ($transactions as $transaction) {
+
+            $description = htmlspecialchars(
+                $transaction['description'] ?? '',
+                ENT_QUOTES,
+                'UTF-8'
+            );
+
+
+            $date = date(
+                'd.m.Y',
+                strtotime(
+                    $transaction['created_at']
+                )
+            );
+
+
+            if ($transaction['type'] == 'debt') {
+
+                $type = 'DETYRIM';
+
+                $amount =
+                    '+ ' .
+                    number_format(
+                        (float)$transaction['amount'],
+                        2,
+                        '.',
+                        ','
+                    ) .
+                    ' €';
+
+            } else {
+
+                $type = 'PAGESË';
+
+                $amount =
+                    '- ' .
+                    number_format(
+                        (float)$transaction['amount'],
+                        2,
+                        '.',
+                        ','
+                    ) .
+                    ' €';
+            }
+
+
+            $html .= '
+
+                <tr>
+
+                    <td
+                        width="7%"
+                        align="center"
+                    >
+                        ' . $nr . '
+                    </td>
+
+                    <td width="18%">
+                        ' . $date . '
+                    </td>
+
+                    <td width="15%">
+                        ' . $type . '
+                    </td>
+
+                    <td width="40%">
+                        ' . $description . '
+                    </td>
+
+                    <td
+                        width="20%"
+                        align="right"
+                    >
+                        <strong>
+                            ' . $amount . '
+                        </strong>
+                    </td>
+
+                </tr>
+            ';
+
+
+            $nr++;
+        }
+
+
+        /*
+        * NËSE NUK KA TRANSAKSIONE
+        */
+        if (empty($transactions)) {
+
+            $html .= '
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        align="center"
+                    >
+                        Nuk ka transaksione.
+                    </td>
+
+                </tr>
+            ';
+        }
+
+
+        /*
+        * TOTALI
+        */
+        $html .= '
+
+                <tr
+                    style="
+                        background-color:#eeeeee;
+                        font-weight:bold;
+                    "
+                >
+
+                    <td
+                        colspan="4"
+                        align="right"
+                    >
+                        DETYRIM AKTUAL:
+                    </td>
+
+                    <td align="right">
+
+                        ' .
+                        number_format(
+                            $totalDebt,
+                            2,
+                            '.',
+                            ','
+                        ) .
+                        ' €
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+        ';
+
+
+        /*
+        * SHKRUAJ HTML NË PDF
+        */
+        $pdf->writeHTML(
+            $html,
+            true,
+            false,
+            true,
+            false,
+            ''
+        );
+
+
+        /*
+        * PASTRO OUTPUT
+        */
+        if (ob_get_length()) {
+
+            ob_end_clean();
+        }
+
+
+        /*
+        * SHFAQ PDF NË BROWSER
+        */
+        $pdf->Output(
+            'Historia-Detyrimit-' .
+            $client['name'] .
+            '.pdf',
+            'I'
+        );
+
+        exit;
+    }
+
+    public function print_debt()
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $clientId = (int) $this->input->post('client_id');
+
+        if (!$clientId) {
+            show_404();
+            return;
+        }
+
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+
+        $printUrl = base_url(
+            'admin/invoices/print_debt_pdf/' . $clientId
+        );
+
+        echo '<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+
+            <title>Printo Historinë e Detyrimit</title>
+
+            <style>
+                html,
+                body {
+                    margin:0;
+                    padding:0;
+                    height:100%;
+                }
+
+                iframe {
+                    width:100%;
+                    height:100%;
+                    border:none;
+                }
+            </style>
+
+        </head>
+
+        <body>
+
+            <iframe
+                id="pdfFrame"
+                src="' .
+                htmlspecialchars(
+                    $printUrl,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) .
+                '"
+            ></iframe>
+
+            <script>
+
+                const iframe =
+                    document.getElementById("pdfFrame");
+
+                iframe.addEventListener(
+                    "load",
+                    function() {
+
+                        try {
+
+                            iframe.contentWindow.focus();
+
+                            iframe.contentWindow.print();
+
+                        } catch (e) {
+
+                            console.error(e);
+
+                        }
+
+                    }
+                );
+
+            </script>
+
+        </body>
+        </html>';
+
+        exit;
+    }
+
+    public function debt_transactions_ajax($clientId)
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $page = (int) $this->input->get('page');
+
+        if ($page < 1) {
+            $page = 1;
+        }
+
+        $perPage = 10;
+
+        $offset = ($page - 1) * $perPage;
+
+        // Numri total
+        $totalTransactions = $this->db
+            ->where('client_id', $clientId)
+            ->count_all_results('debt_transactions');
+
+        // Transaksionet e faqes
+        $transactions = $this->db
+            ->where('client_id', $clientId)
+            ->order_by('id', 'DESC')
+            ->limit($perPage, $offset)
+            ->get('debt_transactions')
+            ->result_array();
+
+        $data['transactions'] = $transactions;
+        $data['page'] = $page;
+        $data['per_page'] = $perPage;
+        $data['total_transactions'] = $totalTransactions;
+
+        $this->load->view(
+            'admin/debt-transactions-table',
+            $data
+        );
+    }
+
+    // =============================================================
+    // SEARCH KLIENTËT ME DETYRIME NGA FATURA
+    // =============================================================
+    public function search_debt_clients_invoice()
+    {
+        if (!in_array($this->session->userdata('role'), ['admin', 'sales'])) {
+            $this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode([]));
+            return;
+        }
+
+        $search = trim($this->input->get('search', true));
+        if ($search === '') {
+            $this->output->set_content_type('application/json')->set_output(json_encode([]));
+            return;
+        }
+
+        $this->db->select('id, name, address, phone');
+        $this->db->from('debt_clients');
+        $this->db->group_start()
+            ->like('name', $search)
+            ->or_like('address', $search)
+            ->or_like('phone', $search)
+        ->group_end();
+        $this->db->order_by('name', 'ASC');
+        $this->db->limit(10);
+
+        $clients = $this->db->get()->result_array();
+        $this->output->set_content_type('application/json')->set_output(json_encode($clients));
+    }
+
+    // =============================================================
+    // TRANSFERO FATURËN SI DETYRIM TË KLIENTIT
+    // =============================================================
+    
+    public function invoice_to_debt()
+    {
+        $reply = function ($status, $message, $httpCode = 200, $extra = []) {
+            return $this->output
+                ->set_status_header($httpCode)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array_merge([
+                    'status' => $status,
+                    'message' => $message
+                ], $extra), JSON_UNESCAPED_UNICODE));
+        };
+
+        if (!in_array($this->session->userdata('role'), ['admin', 'sales'])) {
+            return $reply(false, 'Nuk keni qasje.', 403);
+        }
+
+        $invoiceId = (int) $this->input->post('invoice_id');
+        if ($invoiceId <= 0) {
+            return $reply(false, 'ID e faturës nuk është valide.', 400);
+        }
+
+        $invoice = $this->db->where('id', $invoiceId)
+            ->get('invoices')->row_array();
+
+        if (!$invoice) {
+            return $reply(false, 'Fatura nuk u gjet.', 404);
+        }
+
+        if ($this->session->userdata('role') === 'sales' &&
+            (int) $invoice['user_id'] !== (int) $this->session->userdata('id')) {
+            return $reply(false, 'Nuk keni qasje në këtë faturë.', 403);
+        }
+
+        $hasInvoiceId = $this->db->field_exists('invoice_id', 'debt_transactions');
+        $marker = 'FATURA_ID:' . $invoiceId . ' -';
+
+        // Kërko lidhjen edhe në përshkrim: disa transaksione të vjetra
+        // mund të jenë krijuar para shtimit të kolonës invoice_id.
+        $existing = null;
+        if ($hasInvoiceId) {
+            $existing = $this->db->where('invoice_id', $invoiceId)
+                ->where('type', 'debt')
+                ->order_by('id', 'ASC')
+                ->get('debt_transactions')->row_array();
+        }
+        if (!$existing) {
+            $existing = $this->db->where('type', 'debt')
+                ->like('description', $marker, 'after')
+                ->order_by('id', 'ASC')
+                ->get('debt_transactions')->row_array();
+        }
+
+        $total = (float) $invoice['total_price_invoice'];
+        $prepayment = (float) $invoice['prepayment_price_invoice'];
+        $newAmount = round(max(0, $total - $prepayment), 2);
+
+        // Për faturë të re si detyrim kërko klientin.
+        // Për përditësim mbaj klientin e transaksionit ekzistues.
+        if (!$existing) {
+            if ($newAmount <= 0) {
+                return $reply(false, 'Fatura është paguar plotësisht; nuk ka shumë për detyrim.', 400);
+            }
+
+            $clientId = (int) $this->input->post('debt_client_id');
+            if ($clientId <= 0) {
+                return $reply(false, 'Zgjidhni klientin për regjistrimin e detyrimit.', 400);
+            }
+
+            $client = $this->db->where('id', $clientId)
+                ->get('debt_clients')->row_array();
+            if (!$client) {
+                return $reply(false, 'Klienti i zgjedhur nuk u gjet.', 404);
+            }
+
+            $insert = [
+                'client_id' => $clientId,
+                'type' => 'debt',
+                'amount' => number_format($newAmount, 2, '.', ''),
+                'description' => $marker . 'Detyrimi nga fatura #' . $invoiceId
+            ];
+            if ($hasInvoiceId) {
+                $insert['invoice_id'] = $invoiceId;
+            }
+
+            $this->db->trans_begin();
+
+            // Kontroll i dytë brenda transaksionit për të shmangur
+            // regjistrimin e dyfishtë nga klikime të përsëritura.
+            if ($hasInvoiceId) {
+                $already = $this->db->where('invoice_id', $invoiceId)
+                    ->where('type', 'debt')->get('debt_transactions')->row_array();
+            } else {
+                $already = $this->db->where('type', 'debt')
+                    ->like('description', $marker, 'after')
+                    ->get('debt_transactions')->row_array();
+            }
+            if ($already) {
+                $this->db->trans_rollback();
+                return $reply(false, 'Detyrimi është regjistruar tashmë. Rifreskoni faqen dhe provoni përsëri.', 409);
+            }
+
+            $ok = $this->db->insert('debt_transactions', $insert);
+            if (!$ok || $this->db->trans_status() === false) {
+                $this->db->trans_rollback();
+                return $reply(false, 'Detyrimi nuk u regjistrua.', 500);
+            }
+            $this->db->trans_commit();
+
+            return $reply(true,
+                'Detyrimi prej ' . number_format($newAmount, 2) . ' € u regjistrua me sukses.',
+                200, ['client_id' => $clientId, 'action' => 'created']);
+        }
+
+        $clientId = (int) $existing['client_id'];
+        $oldAmount = round((float) $existing['amount'], 2);
+
+        if ($newAmount === $oldAmount) {
+
+            // Lidhe me faturën edhe transaksionin e vjetër,
+            // nëse më parë kishte vetëm ID-në në përshkrim.
+            if ($hasInvoiceId && empty($existing['invoice_id'])) {
+
+                $ok = $this->db
+                    ->where('id', (int) $existing['id'])
+                    ->where('type', 'debt')
+                    ->update('debt_transactions', [
+                        'invoice_id' => $invoiceId
+                    ]);
+
+                if (!$ok) {
+                    return $reply(
+                        false,
+                        'Lidhja e transaksionit me faturën nuk u ruajt.',
+                        500
+                    );
+                }
+            }
+
+            return $reply(
+                true,
+                'Shuma e detyrimit është e njëjtë. Nuk u ndryshua asgjë.',
+                200,
+                [
+                    'client_id' => $clientId,
+                    'action' => 'unchanged'
+                ]
+            );
+        }
+
+        $update = ['amount' => number_format($newAmount, 2, '.', '')];
+        if ($hasInvoiceId && empty($existing['invoice_id'])) {
+            $update['invoice_id'] = $invoiceId;
+        }
+
+        $ok = $this->db->where('id', (int) $existing['id'])
+            ->where('type', 'debt')
+            ->update('debt_transactions', $update);
+
+        if (!$ok) {
+            return $reply(false, 'Detyrimi nuk u përditësua.', 500);
+        }
+
+        return $reply(true,
+            'Detyrimi i faturës u përditësua nga ' .
+            number_format($oldAmount, 2) . ' € në ' .
+            number_format($newAmount, 2) . ' €.',
+            200, ['client_id' => $clientId, 'action' => 'updated']);
+    }
+
 }

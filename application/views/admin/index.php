@@ -459,7 +459,7 @@ button i {
             </ul>
           </li>
 
-          <?php if (($this->session->userdata('name') == 'Admin' || $this->session->userdata('name') == 'Adminpz')): ?>
+          <?php if (in_array($this->session->userdata('role'), ['admin'])): ?>
 
           <!-- KRIJO dropdown -->
           <li class="nav-item dropdown">
@@ -476,7 +476,7 @@ button i {
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/login_history'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PËRDORUESVE</a></li>
             </ul>
           </li>
-
+          <?php endif; ?>
           <!-- PRINTO dropdown -->
           <!-- <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navPrint" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -489,6 +489,7 @@ button i {
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/printproduct/page_dimension'); ?>"><i class="fa fa-paper-plane me-2"></i> DIMENSIONET E FLETËS</a></li>
             </ul>
           </li> -->
+          <?php if (in_array($this->session->userdata('role'), ['admin'])): ?>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <span class="glyphicon glyphicon-user me-2"></span> 
@@ -499,18 +500,22 @@ button i {
                 <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/workers'); ?>"><i class="fa fa-list me-2"></i> LISTA E PAGAVE</a></li>
             </ul>
           </li>
+          <?php endif; ?>
 
-
+          <?php if (in_array($this->session->userdata('role'), ['admin','sales'])): ?>
           <!-- FATURAT dropdown -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navInvoices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fa fa-file p-r-10 me-1" aria-hidden="true"></i>
               FATURAT
-              <span class="ms-2 nav-badge nav-badge-danger">2</span>
+              <span class="ms-2 nav-badge nav-badge-danger">3</span>
             </a>
             <ul class="dropdown-menu" aria-labelledby="navInvoices">
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/'); ?>"><i class="fa fa-plus me-2"></i> KRIJO FATURËN</a></li>
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/created'); ?>"><i class="fa fa-file me-2"></i> FATURAT E KRIJUARA</a></li>
+              <?php if (in_array($this->session->userdata('role'), ['admin'])): ?>
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/debt_invoices'); ?>"><i class="fa fa-file me-2"></i> DETYRIMET E KLIENTEVE</a></li>
+              <?php endif; ?>
             </ul>
           </li>
 

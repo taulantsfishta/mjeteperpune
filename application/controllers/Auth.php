@@ -61,6 +61,7 @@ class Auth extends CI_Controller
                         'id' => $row->id,
                         'name' => $row->first_name,
                         'role' => $row->role,
+                        'prefix_user' => $row->prefix_user,
                         'view_category' => json_decode($row->view_category, 1),
                         'price_status' => $row->price_status,
                         'is_login' => TRUE,

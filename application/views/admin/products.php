@@ -179,6 +179,15 @@
             background: #fff;
             z-index: 2;
         }
+
+    /* ===== SHOPPING CART ===== */
+    .product-bottom-actions { display:flex; gap:6px; margin-top:8px; }
+    .product-bottom-actions .btn { flex:1; margin-top:0 !important; font-size:14px; }
+    #cartSummaryBar { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); width:min(650px,calc(100% - 30px)); background:#fff; border:1px solid #d9d9d9; border-radius:12px; padding:12px 15px; z-index:1040; box-shadow:0 5px 25px rgba(0,0,0,.20); display:none; }
+    .cart-summary-content { display:flex; align-items:center; justify-content:space-between; gap:15px; }
+    .cart-summary-info { font-size:15px; }
+    .cart-summary-info strong { font-size:17px; }
+    @media(max-width:576px){ .cart-summary-content{flex-direction:column;align-items:stretch;} #finishCartBtn{width:100%;} }
 </style>
 
 <?php if ($this->session->userdata('role') == 'admin') : ?>
@@ -264,34 +273,44 @@
                         <?php endif ?>
                     </div>
 
-                    <?php if ($this->session->userdata('role') == 'admin') : ?>
+                    <?php if (in_array($this->session->userdata('role'), ['admin', 'sales'])) : ?>
                         <div class="mt-2">
-                            <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>" target="_blank">
-                                <button class="btn btn-block" style="background:#53d1b2; font-size: 14px;"
-                                        id="editButton_<?php echo $value['id']; ?>">
-                                    <i class="fa fa-edit"></i> Ndrysho Produktin
+                            <?php if ($this->session->userdata('role') == 'admin') : ?>
+                                <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>" target="_blank">
+                                    <button class="btn btn-block" style="background:#53d1b2; font-size:14px;" id="editButton_<?php echo $value['id']; ?>">
+                                        <i class="fa fa-edit"></i> Ndrysho Produktin
+                                    </button>
+                                </a>
+                                <a href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>"
+                                   data-toggle="modal" data-target="#confirmDeleteModal"
+                                   data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $category['id']; ?>">
+                                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_<?php echo $value['id']; ?>">
+                                        <i class="fa fa-trash"></i> Fshije Produktin
+                                    </button>
+                                </a>
+                                <div class="product-bottom-actions">
+                                    <button type="button" class="btn product-info-btn" style="background:#85b3f7;" id="infoButton_<?php echo $value['id']; ?>" data-productid="<?php echo $value['id']; ?>">
+                                        <i class="fa fa-info-circle"></i> Informata Produkti
+                                    </button>
+                                    <button type="button" class="btn btn-warning add-to-cart-btn"
+                                            data-productid="<?php echo $value['id']; ?>"
+                                            data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
+                                            data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
+                                            data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
+                                        <i class="fa fa-shopping-cart"></i> Shportë
+                                    </button>
+                                </div>
+                            <?php else : ?>
+                                <button type="button" class="btn btn-warning btn-block add-to-cart-btn"
+                                        data-productid="<?php echo $value['id']; ?>"
+                                        data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
+                                        data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
+                                        data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
+                                    <i class="fa fa-shopping-cart"></i> Shportë
                                 </button>
-                            </a>
-
-                            <a href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>"
-                               data-toggle="modal" data-target="#confirmDeleteModal"
-                               data-productid="<?php echo $value['id']; ?>"
-                               data-categoryid="<?php echo $category['id']; ?>">
-                                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size: 14px;"
-                                        id="deleteButton_<?php echo $value['id']; ?>">
-                                    <i class="fa fa-trash"></i> Fshije Produktin
-                                </button>
-                            </a>
-
-                            <button type="button"
-                                    class="btn btn-block mt-2 product-info-btn"
-                                    style="background:#85b3f7; font-size: 14px;"
-                                    id="infoButton_<?php echo $value['id']; ?>"
-                                    data-productid="<?php echo $value['id']; ?>">
-                                <i class="fa fa-info-circle" aria-hidden="true"></i> Informata Produkti
-                            </button>
+                            <?php endif; ?>
                         </div>
-                    <?php endif ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -502,6 +521,33 @@
     </div>
 </div>
 
+
+<!-- ===== ADD TO CART MODAL ===== -->
+<div class="modal" id="addToCartModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="fa fa-shopping-cart"></i> Shto në shportë</h5><button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="cart_product_id">
+      <div class="form-group"><label>Produkti</label><input type="text" id="cart_product_name" class="form-control" readonly></div>
+      <div class="form-group"><label>Sasia</label><input type="number" id="cart_quantity" class="form-control" value="1" min="1" step="1"></div>
+      <div class="form-group"><label>Çmimi (€)</label><input type="number" id="cart_price" class="form-control" min="0" step="0.01"></div>
+      <div id="cartModalError" class="alert alert-danger" style="display:none;"></div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulo</button><button type="button" class="btn btn-success" id="confirmAddToCart"><i class="fa fa-shopping-cart"></i> Shto në shportë</button></div>
+  </div></div>
+</div>
+
+<div id="cartSummaryBar"><div class="cart-summary-content">
+  <div class="cart-summary-info"><i class="fa fa-shopping-cart"></i> <strong><span id="cartProductsCount">0</span></strong> Produkte &nbsp; | &nbsp; Totali: <strong><span id="cartTotal">0.00</span> €</strong></div>
+  <div class="d-flex" style="gap:6px;"><button type="button" class="btn btn-info" id="viewCartBtn"><i class="fa fa-eye"></i> Shiko Shportën</button><button type="button" class="btn btn-danger" id="cancelCartBtn"><i class="fa fa-trash"></i> Anulo</button><button type="button" class="btn btn-success" id="finishCartBtn"><i class="fa fa-check"></i> Përfundo</button></div>
+</div></div>
+
+<div class="modal" id="viewCartModal" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg modal-dialog-centered" role="document"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="fa fa-shopping-cart"></i> Shporta</h5><button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button></div>
+  <div class="modal-body"><div class="table-responsive"><table class="table table-bordered table-striped mb-0"><thead><tr><th>#</th><th>Kodi</th><th>Produkti</th><th style="width:110px;">Sasia</th><th style="width:140px;">Çmimi</th><th style="width:130px;">Totali</th><th style="width:80px;">Veprimi</th></tr></thead><tbody id="cartProductsTable"></tbody></table></div><div class="text-right mt-3"><h4>Totali: <strong><span id="cartModalTotal">0.00</span> €</strong></h4></div></div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button></div>
+</div></div></div>
+
 <script>
 // ===== products.php JS (only) =====
 
@@ -661,36 +707,27 @@ document.addEventListener("DOMContentLoaded", function () {
               </div>` : ''}
             </div>
 
-            ${role === "admin" ? `
+            ${['admin', 'sales'].includes(role) ? `
             <div class="mt-2">
-              ${product.is_deleted == 0 ? `
-              <a href="${url}admin/products/get_product/${product.id}" target="_blank">
-                <button class="btn btn-block" style="background:#53d1b2; font-size:14px;" id="editButton_${product.id}">
-                  <i class="fa fa-edit"></i> Ndrysho Produktin
-                </button>
-              </a>
-              <a href="${url}admin/products/delete_product/${category_id}/${product.id}"
-                 data-toggle="modal" data-target="#confirmDeleteModal"
-                 data-productid="${product.id}" data-categoryid="${category_id}">
-                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_${product.id}">
-                  <i class="fa fa-trash"></i> Fshije Produktin
-                </button>
-              </a>
-              <button type="button"
-                class="btn btn-block mt-2 product-info-btn"
-                style="background:#85b3f7; font-size:14px;"
-                id="infoButton_${product.id}"
-                data-productid="${product.id}">
-                <i class="fa fa-info-circle" aria-hidden="true"></i> Informata Produkti
-              </button>
+              ${role === 'admin' ? `
+                ${product.is_deleted == 0 ? `
+                  <a href="${url}admin/products/get_product/${product.id}" target="_blank">
+                    <button class="btn btn-block" style="background:#53d1b2;font-size:14px;" id="editButton_${product.id}"><i class="fa fa-edit"></i> Ndrysho Produktin</button>
+                  </a>
+                  <a href="${url}admin/products/delete_product/${category_id}/${product.id}" data-toggle="modal" data-target="#confirmDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
+                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc;font-size:14px;" id="deleteButton_${product.id}"><i class="fa fa-trash"></i> Fshije Produktin</button>
+                  </a>
+                  <div class="product-bottom-actions">
+                    <button type="button" class="btn product-info-btn" style="background:#85b3f7;" id="infoButton_${product.id}" data-productid="${product.id}"><i class="fa fa-info-circle"></i> Informata Produkti</button>
+                    <button type="button" class="btn btn-warning add-to-cart-btn" data-productid="${product.id}" data-code="${escapeHtml(product.code)}" data-name="${escapeHtml(product.name)}" data-price="${product.price}"><i class="fa fa-shopping-cart"></i> Shportë</button>
+                  </div>
+                ` : `
+                  <a href="${url}admin/products/delete_product/${category_id}/${product.id}" data-toggle="modal" data-target="#confirmUNDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
+                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc;font-size:14px;" id="deleteButton_${product.id}"><i class="fa fa-angle-left"></i> Rikthe Produktin</button>
+                  </a>`}
               ` : `
-              <a href="${url}admin/products/delete_product/${category_id}/${product.id}"
-                 data-toggle="modal" data-target="#confirmUNDeleteModal"
-                 data-productid="${product.id}" data-categoryid="${category_id}">
-                <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_${product.id}">
-                  <i class="fa fa-angle-left"></i> Rikthe Produktin
-                </button>
-              </a>`}
+                ${product.is_deleted == 0 ? `<button type="button" class="btn btn-warning btn-block add-to-cart-btn" data-productid="${product.id}" data-code="${escapeHtml(product.code)}" data-name="${escapeHtml(product.name)}" data-price="${product.price}"><i class="fa fa-shopping-cart"></i> Shportë</button>` : ''}
+              `}
             </div>` : ""}
           </div>
         </div>
@@ -772,6 +809,216 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     { passive: true }
   );
+
+    // =====================================================
+    // SHOPPING CART - SHARED PHP SESSION
+    // =====================================================
+    let shoppingCart = [];
+    let currentCartProduct = null;
+
+    function loadShoppingCart() {
+        $.ajax({
+            url: url + 'admin/dashboard/get_cart',
+            type: 'GET',
+            dataType: 'json',
+            cache: false,
+            success: function (res) {
+                if (!res || res.status === false) return;
+                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                updateCartSummary();
+            }
+        });
+    }
+
+    loadShoppingCart();
+
+    $(document).on('click', '.add-to-cart-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        currentCartProduct = {
+            id: $(this).data('productid'),
+            code: $(this).attr('data-code'),
+            name: $(this).attr('data-name'),
+            originalPrice: parseFloat($(this).attr('data-price')) || 0
+        };
+
+        $('#cart_product_id').val(currentCartProduct.id);
+        $('#cart_product_name').val(currentCartProduct.code + ' - ' + currentCartProduct.name);
+        $('#cart_quantity').val(1);
+        $('#cart_price').val(currentCartProduct.originalPrice);
+        $('#cartModalError').hide().html('');
+        $('#addToCartModal').modal('show');
+        setTimeout(function () { $('#cart_quantity').focus().select(); }, 300);
+    });
+
+    $(document).on('click', '#confirmAddToCart', function () {
+        if (!currentCartProduct) return;
+
+        const quantity = parseFloat($('#cart_quantity').val());
+        const price = parseFloat($('#cart_price').val());
+
+        if (!quantity || quantity <= 0) {
+            $('#cartModalError').html('Sasia duhet të jetë më e madhe se 0.').show();
+            return;
+        }
+        if (isNaN(price) || price < 0) {
+            $('#cartModalError').html('Çmimi nuk është valid.').show();
+            return;
+        }
+
+        $('#confirmAddToCart').prop('disabled', true);
+        $.ajax({
+            url: url + 'admin/dashboard/add_to_cart',
+            type: 'POST',
+            dataType: 'json',
+            data: { product_id: currentCartProduct.id, quantity: quantity, price: price },
+            success: function (res) {
+                if (!res || res.status === false) {
+                    $('#cartModalError').html((res && res.message) ? res.message : 'Produkti nuk u shtua.').show();
+                    return;
+                }
+                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                $('#addToCartModal').modal('hide');
+                updateCartSummary();
+            },
+            error: function () {
+                $('#cartModalError').html('Gabim gjatë shtimit në shportë.').show();
+            },
+            complete: function () { $('#confirmAddToCart').prop('disabled', false); }
+        });
+    });
+
+    function updateCartSummary() {
+        let totalPrice = 0;
+        shoppingCart.forEach(function (item) {
+            totalPrice += (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
+        });
+        $('#cartProductsCount').text(shoppingCart.length);
+        $('#cartTotal').text(totalPrice.toFixed(2));
+        if (shoppingCart.length > 0) $('#cartSummaryBar').fadeIn(150);
+        else $('#cartSummaryBar').fadeOut(150);
+    }
+
+    $(document).on('click', '#viewCartBtn', function () {
+        if (shoppingCart.length === 0) return;
+        renderCartProducts();
+        $('#viewCartModal').modal('show');
+    });
+
+    function renderCartProducts() {
+        let rowsHtml = '';
+        let totalPrice = 0;
+        shoppingCart.forEach(function (item, index) {
+            const quantity = parseFloat(item.quantity) || 0;
+            const price = parseFloat(item.price) || 0;
+            const rowTotal = quantity * price;
+            totalPrice += rowTotal;
+            rowsHtml += `
+                <tr data-productid="${item.id}">
+                    <td>${index + 1}</td>
+                    <td><b>${escapeHtml(item.code)}</b></td>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td><input type="number" class="form-control form-control-sm cart-edit-quantity" data-productid="${item.id}" value="${quantity}" min="1" step="1"></td>
+                    <td><div class="input-group input-group-sm"><input type="number" class="form-control cart-edit-price" data-productid="${item.id}" value="${price.toFixed(2)}" min="0" step="0.01"><div class="input-group-append"><span class="input-group-text">€</span></div></div></td>
+                    <td class="text-right"><b class="cart-row-total">${rowTotal.toFixed(2)} €</b></td>
+                    <td class="text-center"><button type="button" class="btn btn-danger btn-sm delete-cart-product" data-productid="${item.id}" data-name="${escapeHtml(item.name)}" title="Fshije produktin"><i class="fa fa-trash"></i></button></td>
+                </tr>`;
+        });
+        $('#cartProductsTable').html(rowsHtml);
+        $('#cartModalTotal').text(totalPrice.toFixed(2));
+    }
+
+    function saveCartProduct(productId) {
+        const row = $('#cartProductsTable').find('tr[data-productid="' + productId + '"]');
+        const quantity = parseFloat(row.find('.cart-edit-quantity').val());
+        const price = parseFloat(row.find('.cart-edit-price').val());
+        if (!quantity || quantity <= 0 || isNaN(price) || price < 0) return;
+
+        $.ajax({
+            url: url + 'admin/dashboard/update_cart_product',
+            type: 'POST', dataType: 'json',
+            data: { product_id: productId, quantity: quantity, price: price },
+            success: function (res) {
+                if (!res || res.status === false) return;
+                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                const item = shoppingCart.find(x => String(x.id) === String(productId));
+                if (item) row.find('.cart-row-total').text(((parseFloat(item.quantity)||0)*(parseFloat(item.price)||0)).toFixed(2) + ' €');
+                updateCartSummary();
+                updateCartModalTotal();
+            }
+        });
+    }
+
+    let cartSaveTimer = null;
+    $(document).on('input change', '.cart-edit-quantity, .cart-edit-price', function () {
+        const productId = $(this).data('productid');
+        clearTimeout(cartSaveTimer);
+        cartSaveTimer = setTimeout(function () { saveCartProduct(productId); }, 300);
+    });
+
+    function updateCartModalTotal() {
+        let totalPrice = 0;
+        shoppingCart.forEach(function (item) {
+            totalPrice += (parseFloat(item.quantity)||0) * (parseFloat(item.price)||0);
+        });
+        $('#cartModalTotal').text(totalPrice.toFixed(2));
+    }
+
+    $(document).on('click', '.delete-cart-product', function () {
+        const productId = $(this).data('productid');
+        const productName = $(this).attr('data-name') || '';
+        if (!confirm('A jeni i sigurt që dëshironi ta largoni "' + productName + '" nga shporta?')) return;
+
+        $.ajax({
+            url: url + 'admin/dashboard/delete_cart_product',
+            type: 'POST', dataType: 'json', data: { product_id: productId },
+            success: function (res) {
+                if (!res || res.status === false) return;
+                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                updateCartSummary();
+                if (shoppingCart.length === 0) $('#viewCartModal').modal('hide');
+                else renderCartProducts();
+            }
+        });
+    });
+
+    $(document).on('click', '#cancelCartBtn', function () {
+        if (shoppingCart.length === 0) return;
+        if (!confirm('A jeni i sigurt që dëshironi ta anuloni të gjithë shportën?')) return;
+
+        $.ajax({
+            url: url + 'admin/dashboard/clear_cart',
+            type: 'POST', dataType: 'json',
+            success: function (res) {
+                if (!res || res.status === false) return;
+                shoppingCart = [];
+                currentCartProduct = null;
+                $('#viewCartModal').modal('hide');
+                updateCartSummary();
+            }
+        });
+    });
+
+    $(document).on('keydown', '#cart_quantity, #cart_price', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); $('#confirmAddToCart').trigger('click'); }
+    });
+
+    $(document).on(
+        'click',
+        '#finishCartBtn',
+        function () {
+
+            if (shoppingCart.length === 0) {
+                return;
+            }
+
+            window.location.href =
+                url + 'admin/invoices?from_cart=1';
+
+        }
+    );
+
 
   // ===== single image modal =====
   function cacheBust(u) {

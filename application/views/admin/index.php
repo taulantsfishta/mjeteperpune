@@ -1,412 +1,478 @@
 <?php include 'layout/css.php'; ?>
 
 <style>
-/* —— Remove old sidebar —— */
-.navbar-default.sidebar,
-.slimscrollsidebar {
-  display: none !important;
-}
-#page-wrapper {
-  margin-left: 0 !important;
-}
-
-/* Navbar adjustments */
-body { padding-top: 64px; }
-
-.navbar {
-  background: #fff;
-}
-.navbar .nav-link,
-.navbar .navbar-brand {
-  font-family: Verdana, sans-serif;
-  font-size: 13px;
-  font-weight: bold;
-  color: #111 !important;
-}
-.dropdown-menu {
-  font-family: Verdana, sans-serif;
-  font-size: 12px;
-}
-
-/* Badge style (mimics label-danger look) */
-.nav-badge {
-  display:inline-block;
-  padding: 2px 6px;
-  font-size: 11px;
-  line-height: 1;
-  border-radius: 9999px;
-}
-.nav-badge-danger {
-  background: #ef5350; color: #fff;
-}
-
-
-/* ===== Light modern, realistic palette ===== */
-:root {
-  --header-bg: #fbfcfd;        /* very light blue-gray */
-  --header-text: #2d3e50;      /* neutral dark for contrast */
-  --header-hover: #dce6ed;     /* slight hover tint */
-  --accent: #1694fa8c;           /* red for counts / actions */
-  --body-bg: #f8fafc;          /* near-white background */
-  --card-bg: #ffffff;
-  --border: #e3e7eb;
-  --text-main: #212529;
-  --text-muted: #6c757d;
-}
-
-/* ===== General ===== */
-body {
-  background: var(--body-bg);
-  color: var(--text-main);
-  font-family: "Segoe UI", "Verdana", sans-serif;
-  font-size: 13px;
-}
-#page-wrapper { background: var(--body-bg); }
-
-/* ===== Navbar ===== */
-.navbar.navbar-light {
-  background-color: var(--header-bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-.navbar .navbar-brand,
-.navbar .nav-link {
-  color: var(--header-text) !important;
-  font-weight: 600;
-}
-.navbar .nav-link:hover,
-.navbar .nav-link:focus {
-  background-color: var(--header-hover);
-  color: var(--header-text) !important;
-  border-radius: 4px;
-}
-.navbar .dropdown-menu {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-.navbar .dropdown-item {
-  color: var(--text-main);
-}
-.navbar .dropdown-item:hover {
-  background: #f1f5f8;
-}
-
-/* ===== Badges ===== */
-.nav-badge, .label-danger, .badge-danger {
-  background: var(--accent);
-  color: #fff;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 10px;
-}
-
-/* ===== Search box ===== */
-input.form-control {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  transition: all 0.2s ease;
-}
-input.form-control:focus {
-  border-color: #b7c7d3;
-  box-shadow: 0px -3px 6px -2px var(--accent);
-}
-
-/* ===== Cards / product boxes ===== */
-.panel, .white-box, .card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.panel:hover, .white-box:hover, .card:hover {
-  border-color: #d4dae0;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-}
-
-/* ===== Titles / Text ===== */
-.page-title {
-  color: var(--text-main);
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-.text-muted { color: var(--text-muted) !important; }
-
-/* ===== Buttons ===== */
-.btn-primary {
-  background: #90a4b7;
-  border-color: #90a4b7;
-  color: #fff;
-}
-.btn-primary:hover {
-  background: #7d95a8;
-  border-color: #7d95a8;
-}
-.btn-outline-primary {
-  color: #7d95a8;
-  border-color: #7d95a8;
-}
-.btn-outline-primary:hover {
-  background: #7d95a8;
-  color: #fff;
-}
-
-/* ===== Scrollbar ===== */
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-thumb {
-  background-color: #cfd5da;
-  border-radius: 6px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background-color: #b7c0c7;
-}
-
-/* Add space between menu links */
-.navbar-nav > li {
-  margin-right: 22px;       /* increase/decrease as needed (16–28px is good range) */
-}
-
-/* Reduce margin on the very last element (profile dropdown) */
-.navbar-nav > li:last-child {
-  margin-right: 0;
-}
-
-/* Improve dropdown toggle padding (clickable area) */
-.navbar .nav-link {
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;                 /* small gap between icon and text */
-}
-
-/* On larger screens, increase separation visually */
-@media (min-width: 992px) {
-  .navbar-nav > li {
-    margin-right: 28px;
-  }
-}
-
-/* Dropdowns: small padding tweak for consistent spacing */
-.dropdown-menu {
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-/* Inside dropdown items */
-.dropdown-item {
-  padding: 6px 14px;
-  font-size: 13px;
-}
-
-/* Ensure icons and text in dropdowns align nicely */
-.dropdown-item i {
-  width: 16px;
-  text-align: center;
-  opacity: 0.85;
-}
-
-/* ===== Navbar border styling ===== */
-.navbar.navbar-light {
-  background-color: var(--header-bg);
-  border-bottom: #f9f7f7; /* light black separator */
-  box-shadow: 0px -4px 20px 0px var(--accent);
-}
-
-.bg-title h4 {
-    color: #4b4a4aff;
-    font-weight: 600;
-    margin-top: 6px;
-}
-
-/* ===== Mobile fix: make every menu row full-width and align badge+arrow right ===== */
-@media (max-width: 767.98px) {
-  /* Make the collapsed list truly full width */
-  .navbar-collapse .navbar-nav { width: 100% !important; display: block !important; }
-  .navbar-collapse .navbar-nav .nav-item { width: 100% !important; }
-
-  /* Each link spans the row and uses flex */
-  .navbar-collapse .navbar-nav .nav-link {
-    width: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    padding: 12px 18px !important;
-    position: static !important;     /* kill any absolute rules from earlier */
+  /* —— Remove old sidebar —— */
+  .navbar-default.sidebar,
+  .slimscrollsidebar {
+    display: none !important;
   }
 
-  /* Left icon */
-  .navbar-collapse .navbar-nav .nav-link i {
-    margin-right: 10px;
-    opacity: .65;
-    flex-shrink: 0;
+  #page-wrapper {
+    margin-left: 0 !important;
   }
 
-  /* Badge pushes everything after it to the far right */
-  .navbar-collapse .navbar-nav .nav-link .nav-badge {
-    margin-left: auto !important;
-    position: static !important;
-    transform: none !important;
-    background: #90a4b7 !important;
-    color: #fff !important;
+  /* Navbar adjustments */
+  body {
+    padding-top: 64px;
+  }
+
+  .navbar {
+    background: #fff;
+  }
+
+  .navbar .nav-link,
+  .navbar .navbar-brand {
+    font-family: Verdana, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #111 !important;
+  }
+
+  .dropdown-menu {
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+  }
+
+  /* Badge style (mimics label-danger look) */
+  .nav-badge {
+    display: inline-block;
+    padding: 2px 6px;
     font-size: 11px;
-    font-weight: 700;
     line-height: 1;
-    padding: 3px 8px;
     border-radius: 9999px;
   }
 
-  /* Arrow sits right after the badge, same baseline */
-  .navbar-collapse .navbar-nav .dropdown-toggle::after {
-    content: '›';
-    display: inline-block !important;
-    border: 0 !important;
-    margin-left: 8px !important;
-    color: #9aa5b1;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 1;
-    position: static !important;
-    transform: none !important;
+  .nav-badge-danger {
+    background: #ef5350;
+    color: #fff;
   }
-}
-/* Mobile-only logout row styling (arrow at the far right) */
-@media (max-width: 767.98px) {
-  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron {
+
+
+  /* ===== Light modern, realistic palette ===== */
+  :root {
+    --header-bg: #fbfcfd;
+    /* very light blue-gray */
+    --header-text: #2d3e50;
+    /* neutral dark for contrast */
+    --header-hover: #dce6ed;
+    /* slight hover tint */
+    --accent: #1694fa8c;
+    /* red for counts / actions */
+    --body-bg: #f8fafc;
+    /* near-white background */
+    --card-bg: #ffffff;
+    --border: #e3e7eb;
+    --text-main: #212529;
+    --text-muted: #6c757d;
+  }
+
+  /* ===== General ===== */
+  body {
+    background: var(--body-bg);
+    color: var(--text-main);
+    font-family: "Segoe UI", "Verdana", sans-serif;
+    font-size: 13px;
+  }
+
+  #page-wrapper {
+    background: var(--body-bg);
+  }
+
+  /* ===== Navbar ===== */
+  .navbar.navbar-light {
+    background-color: var(--header-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .navbar .navbar-brand,
+  .navbar .nav-link {
+    color: var(--header-text) !important;
+    font-weight: 600;
+  }
+
+  .navbar .nav-link:hover,
+  .navbar .nav-link:focus {
+    background-color: var(--header-hover);
+    color: var(--header-text) !important;
+    border-radius: 4px;
+  }
+
+  .navbar .dropdown-menu {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .navbar .dropdown-item {
+    color: var(--text-main);
+  }
+
+  .navbar .dropdown-item:hover {
+    background: #f1f5f8;
+  }
+
+  /* ===== Badges ===== */
+  .nav-badge,
+  .label-danger,
+  .badge-danger {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+
+  /* ===== Search box ===== */
+  input.form-control {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    transition: all 0.2s ease;
+  }
+
+  input.form-control:focus {
+    border-color: #b7c7d3;
+    box-shadow: 0px -3px 6px -2px var(--accent);
+  }
+
+  /* ===== Cards / product boxes ===== */
+  .panel,
+  .white-box,
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .panel:hover,
+  .white-box:hover,
+  .card:hover {
+    border-color: #d4dae0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  /* ===== Titles / Text ===== */
+  .page-title {
+    color: var(--text-main);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .text-muted {
+    color: var(--text-muted) !important;
+  }
+
+  /* ===== Buttons ===== */
+  .btn-primary {
+    background: #90a4b7;
+    border-color: #90a4b7;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #7d95a8;
+    border-color: #7d95a8;
+  }
+
+  .btn-outline-primary {
+    color: #7d95a8;
+    border-color: #7d95a8;
+  }
+
+  .btn-outline-primary:hover {
+    background: #7d95a8;
+    color: #fff;
+  }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #cfd5da;
+    border-radius: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #b7c0c7;
+  }
+
+  /* Add space between menu links */
+  .navbar-nav>li {
+    margin-right: 22px;
+    /* increase/decrease as needed (16–28px is good range) */
+  }
+
+  /* Reduce margin on the very last element (profile dropdown) */
+  .navbar-nav>li:last-child {
+    margin-right: 0;
+  }
+
+  /* Improve dropdown toggle padding (clickable area) */
+  .navbar .nav-link {
+    padding: 10px 14px;
     display: flex;
     align-items: center;
-    padding: 12px 18px;
-    color: #2d3e50 !important;
-    font-weight: 700;
-    width: 100%;
-  }
-  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron i {
-    opacity: .65;
-    margin-right: 10px;
-    flex-shrink: 0;
-  }
-  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron::after {
-    content: '›';
-    display: inline-block;
-    margin-left: auto;         /* push to the far right */
-    color: #9aa5b1;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 1;
-  }
-}
-
-/* Make ALL buttons' text bolder */
-button,
-.btn,
-.btn.btn-block,
-.btn[class*="btn-"] {
-  font-weight: 600 !important;   /* 700–800 looks solid; raise/lower if you want */
-  letter-spacing: 0.4px;         /* tiny spacing so bold doesn't look cramped */
-}
-
-/* Keep icons from getting weirdly bold */
-.btn i,
-button i {
-  font-weight:600 !important;
-}
-
-/* If you also want dropdown toggles (that look like buttons) bolder */
-.dropdown .btn.dropdown-toggle {
-  font-weight: 600 !important;
-}
-
-
-/* ===== Navbar dropdown behavior per device ===== */
-
-/* Desktop/tablet: show full list (no internal scroll) */
-/* Desktop/tablet: dropdown scrolls if too tall */
-@media (min-width: 768px) {
-  .navbar .dropdown-menu {
-    position: absolute !important;
-    top: 100% !important;
-    max-height: calc(100vh - 120px) !important; /* viewport minus navbar + spacing */
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-
-/* Mobile: constrain height and enable internal scroll */
-@media (max-width: 767.98px) {
-  /* Ensure the collapse area doesn't clip the dropdown */
-  .navbar-collapse { overflow: visible; }
-
-  /* Make the dropdown a full-width scrolling panel */
-  .navbar .dropdown-menu {
-    position: static !important;      /* align within the collapsed menu */
-    width: 100% !important;
-    max-height: 65vh !important;      /* visible area */
-    overflow-y: auto !important;      /* scroll inside */
-    overscroll-behavior: contain;     /* prevent body scroll chaining */
-    -webkit-overflow-scrolling: touch;/* smooth iOS scroll */
-    margin-top: 4px;
-    z-index: 1200 !important;         /* above page content */
+    gap: 6px;
+    /* small gap between icon and text */
   }
 
-  /* Optional: slightly tighter items on mobile for more visible rows */
-  .navbar .dropdown-item {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-}
-
-/* Mobile: make the navbar collapse open/close instantly and keep children visible */
-@media (max-width: 991.98px) {
-  /* Let Bootstrap manage visibility; don't hide with display:none */
-  .navbar-collapse { overflow: visible; }
-
-  /* Remove the slide animation that makes the shell move before the content */
-  .navbar-collapse.collapsing {
-    height: auto !important;
-    transition: none !important;
+  /* On larger screens, increase separation visually */
+  @media (min-width: 992px) {
+    .navbar-nav>li {
+      margin-right: 28px;
+    }
   }
 
-  /* Ensure the shown state is just block with no animation lag */
-  .navbar-collapse.collapse.show {
-    display: block !important;
+  /* Dropdowns: small padding tweak for consistent spacing */
+  .dropdown-menu {
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 
-  /* Also make dropdowns inside the collapse render immediately */
-  .navbar .dropdown-menu {
-    transition: none !important;
-  }
-}
-
-/* === Prevent mobile zoom on navbar taps (iOS) === */
-@media (max-width: 767.98px) {
-  /* Hamburger button */
-  .navbar-toggler {
-    font-size: 16px !important;
-    line-height: 1.2;
+  /* Inside dropdown items */
+  .dropdown-item {
+    padding: 6px 14px;
+    font-size: 13px;
   }
 
-  /* The three-line icon inside (so Safari sees it as 16px too) */
-  .navbar-toggler-icon {
-    width: 1.5em;
-    height: 1.5em;
+  /* Ensure icons and text in dropdowns align nicely */
+  .dropdown-item i {
+    width: 16px;
+    text-align: center;
+    opacity: 0.85;
   }
 
-  /* Menu links inside the opened mobile menu */
-  .navbar-collapse .navbar-nav .nav-link {
-    font-size: 14px !important;
+  /* ===== Navbar border styling ===== */
+  .navbar.navbar-light {
+    background-color: var(--header-bg);
+    border-bottom: #f9f7f7;
+    /* light black separator */
+    box-shadow: 0px -4px 20px 0px var(--accent);
   }
 
-  /* Mobile logout row as well */
-  .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron {
-    font-size: 14px !important;
+  .bg-title h4 {
+    color: #4b4a4aff;
+    font-weight: 600;
+    margin-top: 6px;
   }
-}
+
+  /* ===== Mobile fix: make every menu row full-width and align badge+arrow right ===== */
+  @media (max-width: 767.98px) {
+
+    /* Make the collapsed list truly full width */
+    .navbar-collapse .navbar-nav {
+      width: 100% !important;
+      display: block !important;
+    }
+
+    .navbar-collapse .navbar-nav .nav-item {
+      width: 100% !important;
+    }
+
+    /* Each link spans the row and uses flex */
+    .navbar-collapse .navbar-nav .nav-link {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      padding: 12px 18px !important;
+      position: static !important;
+      /* kill any absolute rules from earlier */
+    }
+
+    /* Left icon */
+    .navbar-collapse .navbar-nav .nav-link i {
+      margin-right: 10px;
+      opacity: .65;
+      flex-shrink: 0;
+    }
+
+    /* Badge pushes everything after it to the far right */
+    .navbar-collapse .navbar-nav .nav-link .nav-badge {
+      margin-left: auto !important;
+      position: static !important;
+      transform: none !important;
+      background: #90a4b7 !important;
+      color: #fff !important;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 3px 8px;
+      border-radius: 9999px;
+    }
+
+    /* Arrow sits right after the badge, same baseline */
+    .navbar-collapse .navbar-nav .dropdown-toggle::after {
+      content: '›';
+      display: inline-block !important;
+      border: 0 !important;
+      margin-left: 8px !important;
+      color: #9aa5b1;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1;
+      position: static !important;
+      transform: none !important;
+    }
+  }
+
+  /* Mobile-only logout row styling (arrow at the far right) */
+  @media (max-width: 767.98px) {
+    .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      color: #2d3e50 !important;
+      font-weight: 700;
+      width: 100%;
+    }
+
+    .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron i {
+      opacity: .65;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron::after {
+      content: '›';
+      display: inline-block;
+      margin-left: auto;
+      /* push to the far right */
+      color: #9aa5b1;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1;
+    }
+  }
+
+  /* Make ALL buttons' text bolder */
+  button,
+  .btn,
+  .btn.btn-block,
+  .btn[class*="btn-"] {
+    font-weight: 600 !important;
+    /* 700–800 looks solid; raise/lower if you want */
+    letter-spacing: 0.4px;
+    /* tiny spacing so bold doesn't look cramped */
+  }
+
+  /* Keep icons from getting weirdly bold */
+  .btn i,
+  button i {
+    font-weight: 600 !important;
+  }
+
+  /* If you also want dropdown toggles (that look like buttons) bolder */
+  .dropdown .btn.dropdown-toggle {
+    font-weight: 600 !important;
+  }
 
 
+  /* ===== Navbar dropdown behavior per device ===== */
 
+  /* Desktop/tablet: show full list (no internal scroll) */
+  /* Desktop/tablet: dropdown scrolls if too tall */
+  @media (min-width: 768px) {
+    .navbar .dropdown-menu {
+      position: absolute !important;
+      top: 100% !important;
+      max-height: calc(100vh - 120px) !important;
+      /* viewport minus navbar + spacing */
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+
+  /* Mobile: constrain height and enable internal scroll */
+  @media (max-width: 767.98px) {
+
+    /* Ensure the collapse area doesn't clip the dropdown */
+    .navbar-collapse {
+      overflow: visible;
+    }
+
+    /* Make the dropdown a full-width scrolling panel */
+    .navbar .dropdown-menu {
+      position: static !important;
+      /* align within the collapsed menu */
+      width: 100% !important;
+      max-height: 65vh !important;
+      /* visible area */
+      overflow-y: auto !important;
+      /* scroll inside */
+      overscroll-behavior: contain;
+      /* prevent body scroll chaining */
+      -webkit-overflow-scrolling: touch;
+      /* smooth iOS scroll */
+      margin-top: 4px;
+      z-index: 1200 !important;
+      /* above page content */
+    }
+
+    /* Optional: slightly tighter items on mobile for more visible rows */
+    .navbar .dropdown-item {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+  }
+
+  /* Mobile: make the navbar collapse open/close instantly and keep children visible */
+  @media (max-width: 991.98px) {
+
+    /* Let Bootstrap manage visibility; don't hide with display:none */
+    .navbar-collapse {
+      overflow: visible;
+    }
+
+    /* Remove the slide animation that makes the shell move before the content */
+    .navbar-collapse.collapsing {
+      height: auto !important;
+      transition: none !important;
+    }
+
+    /* Ensure the shown state is just block with no animation lag */
+    .navbar-collapse.collapse.show {
+      display: block !important;
+    }
+
+    /* Also make dropdowns inside the collapse render immediately */
+    .navbar .dropdown-menu {
+      transition: none !important;
+    }
+  }
+
+  /* === Prevent mobile zoom on navbar taps (iOS) === */
+  @media (max-width: 767.98px) {
+
+    /* Hamburger button */
+    .navbar-toggler {
+      font-size: 16px !important;
+      line-height: 1.2;
+    }
+
+    /* The three-line icon inside (so Safari sees it as 16px too) */
+    .navbar-toggler-icon {
+      width: 1.5em;
+      height: 1.5em;
+    }
+
+    /* Menu links inside the opened mobile menu */
+    .navbar-collapse .navbar-nav .nav-link {
+      font-size: 14px !important;
+    }
+
+    /* Mobile logout row as well */
+    .navbar-nav .nav-item.d-md-none .nav-link.mobile-chevron {
+      font-size: 14px !important;
+    }
+  }
 </style>
 
 
@@ -445,7 +511,9 @@ button i {
                   <i class="fa fa-wrench me-2"></i> TË GJITHA PRODUKTET
                 </a>
               </li>
-              <li><hr class="dropdown-divider"></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
 
               <!-- Categories -->
               <?php foreach ($this->session->userdata('category') as $key => $value) { ?>
@@ -461,21 +529,21 @@ button i {
 
           <?php if (in_array($this->session->userdata('role'), ['admin'])): ?>
 
-          <!-- KRIJO dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="icon-user p-r-10 me-1"></i>
-              KRIJO
-              <span class="ms-2 nav-badge nav-badge-danger">4</span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navCreate">
-              <!-- <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/workers'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PUNTORËVE</a></li> -->
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user'); ?>"><i class="fa fa-plus me-2"></i> PËRDORUES I RI</a></li>
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/all_user_list'); ?>"><i class="fa fa-list me-2"></i> LISTA E TË GJITHË PËRDORUESVE</a></li>
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/categories'); ?>"><i class="fa fa-list me-2"></i> KATEGORIT</a></li>
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/login_history'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PËRDORUESVE</a></li>
-            </ul>
-          </li>
+            <!-- KRIJO dropdown -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="icon-user p-r-10 me-1"></i>
+                KRIJO
+                <span class="ms-2 nav-badge nav-badge-danger">4</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navCreate">
+                <!-- <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/workers'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PUNTORËVE</a></li> -->
+                <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user'); ?>"><i class="fa fa-plus me-2"></i> PËRDORUES I RI</a></li>
+                <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/all_user_list'); ?>"><i class="fa fa-list me-2"></i> LISTA E TË GJITHË PËRDORUESVE</a></li>
+                <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/categories'); ?>"><i class="fa fa-list me-2"></i> KATEGORIT</a></li>
+                <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/login_history'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PËRDORUESVE</a></li>
+              </ul>
+            </li>
           <?php endif; ?>
           <!-- PRINTO dropdown -->
           <!-- <li class="nav-item dropdown">
@@ -490,58 +558,58 @@ button i {
             </ul>
           </li> -->
           <?php if (in_array($this->session->userdata('role'), ['admin'])): ?>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span class="glyphicon glyphicon-user me-2"></span> 
-               PUNËTORËT
-              <span class="ms-2 nav-badge nav-badge-danger">1</span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navCreate">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="glyphicon glyphicon-user me-2"></span>
+                PUNËTORËT
+                <span class="ms-2 nav-badge nav-badge-danger">1</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navCreate">
                 <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/workers'); ?>"><i class="fa fa-list me-2"></i> LISTA E PAGAVE</a></li>
-            </ul>
-          </li>
+              </ul>
+            </li>
           <?php endif; ?>
 
-          <?php if (in_array($this->session->userdata('role'), ['admin','sales'])): ?>
-          <!-- FATURAT dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navInvoices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fa fa-file p-r-10 me-1" aria-hidden="true"></i>
-              FATURAT
-              <span class="ms-2 nav-badge nav-badge-danger">3</span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navInvoices">
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/'); ?>"><i class="fa fa-plus me-2"></i> KRIJO FATURËN</a></li>
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/created'); ?>"><i class="fa fa-file me-2"></i> FATURAT E KRIJUARA</a></li>
-              <?php if (in_array($this->session->userdata('role'), ['admin'])): ?>
-              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/debt_invoices'); ?>"><i class="fa fa-file me-2"></i> DETYRIMET E KLIENTEVE</a></li>
-              <?php endif; ?>
-            </ul>
-          </li>
+          <?php if (in_array($this->session->userdata('role'), ['admin', 'sales'])): ?>
+            <!-- FATURAT dropdown -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navInvoices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-file p-r-10 me-1" aria-hidden="true"></i>
+                FATURAT
+                <span class="ms-2 nav-badge nav-badge-danger">3</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navInvoices">
+                <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/'); ?>"><i class="fa fa-plus me-2"></i> KRIJO FATURËN</a></li>
+                <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/created'); ?>"><i class="fa fa-file me-2"></i> FATURAT E KRIJUARA</a></li>
+                <?php if (in_array($this->session->userdata('role'), ['admin'])): ?>
+                  <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/invoices/debt_invoices'); ?>"><i class="fa fa-file me-2"></i> DETYRIMET E KLIENTEVE</a></li>
+                <?php endif; ?>
+              </ul>
+            </li>
 
           <?php endif; ?>
         </ul>
 
         <!-- Right side: Profile + Logout -->
-      <li class="nav-item dropdown d-none d-md-flex" id="navProfile">
-        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navProfile" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <img src="<?php echo base_url(); ?>optimum/images/profile-icon1.png" alt="user-img" width="32" height="32" class="rounded-circle me-2">
-          <span class="d-none d-lg-inline"><?php echo $this->session->userdata('name'); ?></span>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navProfile">
-          <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('auth/logout'); ?>"><i class="fa fa-power-off me-2"></i> Logout</a></li>
-        </ul>
-      </li>
+        <li class="nav-item dropdown d-none d-md-flex" id="navProfile">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navProfile" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="<?php echo base_url(); ?>optimum/images/profile-icon1.png" alt="user-img" width="32" height="32" class="rounded-circle me-2">
+            <span class="d-none d-lg-inline"><?php echo $this->session->userdata('name'); ?></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navProfile">
+            <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('auth/logout'); ?>"><i class="fa fa-power-off me-2"></i> Logout</a></li>
+          </ul>
+        </li>
 
-      <!-- Mobile-only logout item -->
-      <li class="nav-item d-md-none">
-        <a href="<?php echo base_url('auth/logout'); ?>" class="nav-link d-flex align-items-center mobile-chevron">
-          <i class="icon-logout fa-fw me-2"></i>
-          DIL NGA PROGRAMI
-        </a>
-      </li>
+        <!-- Mobile-only logout item -->
+        <li class="nav-item d-md-none">
+          <a href="<?php echo base_url('auth/logout'); ?>" class="nav-link d-flex align-items-center mobile-chevron">
+            <i class="icon-logout fa-fw me-2"></i>
+            DIL NGA PROGRAMI
+          </a>
+        </li>
 
-        
+
       </div>
     </div>
   </nav>
@@ -561,10 +629,10 @@ button i {
 <?php include 'layout/js.php'; ?>
 
 <script>
-(function($){
-  $(function(){
-    $('body').removeClass('mini-sidebar');
-    $('.navbar-collapse').removeClass('in show').attr('aria-expanded','false');
-  });
-})(jQuery);
+  (function($) {
+    $(function() {
+      $('body').removeClass('mini-sidebar');
+      $('.navbar-collapse').removeClass('in show').attr('aria-expanded', 'false');
+    });
+  })(jQuery);
 </script>

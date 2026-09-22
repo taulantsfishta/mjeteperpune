@@ -96,55 +96,53 @@
 <body>
 
 
-      <!-- BUTONI SHTO KLIENTIN -->
+    <!-- BUTONI SHTO KLIENTIN -->
 
-      <!-- SEARCH + SHTO KLIENTIN -->
+    <!-- SEARCH + SHTO KLIENTIN -->
 
-      <div class="row">
+    <div class="row">
 
-      <div class="col-xs-12 col-sm-6 col-md-5">
+        <div class="col-xs-12 col-sm-6 col-md-5">
 
-          <div class="input-group" style="width:100%;">
+            <div class="input-group" style="width:100%;">
 
-              <span class="input-group-addon">
-                  <i class="fa fa-search"></i>
-              </span>
+                <span class="input-group-addon">
+                    <i class="fa fa-search"></i>
+                </span>
 
-              <input
-                  type="text"
-                  id="clientSearch"
-                  class="form-control"
-                  placeholder="Kërko sipas emrit, adresës ose telefonit..."
-                  autocomplete="off"
-              >
+                <input
+                    type="text"
+                    id="clientSearch"
+                    class="form-control"
+                    placeholder="Kërko sipas emrit, adresës ose telefonit..."
+                    autocomplete="off">
 
-          </div>
+            </div>
 
-      </div>
-
-
-      <div class="hidden-xs col-sm-2 col-md-4"></div>
+        </div>
 
 
-      <div class="col-xs-12 col-sm-4 col-md-3">
+        <div class="hidden-xs col-sm-2 col-md-4"></div>
 
-          <a
-              href="<?php echo base_url('admin/invoices/add_debt_client'); ?>"
-              class="btn btn-block"
-              style="background:#ffcd35;color:#1a1a1a;"
-          >
 
-              <i class="fa fa-plus"></i>
-              &nbsp;&nbsp;
-              Shto Klientin
+        <div class="col-xs-12 col-sm-4 col-md-3">
 
-          </a>
+            <a
+                href="<?php echo base_url('admin/invoices/add_debt_client'); ?>"
+                class="btn btn-block"
+                style="background:#ffcd35;color:#1a1a1a;">
 
-      </div>
+                <i class="fa fa-plus"></i>
+                &nbsp;&nbsp;
+                Shto Klientin
 
-  </div>
+            </a>
 
-  <br>
+        </div>
+
+    </div>
+
+    <br>
 
 
     <!-- LISTA E KLIENTEVE -->
@@ -185,57 +183,56 @@
 
                     <tbody id="clientsTableBody">
 
-                      <?php if (!empty($clients)): ?>
+                        <?php if (!empty($clients)): ?>
 
-                          <?php foreach ($clients as $client): ?>
+                            <?php foreach ($clients as $client): ?>
 
-                              <tr
-                                  class="clickable-row"
-                                  data-href="<?php echo base_url(
-                                      'admin/invoices/debt_client/' . $client['id']
-                                  ); ?>"
-                              >
+                                <tr
+                                    class="clickable-row"
+                                    data-href="<?php echo base_url(
+                                                    'admin/invoices/debt_client/' . $client['id']
+                                                ); ?>">
 
-                                  <td data-label="ID">
-                                      <?php echo $client['id']; ?>
-                                  </td>
+                                    <td data-label="ID">
+                                        <?php echo $client['id']; ?>
+                                    </td>
 
-                                  <td data-label="Emri i Klientit">
+                                    <td data-label="Emri i Klientit">
 
-                                      <span class="client-name">
+                                        <span class="client-name">
 
-                                          <?php echo htmlspecialchars(
-                                              $client['name'],
-                                              ENT_QUOTES,
-                                              'UTF-8'
-                                          ); ?>
+                                            <?php echo htmlspecialchars(
+                                                $client['name'],
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ); ?>
 
-                                      </span>
+                                        </span>
 
-                                  </td>
+                                    </td>
 
-                                  <td data-label="Detyrimi Total">
+                                    <td data-label="Detyrimi Total">
 
-                                      <span class="debt-amount">
+                                        <span class="debt-amount">
 
-                                          <?php echo number_format(
-                                              (float)$client['total_debt'],
-                                              2,
-                                              '.',
-                                              ','
-                                          ); ?> €
+                                            <?php echo number_format(
+                                                (float)$client['total_debt'],
+                                                2,
+                                                '.',
+                                                ','
+                                            ); ?> €
 
-                                      </span>
+                                        </span>
 
-                                  </td>
+                                    </td>
 
-                              </tr>
+                                </tr>
 
-                          <?php endforeach; ?>
+                            <?php endforeach; ?>
 
-                      <?php endif; ?>
+                        <?php endif; ?>
 
-                  </tbody>
+                    </tbody>
 
 
                 </table>
@@ -250,8 +247,7 @@
 
 
     <script>
-
-        $(document).ready(function () {
+        $(document).ready(function() {
 
 
             /*
@@ -262,7 +258,7 @@
             $(document).on(
                 'click',
                 '.clickable-row',
-                function () {
+                function() {
 
                     var href = $(this).data('href');
 
@@ -277,91 +273,88 @@
 
 
         });
-
     </script>
 
     <script>
+        $(document).ready(function() {
 
-    $(document).ready(function () {
-
-        var searchTimer;
-
-
-        /*
-        * SEARCH AJAX
-        */
-        $('#clientSearch').on('keyup', function () {
-
-            clearTimeout(searchTimer);
-
-            var search = $(this).val();
+            var searchTimer;
 
 
-            searchTimer = setTimeout(function () {
+            /*
+             * SEARCH AJAX
+             */
+            $('#clientSearch').on('keyup', function() {
 
-                $.ajax({
+                clearTimeout(searchTimer);
 
-                    url: '<?php echo base_url("admin/invoices/search_debt_clients"); ?>',
+                var search = $(this).val();
 
-                    type: 'GET',
 
-                    data: {
-                        search: search
-                    },
+                searchTimer = setTimeout(function() {
 
-                    beforeSend: function () {
+                    $.ajax({
 
-                        $('#clientsTableBody').html(
-                            '<tr>' +
+                        url: '<?php echo base_url("admin/invoices/search_debt_clients"); ?>',
+
+                        type: 'GET',
+
+                        data: {
+                            search: search
+                        },
+
+                        beforeSend: function() {
+
+                            $('#clientsTableBody').html(
+                                '<tr>' +
                                 '<td colspan="3" class="text-center" style="padding:25px;">' +
-                                    '<i class="fa fa-spinner fa-spin"></i> Duke kërkuar...' +
+                                '<i class="fa fa-spinner fa-spin"></i> Duke kërkuar...' +
                                 '</td>' +
-                            '</tr>'
-                        );
+                                '</tr>'
+                            );
 
-                    },
+                        },
 
-                    success: function (response) {
+                        success: function(response) {
 
-                        $('#clientsTableBody').html(response);
+                            $('#clientsTableBody').html(response);
 
-                    },
+                        },
 
-                    error: function () {
+                        error: function() {
 
-                        $('#clientsTableBody').html(
-                            '<tr>' +
+                            $('#clientsTableBody').html(
+                                '<tr>' +
                                 '<td colspan="3" class="text-center text-danger" style="padding:25px;">' +
-                                    'Ndodhi një gabim gjatë kërkimit.' +
+                                'Ndodhi një gabim gjatë kërkimit.' +
                                 '</td>' +
-                            '</tr>'
-                        );
+                                '</tr>'
+                            );
 
-                    }
+                        }
 
-                });
+                    });
 
-            }, 300);
+                }, 300);
+
+            });
+
+
+
+            /*
+             * HAP DETAJET E KLIENTIT
+             */
+            $(document).on('click', '.clickable-row', function() {
+
+                var href = $(this).data('href');
+
+                if (href) {
+                    window.location.href = href;
+                }
+
+            });
 
         });
-
-
-
-        /*
-        * HAP DETAJET E KLIENTIT
-        */
-        $(document).on('click', '.clickable-row', function () {
-
-            var href = $(this).data('href');
-
-            if (href) {
-                window.location.href = href;
-            }
-
-        });
-
-    });
-
     </script>
 
 

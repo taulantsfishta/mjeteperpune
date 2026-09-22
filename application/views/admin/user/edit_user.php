@@ -28,8 +28,8 @@
 
 
                 <form method="post"
-                      action="<?php echo base_url('admin/user/update/' . $user->id) ?>"
-                      class="form-horizontal">
+                    action="<?php echo base_url('admin/user/update/' . $user->id) ?>"
+                    class="form-horizontal">
 
 
                     <!-- EMRI I PERDORUESIT -->
@@ -41,11 +41,11 @@
 
                         <div class="col-sm-4">
                             <input type="text"
-                                   name="first_name"
-                                   class="form-control"
-                                   value="<?php echo $user->first_name; ?>"
-                                   data-validation-required-message="Kerkohet emri i perdoruesit"
-                                   disabled>
+                                name="first_name"
+                                class="form-control"
+                                value="<?php echo $user->first_name; ?>"
+                                data-validation-required-message="Kerkohet emri i perdoruesit"
+                                disabled>
                         </div>
                     </div>
 
@@ -69,12 +69,11 @@
                                     id="passwordInput"
                                     class="form-control"
                                     data-validation-required-message="Kerkohet fjalekalimi"
-                                    required
-                                >
+                                    required>
 
                                 <span class="input-group-addon"
-                                      id="togglePassword"
-                                      style="cursor:pointer;">
+                                    id="togglePassword"
+                                    style="cursor:pointer;">
 
                                     <i class="fa fa-eye" aria-hidden="true"></i>
 
@@ -102,11 +101,11 @@
                                 <div class="input-group">
 
                                     <input type="text"
-                                           name="prefix_user"
-                                           id="prefix_user"
-                                           class="form-control"
-                                           value="<?php echo $prefix_user->prefix_user; ?>"
-                                           placeholder="FK,PR">
+                                        name="prefix_user"
+                                        id="prefix_user"
+                                        class="form-control"
+                                        value="<?php echo $prefix_user->prefix_user; ?>"
+                                        placeholder="FK,PR">
 
                                 </div>
 
@@ -129,12 +128,13 @@
                         <span>ADMIN </span>
 
                         <input
-                            <?php if ($user->role == "admin") { echo "checked"; } ?>
+                            <?php if ($user->role == "admin") {
+                                echo "checked";
+                            } ?>
                             type="radio"
                             name="role"
                             id="adminCheck"
-                            value="admin"
-                        >
+                            value="admin">
 
                         <br><br>
 
@@ -144,12 +144,13 @@
                         <span>AGJENT </span>
 
                         <input
-                            <?php if ($user->role == "sales") { echo "checked"; } ?>
+                            <?php if ($user->role == "sales") {
+                                echo "checked";
+                            } ?>
                             type="radio"
                             name="role"
                             id="salesCheck"
-                            value="sales"
-                        >
+                            value="sales">
 
                         <br><br>
 
@@ -159,12 +160,13 @@
                         <span>PËRDORUES </span>
 
                         <input
-                            <?php if ($user->role == "user") { echo "checked"; } ?>
+                            <?php if ($user->role == "user") {
+                                echo "checked";
+                            } ?>
                             type="radio"
                             name="role"
                             id="userCheck"
-                            value="user"
-                        >
+                            value="user">
 
                         <br>
 
@@ -181,16 +183,16 @@
 
 
                         <input type="checkbox"
-                               value="0"
-                               name="role_action[]"
-                               id="selectAllCheckbox"
-                               <?php
-                               if ($view_category[0] == 0) {
-                                   echo 'checked';
-                               } else {
-                                   echo 'disabled';
-                               }
-                               ?>>
+                            value="0"
+                            name="role_action[]"
+                            id="selectAllCheckbox"
+                            <?php
+                            if ($view_category[0] == 0) {
+                                echo 'checked';
+                            } else {
+                                echo 'disabled';
+                            }
+                            ?>>
 
                         &nbsp;&nbsp;TE GJITHA
 
@@ -200,24 +202,22 @@
                         <?php foreach ($category as $cat) : ?>
 
                             <input type="checkbox"
-                                   value="<?php echo $cat['id']; ?>"
-                                   name="role_action[]"
+                                value="<?php echo $cat['id']; ?>"
+                                name="role_action[]"
 
-                                   <?php
-                                   if ($view_category[0] == 0) {
+                                <?php
+                                if ($view_category[0] == 0) {
 
-                                       echo 'disabled';
+                                    echo 'disabled';
+                                } else {
 
-                                   } else {
+                                    if (in_array($cat['id'], $view_category)) {
+                                        echo 'checked';
+                                    }
+                                }
+                                ?>
 
-                                       if (in_array($cat['id'], $view_category)) {
-                                           echo 'checked';
-                                       }
-
-                                   }
-                                   ?>
-
-                                   onchange="handleOtherCheckboxChange(this)">
+                                onchange="handleOtherCheckboxChange(this)">
 
                             &nbsp;&nbsp;<?php echo $cat['name']; ?>
 
@@ -232,13 +232,13 @@
                         Shfaq Cmimet:&nbsp;
 
                         <input type="checkbox"
-                               name="price_status"
-                               class="js-switch"
-                               <?php
-                               if ($user->price_status == 1) {
-                                   echo 'checked';
-                               }
-                               ?>>
+                            name="price_status"
+                            class="js-switch"
+                            <?php
+                            if ($user->price_status == 1) {
+                                echo 'checked';
+                            }
+                            ?>>
 
                     </div>
 
@@ -249,8 +249,8 @@
                     <!-- CSRF token -->
 
                     <input type="hidden"
-                           name="<?= $this->security->get_csrf_token_name(); ?>"
-                           value="<?= $this->security->get_csrf_hash(); ?>" />
+                        name="<?= $this->security->get_csrf_token_name(); ?>"
+                        value="<?= $this->security->get_csrf_hash(); ?>" />
 
 
                     <!-- SAVE -->
@@ -260,7 +260,7 @@
                         <div class="col-sm-offset-3 col-sm-5">
 
                             <button type="submit"
-                                    class="btn btn-success btn-rounded btn-sm">
+                                class="btn btn-success btn-rounded btn-sm">
 
                                 <i class="fa fa-plus"></i>
                                 &nbsp;&nbsp;Save
@@ -283,114 +283,113 @@
 <!-- ROLE LOGIC -->
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
-    var roleRadios = document.querySelectorAll('input[name="role"]');
+        var roleRadios = document.querySelectorAll('input[name="role"]');
 
-    var prefixField = document.getElementById("prefixField");
-    var prefixInput = document.getElementById("prefix_user");
+        var prefixField = document.getElementById("prefixField");
+        var prefixInput = document.getElementById("prefix_user");
 
-    var ifYesDiv = document.getElementById("ifYes");
+        var ifYesDiv = document.getElementById("ifYes");
 
 
-    function updateRoleFields() {
+        function updateRoleFields() {
 
-        var checkedRole = document.querySelector('input[name="role"]:checked');
+            var checkedRole = document.querySelector('input[name="role"]:checked');
 
-        if (!checkedRole) {
-            return;
+            if (!checkedRole) {
+                return;
+            }
+
+            var role = checkedRole.value;
+
+
+            // =========================
+            // USER
+            // =========================
+
+            if (role === "user") {
+
+                // Fsheh prefixin
+                prefixField.style.display = "none";
+
+                // Prefix nuk eshte required
+                prefixInput.required = false;
+
+                // Shfaq kategorite
+                ifYesDiv.style.display = "block";
+
+            }
+
+
+            // =========================
+            // ADMIN OSE SALES
+            // =========================
+            else {
+
+                // Shfaq prefixin
+                prefixField.style.display = "block";
+
+                // Prefix duhet te plotesohet
+                prefixInput.required = true;
+
+                // Fsheh kategorite
+                ifYesDiv.style.display = "none";
+
+            }
+
         }
 
-        var role = checkedRole.value;
 
+        // Kur ndryshohet roli
+        roleRadios.forEach(function(radio) {
 
-        // =========================
-        // USER
-        // =========================
+            radio.addEventListener("change", function() {
+                updateRoleFields();
+            });
 
-        if (role === "user") {
-
-            // Fsheh prefixin
-            prefixField.style.display = "none";
-
-            // Prefix nuk eshte required
-            prefixInput.required = false;
-
-            // Shfaq kategorite
-            ifYesDiv.style.display = "block";
-
-        }
-
-
-        // =========================
-        // ADMIN OSE SALES
-        // =========================
-
-        else {
-
-            // Shfaq prefixin
-            prefixField.style.display = "block";
-
-            // Prefix duhet te plotesohet
-            prefixInput.required = true;
-
-            // Fsheh kategorite
-            ifYesDiv.style.display = "none";
-
-        }
-
-    }
-
-
-    // Kur ndryshohet roli
-    roleRadios.forEach(function (radio) {
-
-        radio.addEventListener("change", function () {
-            updateRoleFields();
         });
 
+
+        // Kur hapet faqja e editimit
+        updateRoleFields();
+
     });
-
-
-    // Kur hapet faqja e editimit
-    updateRoleFields();
-
-});
 </script>
 
 
 <!-- PASSWORD SHOW / HIDE -->
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
-    var toggle = document.getElementById("togglePassword");
-    var input  = document.getElementById("passwordInput");
+        var toggle = document.getElementById("togglePassword");
+        var input = document.getElementById("passwordInput");
 
-    toggle.addEventListener("click", function () {
+        toggle.addEventListener("click", function() {
 
-        var isPassword = input.type === "password";
+            var isPassword = input.type === "password";
 
-        input.type = isPassword ? "text" : "password";
+            input.type = isPassword ? "text" : "password";
 
-        var icon = this.querySelector("i");
+            var icon = this.querySelector("i");
 
-        icon.classList.toggle("fa-eye", !isPassword);
-        icon.classList.toggle("fa-eye-slash", isPassword);
+            icon.classList.toggle("fa-eye", !isPassword);
+            icon.classList.toggle("fa-eye-slash", isPassword);
 
-        this.setAttribute(
-            "aria-label",
-            isPassword ? "Hide password" : "Show password"
-        );
+            this.setAttribute(
+                "aria-label",
+                isPassword ? "Hide password" : "Show password"
+            );
 
-        this.setAttribute(
-            "title",
-            isPassword ? "Hide password" : "Show password"
-        );
+            this.setAttribute(
+                "title",
+                isPassword ? "Hide password" : "Show password"
+            );
+
+        });
 
     });
-
-});
 </script>
 
 <!-- End Page Content -->

@@ -7,9 +7,13 @@
         width: 100%;
     }
 
-    .dropdown-menu { width: 100%; }
+    .dropdown-menu {
+        width: 100%;
+    }
 
-    .product-card.selected { background-color: lightblue; }
+    .product-card.selected {
+        background-color: lightblue;
+    }
 
     #selectedProductsButtonContainer {
         position: fixed;
@@ -20,25 +24,39 @@
         display: none;
     }
 
-    svg { display: none; }
+    svg {
+        display: none;
+    }
 
     [role="search"] {
         box-sizing: border-box;
         background-color: #fff;
-        border: 1px solid rgba(0,0,0,.5);
+        border: 1px solid rgba(0, 0, 0, .5);
         border-radius: 1em;
         padding: 0;
         max-width: 100em;
         height: 34px;
     }
+
     [role="search"] label {
         display: inline-block;
-        width: 0; overflow: hidden; text-indent: -1000px; margin: 0;
+        width: 0;
+        overflow: hidden;
+        text-indent: -1000px;
+        margin: 0;
     }
 
-    input::-webkit-input-placeholder { color: #757575; }
-    input:-ms-input-placeholder { color: #757575; }
-    input::-moz-placeholder { color: #757575; }
+    input::-webkit-input-placeholder {
+        color: #757575;
+    }
+
+    input:-ms-input-placeholder {
+        color: #757575;
+    }
+
+    input::-moz-placeholder {
+        color: #757575;
+    }
 
     input[type="text"] {
         border-radius: .5em;
@@ -70,37 +88,68 @@
         align-items: center;
         justify-content: center;
     }
-    [role="search"] button svg {
-        display: block; margin: 0 auto; fill: #666; width: 100%; height: auto;
-    }
-    [role="search"] button:hover, [role="search"] button:focus { outline: none; }
-    [role="search"] button:hover svg, [role="search"] button:focus svg { fill: #7396CE; }
 
-    [role="search"] input[type="text"]:focus { outline: none; box-shadow: none; }
+    [role="search"] button svg {
+        display: block;
+        margin: 0 auto;
+        fill: #666;
+        width: 100%;
+        height: auto;
+    }
+
+    [role="search"] button:hover,
+    [role="search"] button:focus {
+        outline: none;
+    }
+
+    [role="search"] button:hover svg,
+    [role="search"] button:focus svg {
+        fill: #7396CE;
+    }
+
+    [role="search"] input[type="text"]:focus {
+        outline: none;
+        box-shadow: none;
+    }
 
     [role="search"] button i {
-        color: #666; transition: color .3s ease; font-size: 1.2em;
+        color: #666;
+        transition: color .3s ease;
+        font-size: 1.2em;
     }
+
     [role="search"] button:hover i,
-    [role="search"] button:focus i { color: #7396CE; }
+    [role="search"] button:focus i {
+        color: #7396CE;
+    }
 
     #loadingIndicator .spinner {
         display: inline-block;
-        width: 40px; height: 40px;
-        border: 3px solid rgba(0,0,0,0.1);
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(0, 0, 0, 0.1);
         border-radius: 50%;
         border-top-color: #3498db;
         animation: spin 1s ease-in-out infinite;
         margin-right: 8px;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 
     body.modal-open .background-blur:not(.modal):not(.modal *) {
         filter: blur(5px);
         pointer-events: none;
         user-select: none;
     }
-    .modal { z-index: 1055; position: fixed; }
+
+    .modal {
+        z-index: 1055;
+        position: fixed;
+    }
 
     .card.product-card {
         display: flex;
@@ -116,13 +165,13 @@
         flex-grow: 1;
     }
 
-    .product-description{
-        margin-left:10px;
-        font-size:14px;
-        line-height:1.3;
-        display:block;
-        overflow:visible;
-        white-space:normal;
+    .product-description {
+        margin-left: 10px;
+        font-size: 14px;
+        line-height: 1.3;
+        display: block;
+        overflow: visible;
+        white-space: normal;
     }
 
     .navbar .dropdown-menu {
@@ -131,14 +180,22 @@
         z-index: 1200 !important;
         border: 1px solid #e3e7eb;
         border-radius: 4px;
-        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
         padding-top: 6px;
         padding-bottom: 6px;
     }
-    #searchContainer { z-index: 100 !important; }
 
-    .container.background-blur .dropdown .dropdown-toggle { width: 100%; }
-    .container.background-blur .dropdown .dropdown-menu   { width: 100%; }
+    #searchContainer {
+        z-index: 100 !important;
+    }
+
+    .container.background-blur .dropdown .dropdown-toggle {
+        width: 100%;
+    }
+
+    .container.background-blur .dropdown .dropdown-menu {
+        width: 100%;
+    }
 
     #searchContainer {
         position: sticky;
@@ -155,39 +212,89 @@
         align-items: center;
     }
 
-    #searchContainer.focused { box-shadow: 0 0 10px #67b2f08c; }
-
-    .background-blur { overflow: visible; }
-
-    #imagemodal_img{
-      transition: opacity .15s ease;
+    #searchContainer.focused {
+        box-shadow: 0 0 10px #67b2f08c;
     }
 
-        .product-col{
-            padding-bottom: 10px;
-        }
+    .background-blur {
+        overflow: visible;
+    }
 
-        .product-info-table {
-            max-height: 230px; /* About 3 rows */
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-        }
+    #imagemodal_img {
+        transition: opacity .15s ease;
+    }
 
-        .product-info-table thead th {
-            position: sticky;
-            top: 0;
-            background: #fff;
-            z-index: 2;
-        }
+    .product-col {
+        padding-bottom: 10px;
+    }
+
+    .product-info-table {
+        max-height: 230px;
+        /* About 3 rows */
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+    }
+
+    .product-info-table thead th {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 2;
+    }
 
     /* ===== SHOPPING CART ===== */
-    .product-bottom-actions { display:flex; gap:6px; margin-top:8px; }
-    .product-bottom-actions .btn { flex:1; margin-top:0 !important; font-size:14px; }
-    #cartSummaryBar { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); width:min(650px,calc(100% - 30px)); background:#fff; border:1px solid #d9d9d9; border-radius:12px; padding:12px 15px; z-index:1040; box-shadow:0 5px 25px rgba(0,0,0,.20); display:none; }
-    .cart-summary-content { display:flex; align-items:center; justify-content:space-between; gap:15px; }
-    .cart-summary-info { font-size:15px; }
-    .cart-summary-info strong { font-size:17px; }
-    @media(max-width:576px){ .cart-summary-content{flex-direction:column;align-items:stretch;} #finishCartBtn{width:100%;} }
+    .product-bottom-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .product-bottom-actions .btn {
+        flex: 1;
+        margin-top: 0 !important;
+        font-size: 14px;
+    }
+
+    #cartSummaryBar {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        width: min(650px, calc(100% - 30px));
+        background: #fff;
+        border: 1px solid #d9d9d9;
+        border-radius: 12px;
+        padding: 12px 15px;
+        z-index: 1040;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, .20);
+        display: none;
+    }
+
+    .cart-summary-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .cart-summary-info {
+        font-size: 15px;
+    }
+
+    .cart-summary-info strong {
+        font-size: 17px;
+    }
+
+    @media(max-width:576px) {
+        .cart-summary-content {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #finishCartBtn {
+            width: 100%;
+        }
+    }
 </style>
 
 <?php if ($this->session->userdata('role') == 'admin') : ?>
@@ -197,20 +304,20 @@
             <div class="col-lg-3">
                 <div class="dropdown">
                     <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1"
-                            data-bs-toggle="dropdown" aria-expanded="false" style="background:#7396CE;">
+                        data-bs-toggle="dropdown" aria-expanded="false" style="background:#7396CE;">
                         <i class="fa fa-print"></i> Aktivizo Printimin
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                         <li><a class="dropdown-item" id="printOption" onClick="onClickButton('print')" style="font-size:13px;">
-                            <i class="fa fa-print"></i> Printo</a></li>
+                                <i class="fa fa-print"></i> Printo</a></li>
                         <li><a class="dropdown-item" id="selectOption" onClick="onClickButton('select')" style="font-size:13px;">
-                            <i class="fa fa-check" aria-hidden="true"></i> Selekto</a></li>
+                                <i class="fa fa-check" aria-hidden="true"></i> Selekto</a></li>
                         <li><a class="dropdown-item" id="cancelOption" onClick="onClickButton('cancel')" style="font-size:13px;">
-                            <i class="fa fa-times" aria-hidden="true"></i> Anulo Printimin</a></li>
+                                <i class="fa fa-times" aria-hidden="true"></i> Anulo Printimin</a></li>
                     </ul>
                 </div>
             </div>
-            <br/>
+            <br />
             <div class="col-lg-3 mb-3 mb-lg-0">
                 <a href="<?php echo base_url('admin/products/add/' . $category['id']); ?>">
                     <button type="submit" class="btn btn-block" style="background:#ffcd35;">
@@ -239,15 +346,14 @@
     <?php foreach ($products as $key => $value) { ?>
         <div class="col-md-12 col-lg-3 product-col" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
             <div class="card product-card d-flex flex-column h-100"
-                 data-product-id-main="<?php echo $value['id']; ?>"
-                 data-product-name="<?php echo htmlspecialchars($value['name']); ?>">
+                data-product-id-main="<?php echo $value['id']; ?>"
+                data-product-name="<?php echo htmlspecialchars($value['name']); ?>">
                 <img
                     id="imageresource_<?php echo $value['id']; ?>"
                     imgId="<?php echo $value['id']; ?>"
                     class="lazyload img-fluid mx-auto mt-3"
                     style="width:90px; height:70px; object-fit: contain;"
-                    data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
-                />
+                    data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" />
 
                 <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
                     <div>
@@ -282,8 +388,8 @@
                                     </button>
                                 </a>
                                 <a href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>"
-                                   data-toggle="modal" data-target="#confirmDeleteModal"
-                                   data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $category['id']; ?>">
+                                    data-toggle="modal" data-target="#confirmDeleteModal"
+                                    data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $category['id']; ?>">
                                     <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_<?php echo $value['id']; ?>">
                                         <i class="fa fa-trash"></i> Fshije Produktin
                                     </button>
@@ -293,19 +399,19 @@
                                         <i class="fa fa-info-circle"></i> Informata Produkti
                                     </button>
                                     <button type="button" class="btn btn-warning add-to-cart-btn"
-                                            data-productid="<?php echo $value['id']; ?>"
-                                            data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
-                                            data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
-                                            data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
+                                        data-productid="<?php echo $value['id']; ?>"
+                                        data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
+                                        data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
+                                        data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
                                         <i class="fa fa-shopping-cart"></i> Shportë
                                     </button>
                                 </div>
                             <?php else : ?>
                                 <button type="button" class="btn btn-warning btn-block add-to-cart-btn"
-                                        data-productid="<?php echo $value['id']; ?>"
-                                        data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
-                                        data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
-                                        data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
+                                    data-productid="<?php echo $value['id']; ?>"
+                                    data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
+                                    data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
+                                    data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
                                     <i class="fa fa-shopping-cart"></i> Shportë
                                 </button>
                             <?php endif; ?>
@@ -334,35 +440,35 @@
             </div>
             <div class="modal-body">
                 <img id="imagemodal_img" class="img-fluid"
-                     style="margin-left:auto;margin-right:auto;display:block;width:270px;height:220px;">
+                    style="margin-left:auto;margin-right:auto;display:block;width:270px;height:220px;">
             </div>
         </div>
     </div>
 </div>
 
 <!-- DELETE MODALS -->
-    <div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header border-0">
+<div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
                 <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmo</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                </div>
-                <div class="modal-body">
-                    A jeni i sigurt qe deshironi te fshini kete produkt?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
-                    <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
-                </div>
+            </div>
+            <div class="modal-body">
+                A jeni i sigurt qe deshironi te fshini kete produkt?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Jo</button>
+                <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+<div class="modal background-blur" id="confirmUNDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmUNDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header border-0">
                 <h5 class="modal-title" id="confirmUNDeleteModalLabel">Konfirmo</h5>
@@ -378,8 +484,8 @@
                 <a id="UNdeleteProductLink" href="#" class="btn btn-danger">Rikthe</a>
             </div>
         </div>
-        </div>
     </div>
+</div>
 
 <div id="loadingIndicator" style="display:none;text-align:center;padding:10px;">
     <div class="spinner"></div><br>
@@ -400,8 +506,8 @@
 
             <div class="px-3 pt-3">
                 <button type="button"
-                        class="btn btn-success btn-sm"
-                        id="openAddProductOrderModal">
+                    class="btn btn-success btn-sm"
+                    id="openAddProductOrderModal">
                     <i class="fa fa-plus"></i> Shto porosi të re
                 </button>
             </div>
@@ -450,7 +556,7 @@
 
                     <div class="form-group">
                         <label>Numri i Faturës</label>
-                        <input type="text" class="form-control" id="order_invoice_number" name="invoice_number" >
+                        <input type="text" class="form-control" id="order_invoice_number" name="invoice_number">
                     </div>
 
                     <div id="addProductOrderError" class="alert alert-danger d-none"></div>
@@ -524,161 +630,196 @@
 
 <!-- ===== ADD TO CART MODAL ===== -->
 <div class="modal" id="addToCartModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title"><i class="fa fa-shopping-cart"></i> Shto në shportë</h5><button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button></div>
-    <div class="modal-body">
-      <input type="hidden" id="cart_product_id">
-      <div class="form-group"><label>Produkti</label><input type="text" id="cart_product_name" class="form-control" readonly></div>
-      <div class="form-group"><label>Sasia</label><input type="number" id="cart_quantity" class="form-control" value="1" min="1" step="1"></div>
-      <div class="form-group"><label>Çmimi (€)</label><input type="number" id="cart_price" class="form-control" min="0" step="0.01"></div>
-      <div id="cartModalError" class="alert alert-danger" style="display:none;"></div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-shopping-cart"></i> Shto në shportë</h5><button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cart_product_id">
+                <div class="form-group"><label>Produkti</label><input type="text" id="cart_product_name" class="form-control" readonly></div>
+                <div class="form-group"><label>Sasia</label><input type="number" id="cart_quantity" class="form-control" value="1" min="1" step="1"></div>
+                <div class="form-group"><label>Çmimi (€)</label><input type="number" id="cart_price" class="form-control" min="0" step="0.01"></div>
+                <div id="cartModalError" class="alert alert-danger" style="display:none;"></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulo</button><button type="button" class="btn btn-success" id="confirmAddToCart"><i class="fa fa-shopping-cart"></i> Shto në shportë</button></div>
+        </div>
     </div>
-    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulo</button><button type="button" class="btn btn-success" id="confirmAddToCart"><i class="fa fa-shopping-cart"></i> Shto në shportë</button></div>
-  </div></div>
 </div>
 
-<div id="cartSummaryBar"><div class="cart-summary-content">
-  <div class="cart-summary-info"><i class="fa fa-shopping-cart"></i> <strong><span id="cartProductsCount">0</span></strong> Produkte &nbsp; | &nbsp; Totali: <strong><span id="cartTotal">0.00</span> €</strong></div>
-  <div class="d-flex" style="gap:6px;"><button type="button" class="btn btn-info" id="viewCartBtn"><i class="fa fa-eye"></i> Shiko Shportën</button><button type="button" class="btn btn-danger" id="cancelCartBtn"><i class="fa fa-trash"></i> Anulo</button><button type="button" class="btn btn-success" id="finishCartBtn"><i class="fa fa-check"></i> Përfundo</button></div>
-</div></div>
+<div id="cartSummaryBar">
+    <div class="cart-summary-content">
+        <div class="cart-summary-info"><i class="fa fa-shopping-cart"></i> <strong><span id="cartProductsCount">0</span></strong> Produkte &nbsp; | &nbsp; Totali: <strong><span id="cartTotal">0.00</span> €</strong></div>
+        <div class="d-flex" style="gap:6px;"><button type="button" class="btn btn-info" id="viewCartBtn"><i class="fa fa-eye"></i> Shiko Shportën</button><button type="button" class="btn btn-danger" id="cancelCartBtn"><i class="fa fa-trash"></i> Anulo</button><button type="button" class="btn btn-success" id="finishCartBtn"><i class="fa fa-check"></i> Përfundo</button></div>
+    </div>
+</div>
 
-<div class="modal" id="viewCartModal" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg modal-dialog-centered" role="document"><div class="modal-content">
-  <div class="modal-header"><h5 class="modal-title"><i class="fa fa-shopping-cart"></i> Shporta</h5><button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button></div>
-  <div class="modal-body"><div class="table-responsive"><table class="table table-bordered table-striped mb-0"><thead><tr><th>#</th><th>Kodi</th><th>Produkti</th><th style="width:110px;">Sasia</th><th style="width:140px;">Çmimi</th><th style="width:130px;">Totali</th><th style="width:80px;">Veprimi</th></tr></thead><tbody id="cartProductsTable"></tbody></table></div><div class="text-right mt-3"><h4>Totali: <strong><span id="cartModalTotal">0.00</span> €</strong></h4></div></div>
-  <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button></div>
-</div></div></div>
+<div class="modal" id="viewCartModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-shopping-cart"></i> Shporta</h5><button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Kodi</th>
+                                <th>Produkti</th>
+                                <th style="width:110px;">Sasia</th>
+                                <th style="width:140px;">Çmimi</th>
+                                <th style="width:130px;">Totali</th>
+                                <th style="width:80px;">Veprimi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartProductsTable"></tbody>
+                    </table>
+                </div>
+                <div class="text-right mt-3">
+                    <h4>Totali: <strong><span id="cartModalTotal">0.00</span> €</strong></h4>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button></div>
+        </div>
+    </div>
+</div>
 
 <script>
-// ===== products.php JS (only) =====
+    // ===== products.php JS (only) =====
 
-// server data
-let productsList = <?php echo json_encode($products); ?>;
-let total_row_products = <?php echo json_encode($total_row_products); ?>;
+    // server data
+    let productsList = <?php echo json_encode($products); ?>;
+    let total_row_products = <?php echo json_encode($total_row_products); ?>;
 
-// selection / print state
-let selectedProducts = [];
-let stateDropdown = '';
+    // selection / print state
+    let selectedProducts = [];
+    let stateDropdown = '';
 
-document.addEventListener("DOMContentLoaded", function () {
-  history.scrollRestoration = "manual";
-  setTimeout(() => window.scrollTo(0, 0), 10);
+    document.addEventListener("DOMContentLoaded", function() {
+        history.scrollRestoration = "manual";
+        setTimeout(() => window.scrollTo(0, 0), 10);
 
-  const searchInput = document.getElementById("searchInput");
-  const searchIcon = document.getElementById("searchIcon");
-  const productListing = document.getElementById("productListing");
-  const loadingIndicator = document.getElementById("loadingIndicator");
-  const selectedBtnContainer = document.getElementById("selectedProductsButtonContainer");
-  const gatherBtn = document.getElementById("gatherSelectedProductsBtn");
+        const searchInput = document.getElementById("searchInput");
+        const searchIcon = document.getElementById("searchIcon");
+        const productListing = document.getElementById("productListing");
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        const selectedBtnContainer = document.getElementById("selectedProductsButtonContainer");
+        const gatherBtn = document.getElementById("gatherSelectedProductsBtn");
 
-  window.base_url = <?php echo json_encode(base_url()); ?>;
-  const url = window.base_url;
+        window.base_url = <?php echo json_encode(base_url()); ?>;
+        const url = window.base_url;
 
-  const priceStatus = "<?php echo $_SESSION['price_status']; ?>";
-  const role = "<?php echo $_SESSION['role']; ?>";
+        const priceStatus = "<?php echo $_SESSION['price_status']; ?>";
+        const role = "<?php echo $_SESSION['role']; ?>";
 
-  // paging / search flags
-  let isLoading = false;
-  let isSearching = false;
-  let searchInProgress = false;
-  let hasMore = true;                 // HARD stop when no more data
-  let getSearchResult = 0;            // total matches from backend (if provided)
+        // paging / search flags
+        let isLoading = false;
+        let isSearching = false;
+        let searchInProgress = false;
+        let hasMore = true; // HARD stop when no more data
+        let getSearchResult = 0; // total matches from backend (if provided)
 
-  const limit = 20;
+        const limit = 20;
 
-  // IMPORTANT: start after SSR products
-  let offset = Array.isArray(productsList) ? productsList.length : 0;
-  if (offset >= total_row_products) hasMore = false;
+        // IMPORTANT: start after SSR products
+        let offset = Array.isArray(productsList) ? productsList.length : 0;
+        if (offset >= total_row_products) hasMore = false;
 
-  let searchAbort = null;
+        let searchAbort = null;
 
-  function showLoadingIndicator() {
-    loadingIndicator.style.display = "block";
-  }
-  function hideLoadingIndicator() {
-    loadingIndicator.style.display = "none";
-    isLoading = false;
-  }
+        function showLoadingIndicator() {
+            loadingIndicator.style.display = "block";
+        }
 
-  async function makeAsyncRequest(urlParam) {
-    if (searchAbort) searchAbort.abort();
-    searchAbort = new AbortController();
+        function hideLoadingIndicator() {
+            loadingIndicator.style.display = "none";
+            isLoading = false;
+        }
 
-    const res = await fetch(urlParam, { signal: searchAbort.signal });
-    if (!res.ok) throw new Error(res.statusText);
-    return await res.json();
-  }
+        async function makeAsyncRequest(urlParam) {
+            if (searchAbort) searchAbort.abort();
+            searchAbort = new AbortController();
 
-  function resetSearchState() {
-    offset = 0;
-    isLoading = false;
-    isSearching = false;
-    searchInProgress = false;
-    hasMore = true;
-    getSearchResult = 0;
+            const res = await fetch(urlParam, {
+                signal: searchAbort.signal
+            });
+            if (!res.ok) throw new Error(res.statusText);
+            return await res.json();
+        }
 
-    productListing.innerHTML = "";
-    productsList.length = 0;
-    selectedProducts.length = 0;
+        function resetSearchState() {
+            offset = 0;
+            isLoading = false;
+            isSearching = false;
+            searchInProgress = false;
+            hasMore = true;
+            getSearchResult = 0;
 
-    if (selectedBtnContainer) selectedBtnContainer.style.display = "none";
-  }
+            productListing.innerHTML = "";
+            productsList.length = 0;
+            selectedProducts.length = 0;
 
-  function showNotFound() {
-    productListing.innerHTML =
-      `<h4 class="page-title" style="color:#d9534f;font-weight:600;margin-left:26px;">
+            if (selectedBtnContainer) selectedBtnContainer.style.display = "none";
+        }
+
+        function showNotFound() {
+            productListing.innerHTML =
+                `<h4 class="page-title" style="color:#d9534f;font-weight:600;margin-left:26px;">
          PRODUKTI NUK U GJEND!
        </h4>`;
-    searchInput.focus();
-    window.scrollTo(0, 0);
-  }
+            searchInput.focus();
+            window.scrollTo(0, 0);
+        }
 
-  async function searchProducts(query) {
-    let response;
+        async function searchProducts(query) {
+            let response;
 
-    if (query === "") {
-      if (!hasMore || offset >= total_row_products) {
-        hasMore = false;
-        return;
-      }
-      response = await makeAsyncRequest(
-        url + `admin/dashboard/get_products_with_limit/<?php echo $category['id']; ?>/${offset}`
-      );
-    } else {
-      response = await makeAsyncRequest(
-        url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${encodeURIComponent(query)}&offset=${offset}`
-      );
-      if (typeof response.total === "number") getSearchResult = response.total;
-    }
+            if (query === "") {
+                if (!hasMore || offset >= total_row_products) {
+                    hasMore = false;
+                    return;
+                }
+                response = await makeAsyncRequest(
+                    url + `admin/dashboard/get_products_with_limit/<?php echo $category['id']; ?>/${offset}`
+                );
+            } else {
+                response = await makeAsyncRequest(
+                    url + `admin/dashboard/search_products_by_category/<?php echo $category['id']; ?>/?query=${encodeURIComponent(query)}&offset=${offset}`
+                );
+                if (typeof response.total === "number") getSearchResult = response.total;
+            }
 
-    const batch = response.products || [];
+            const batch = response.products || [];
 
-    // end of results
-    if (batch.length === 0) {
-      hasMore = false;
+            // end of results
+            if (batch.length === 0) {
+                hasMore = false;
 
-      // only show "not found" on first page of a search
-      if (query !== "" && offset === 0) showNotFound();
-      return;
-    }
+                // only show "not found" on first page of a search
+                if (query !== "" && offset === 0) showNotFound();
+                return;
+            }
 
-    // move forward only after successful batch
-    offset += limit;
+            // move forward only after successful batch
+            offset += limit;
 
-    productsList.push(...batch);
-    updateProductListing(batch, response.category_id, query);
+            productsList.push(...batch);
+            updateProductListing(batch, response.category_id, query);
 
-    // restore dropdown mode
-    if (stateDropdown === "print") onClickButton("print");
-    else if (stateDropdown === "select") onClickButton("select");
-    else onClickButton("cancel");
-  }
+            // restore dropdown mode
+            if (stateDropdown === "print") onClickButton("print");
+            else if (stateDropdown === "select") onClickButton("select");
+            else onClickButton("cancel");
+        }
 
-  function updateProductListing(products, category_id, query) {
-    searchInput.value = query;
+        function updateProductListing(products, category_id, query) {
+            searchInput.value = query;
 
-    if (products.length === 0) return;
+            if (products.length === 0) return;
 
-    const html = products.map(product => `
+            const html = products.map(product => `
       <div class="col-md-12 col-lg-3 product-col" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
         <div class="card product-card d-flex flex-column h-100"
              data-product-id-main="${product.id}"
@@ -734,187 +875,196 @@ document.addEventListener("DOMContentLoaded", function () {
       </div>
     `).join("");
 
-    productListing.insertAdjacentHTML("beforeend", html);
-    moveModalsOutside();
+            productListing.insertAdjacentHTML("beforeend", html);
+            moveModalsOutside();
 
-    // attach select handler to newly added cards only if in select mode
-    if (stateDropdown === "select") {
-      productListing.querySelectorAll(".product-card:not([data-select-bound])").forEach(card => {
-        card.setAttribute("data-select-bound", "1");
-        card.addEventListener("click", handleProductCardClick);
-      });
-    }
-  }
-
-  function performSearch() {
-    const searchQuery = searchInput.value.trim();
-
-    resetSearchState();
-    window.scrollTo(0, 0);
-
-    if (searchQuery === "") {
-      isSearching = false;
-      searchProducts("").catch(console.error);
-    } else {
-      isSearching = true;
-      searchInProgress = true;
-      searchProducts(searchQuery)
-        .catch(console.error)
-        .finally(() => (searchInProgress = false));
-    }
-  }
-
-  // click / enter search
-  searchIcon.addEventListener("click", performSearch);
-  searchInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") performSearch();
-  });
-
-
-  // infinite scroll (throttled)
-  function checkScrollLoadMore() {
-    if (isLoading || searchInProgress || !hasMore) return;
-
-    // stop if we know total and we've loaded all
-    if (isSearching && getSearchResult > 0 && offset >= getSearchResult) {
-      hasMore = false;
-      return;
-    }
-
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-
-    if (scrollTop + windowHeight >= documentHeight - 120) {
-      isLoading = true;
-      showLoadingIndicator();
-
-      const q = isSearching ? searchInput.value.trim() : "";
-      searchProducts(q)
-        .catch(console.error)
-        .finally(hideLoadingIndicator);
-    }
-  }
-
-  let scrollTick = false;
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (scrollTick) return;
-      scrollTick = true;
-      requestAnimationFrame(() => {
-        checkScrollLoadMore();
-        scrollTick = false;
-      });
-    },
-    { passive: true }
-  );
-
-    // =====================================================
-    // SHOPPING CART - SHARED PHP SESSION
-    // =====================================================
-    let shoppingCart = [];
-    let currentCartProduct = null;
-
-    function loadShoppingCart() {
-        $.ajax({
-            url: url + 'admin/dashboard/get_cart',
-            type: 'GET',
-            dataType: 'json',
-            cache: false,
-            success: function (res) {
-                if (!res || res.status === false) return;
-                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
-                updateCartSummary();
+            // attach select handler to newly added cards only if in select mode
+            if (stateDropdown === "select") {
+                productListing.querySelectorAll(".product-card:not([data-select-bound])").forEach(card => {
+                    card.setAttribute("data-select-bound", "1");
+                    card.addEventListener("click", handleProductCardClick);
+                });
             }
+        }
+
+        function performSearch() {
+            const searchQuery = searchInput.value.trim();
+
+            resetSearchState();
+            window.scrollTo(0, 0);
+
+            if (searchQuery === "") {
+                isSearching = false;
+                searchProducts("").catch(console.error);
+            } else {
+                isSearching = true;
+                searchInProgress = true;
+                searchProducts(searchQuery)
+                    .catch(console.error)
+                    .finally(() => (searchInProgress = false));
+            }
+        }
+
+        // click / enter search
+        searchIcon.addEventListener("click", performSearch);
+        searchInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") performSearch();
         });
-    }
 
-    loadShoppingCart();
 
-    $(document).on('click', '.add-to-cart-btn', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+        // infinite scroll (throttled)
+        function checkScrollLoadMore() {
+            if (isLoading || searchInProgress || !hasMore) return;
 
-        currentCartProduct = {
-            id: $(this).data('productid'),
-            code: $(this).attr('data-code'),
-            name: $(this).attr('data-name'),
-            originalPrice: parseFloat($(this).attr('data-price')) || 0
-        };
+            // stop if we know total and we've loaded all
+            if (isSearching && getSearchResult > 0 && offset >= getSearchResult) {
+                hasMore = false;
+                return;
+            }
 
-        $('#cart_product_id').val(currentCartProduct.id);
-        $('#cart_product_name').val(currentCartProduct.code + ' - ' + currentCartProduct.name);
-        $('#cart_quantity').val(1);
-        $('#cart_price').val(currentCartProduct.originalPrice);
-        $('#cartModalError').hide().html('');
-        $('#addToCartModal').modal('show');
-        setTimeout(function () { $('#cart_quantity').focus().select(); }, 300);
-    });
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
 
-    $(document).on('click', '#confirmAddToCart', function () {
-        if (!currentCartProduct) return;
+            if (scrollTop + windowHeight >= documentHeight - 120) {
+                isLoading = true;
+                showLoadingIndicator();
 
-        const quantity = parseFloat($('#cart_quantity').val());
-        const price = parseFloat($('#cart_price').val());
-
-        if (!quantity || quantity <= 0) {
-            $('#cartModalError').html('Sasia duhet të jetë më e madhe se 0.').show();
-            return;
-        }
-        if (isNaN(price) || price < 0) {
-            $('#cartModalError').html('Çmimi nuk është valid.').show();
-            return;
+                const q = isSearching ? searchInput.value.trim() : "";
+                searchProducts(q)
+                    .catch(console.error)
+                    .finally(hideLoadingIndicator);
+            }
         }
 
-        $('#confirmAddToCart').prop('disabled', true);
-        $.ajax({
-            url: url + 'admin/dashboard/add_to_cart',
-            type: 'POST',
-            dataType: 'json',
-            data: { product_id: currentCartProduct.id, quantity: quantity, price: price },
-            success: function (res) {
-                if (!res || res.status === false) {
-                    $('#cartModalError').html((res && res.message) ? res.message : 'Produkti nuk u shtua.').show();
-                    return;
+        let scrollTick = false;
+        window.addEventListener(
+            "scroll",
+            () => {
+                if (scrollTick) return;
+                scrollTick = true;
+                requestAnimationFrame(() => {
+                    checkScrollLoadMore();
+                    scrollTick = false;
+                });
+            }, {
+                passive: true
+            }
+        );
+
+        // =====================================================
+        // SHOPPING CART - SHARED PHP SESSION
+        // =====================================================
+        let shoppingCart = [];
+        let currentCartProduct = null;
+
+        function loadShoppingCart() {
+            $.ajax({
+                url: url + 'admin/dashboard/get_cart',
+                type: 'GET',
+                dataType: 'json',
+                cache: false,
+                success: function(res) {
+                    if (!res || res.status === false) return;
+                    shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                    updateCartSummary();
                 }
-                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
-                $('#addToCartModal').modal('hide');
-                updateCartSummary();
-            },
-            error: function () {
-                $('#cartModalError').html('Gabim gjatë shtimit në shportë.').show();
-            },
-            complete: function () { $('#confirmAddToCart').prop('disabled', false); }
+            });
+        }
+
+        loadShoppingCart();
+
+        $(document).on('click', '.add-to-cart-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            currentCartProduct = {
+                id: $(this).data('productid'),
+                code: $(this).attr('data-code'),
+                name: $(this).attr('data-name'),
+                originalPrice: parseFloat($(this).attr('data-price')) || 0
+            };
+
+            $('#cart_product_id').val(currentCartProduct.id);
+            $('#cart_product_name').val(currentCartProduct.code + ' - ' + currentCartProduct.name);
+            $('#cart_quantity').val(1);
+            $('#cart_price').val(currentCartProduct.originalPrice);
+            $('#cartModalError').hide().html('');
+            $('#addToCartModal').modal('show');
+            setTimeout(function() {
+                $('#cart_quantity').focus().select();
+            }, 300);
         });
-    });
 
-    function updateCartSummary() {
-        let totalPrice = 0;
-        shoppingCart.forEach(function (item) {
-            totalPrice += (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
+        $(document).on('click', '#confirmAddToCart', function() {
+            if (!currentCartProduct) return;
+
+            const quantity = parseFloat($('#cart_quantity').val());
+            const price = parseFloat($('#cart_price').val());
+
+            if (!quantity || quantity <= 0) {
+                $('#cartModalError').html('Sasia duhet të jetë më e madhe se 0.').show();
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                $('#cartModalError').html('Çmimi nuk është valid.').show();
+                return;
+            }
+
+            $('#confirmAddToCart').prop('disabled', true);
+            $.ajax({
+                url: url + 'admin/dashboard/add_to_cart',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    product_id: currentCartProduct.id,
+                    quantity: quantity,
+                    price: price
+                },
+                success: function(res) {
+                    if (!res || res.status === false) {
+                        $('#cartModalError').html((res && res.message) ? res.message : 'Produkti nuk u shtua.').show();
+                        return;
+                    }
+                    shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                    $('#addToCartModal').modal('hide');
+                    updateCartSummary();
+                },
+                error: function() {
+                    $('#cartModalError').html('Gabim gjatë shtimit në shportë.').show();
+                },
+                complete: function() {
+                    $('#confirmAddToCart').prop('disabled', false);
+                }
+            });
         });
-        $('#cartProductsCount').text(shoppingCart.length);
-        $('#cartTotal').text(totalPrice.toFixed(2));
-        if (shoppingCart.length > 0) $('#cartSummaryBar').fadeIn(150);
-        else $('#cartSummaryBar').fadeOut(150);
-    }
 
-    $(document).on('click', '#viewCartBtn', function () {
-        if (shoppingCart.length === 0) return;
-        renderCartProducts();
-        $('#viewCartModal').modal('show');
-    });
+        function updateCartSummary() {
+            let totalPrice = 0;
+            shoppingCart.forEach(function(item) {
+                totalPrice += (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
+            });
+            $('#cartProductsCount').text(shoppingCart.length);
+            $('#cartTotal').text(totalPrice.toFixed(2));
+            if (shoppingCart.length > 0) $('#cartSummaryBar').fadeIn(150);
+            else $('#cartSummaryBar').fadeOut(150);
+        }
 
-    function renderCartProducts() {
-        let rowsHtml = '';
-        let totalPrice = 0;
-        shoppingCart.forEach(function (item, index) {
-            const quantity = parseFloat(item.quantity) || 0;
-            const price = parseFloat(item.price) || 0;
-            const rowTotal = quantity * price;
-            totalPrice += rowTotal;
-            rowsHtml += `
+        $(document).on('click', '#viewCartBtn', function() {
+            if (shoppingCart.length === 0) return;
+            renderCartProducts();
+            $('#viewCartModal').modal('show');
+        });
+
+        function renderCartProducts() {
+            let rowsHtml = '';
+            let totalPrice = 0;
+            shoppingCart.forEach(function(item, index) {
+                const quantity = parseFloat(item.quantity) || 0;
+                const price = parseFloat(item.price) || 0;
+                const rowTotal = quantity * price;
+                totalPrice += rowTotal;
+                rowsHtml += `
                 <tr data-productid="${item.id}">
                     <td>${index + 1}</td>
                     <td><b>${escapeHtml(item.code)}</b></td>
@@ -924,178 +1074,193 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td class="text-right"><b class="cart-row-total">${rowTotal.toFixed(2)} €</b></td>
                     <td class="text-center"><button type="button" class="btn btn-danger btn-sm delete-cart-product" data-productid="${item.id}" data-name="${escapeHtml(item.name)}" title="Fshije produktin"><i class="fa fa-trash"></i></button></td>
                 </tr>`;
-        });
-        $('#cartProductsTable').html(rowsHtml);
-        $('#cartModalTotal').text(totalPrice.toFixed(2));
-    }
-
-    function saveCartProduct(productId) {
-        const row = $('#cartProductsTable').find('tr[data-productid="' + productId + '"]');
-        const quantity = parseFloat(row.find('.cart-edit-quantity').val());
-        const price = parseFloat(row.find('.cart-edit-price').val());
-        if (!quantity || quantity <= 0 || isNaN(price) || price < 0) return;
-
-        $.ajax({
-            url: url + 'admin/dashboard/update_cart_product',
-            type: 'POST', dataType: 'json',
-            data: { product_id: productId, quantity: quantity, price: price },
-            success: function (res) {
-                if (!res || res.status === false) return;
-                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
-                const item = shoppingCart.find(x => String(x.id) === String(productId));
-                if (item) row.find('.cart-row-total').text(((parseFloat(item.quantity)||0)*(parseFloat(item.price)||0)).toFixed(2) + ' €');
-                updateCartSummary();
-                updateCartModalTotal();
-            }
-        });
-    }
-
-    let cartSaveTimer = null;
-    $(document).on('input change', '.cart-edit-quantity, .cart-edit-price', function () {
-        const productId = $(this).data('productid');
-        clearTimeout(cartSaveTimer);
-        cartSaveTimer = setTimeout(function () { saveCartProduct(productId); }, 300);
-    });
-
-    function updateCartModalTotal() {
-        let totalPrice = 0;
-        shoppingCart.forEach(function (item) {
-            totalPrice += (parseFloat(item.quantity)||0) * (parseFloat(item.price)||0);
-        });
-        $('#cartModalTotal').text(totalPrice.toFixed(2));
-    }
-
-    $(document).on('click', '.delete-cart-product', function () {
-        const productId = $(this).data('productid');
-        const productName = $(this).attr('data-name') || '';
-        if (!confirm('A jeni i sigurt që dëshironi ta largoni "' + productName + '" nga shporta?')) return;
-
-        $.ajax({
-            url: url + 'admin/dashboard/delete_cart_product',
-            type: 'POST', dataType: 'json', data: { product_id: productId },
-            success: function (res) {
-                if (!res || res.status === false) return;
-                shoppingCart = Array.isArray(res.cart) ? res.cart : [];
-                updateCartSummary();
-                if (shoppingCart.length === 0) $('#viewCartModal').modal('hide');
-                else renderCartProducts();
-            }
-        });
-    });
-
-    $(document).on('click', '#cancelCartBtn', function () {
-        if (shoppingCart.length === 0) return;
-        if (!confirm('A jeni i sigurt që dëshironi ta anuloni të gjithë shportën?')) return;
-
-        $.ajax({
-            url: url + 'admin/dashboard/clear_cart',
-            type: 'POST', dataType: 'json',
-            success: function (res) {
-                if (!res || res.status === false) return;
-                shoppingCart = [];
-                currentCartProduct = null;
-                $('#viewCartModal').modal('hide');
-                updateCartSummary();
-            }
-        });
-    });
-
-    $(document).on('keydown', '#cart_quantity, #cart_price', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); $('#confirmAddToCart').trigger('click'); }
-    });
-
-    $(document).on(
-        'click',
-        '#finishCartBtn',
-        function () {
-
-            if (shoppingCart.length === 0) {
-                return;
-            }
-
-            window.location.href =
-                url + 'admin/invoices?from_cart=1';
-
+            });
+            $('#cartProductsTable').html(rowsHtml);
+            $('#cartModalTotal').text(totalPrice.toFixed(2));
         }
-    );
 
+        function saveCartProduct(productId) {
+            const row = $('#cartProductsTable').find('tr[data-productid="' + productId + '"]');
+            const quantity = parseFloat(row.find('.cart-edit-quantity').val());
+            const price = parseFloat(row.find('.cart-edit-price').val());
+            if (!quantity || quantity <= 0 || isNaN(price) || price < 0) return;
 
-  // ===== single image modal =====
-  function cacheBust(u) {
-    if (!u) return u;
-    const sep = u.includes("?") ? "&" : "?";
-    return u + sep + "cb=" + Date.now();
-  }
+            $.ajax({
+                url: url + 'admin/dashboard/update_cart_product',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    product_id: productId,
+                    quantity: quantity,
+                    price: price
+                },
+                success: function(res) {
+                    if (!res || res.status === false) return;
+                    shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                    const item = shoppingCart.find(x => String(x.id) === String(productId));
+                    if (item) row.find('.cart-row-total').text(((parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0)).toFixed(2) + ' €');
+                    updateCartSummary();
+                    updateCartModalTotal();
+                }
+            });
+        }
 
-      // ===== move appended modals to body =====
-    function moveModalsOutside() {
-        $('#productListing .modal').each(function () {
-            $('body').append(this);
+        let cartSaveTimer = null;
+        $(document).on('input change', '.cart-edit-quantity, .cart-edit-price', function() {
+            const productId = $(this).data('productid');
+            clearTimeout(cartSaveTimer);
+            cartSaveTimer = setTimeout(function() {
+                saveCartProduct(productId);
+            }, 300);
         });
-    }
 
-    // ===== product information modal (works for initial products + search products) =====
-    function escapeHtml(value) {
-        if (value === null || value === undefined || value === '') return '-';
-        return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
+        function updateCartModalTotal() {
+            let totalPrice = 0;
+            shoppingCart.forEach(function(item) {
+                totalPrice += (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
+            });
+            $('#cartModalTotal').text(totalPrice.toFixed(2));
+        }
 
-    function money(value) {
-        if (value === null || value === undefined || value === '') return '-';
-        return escapeHtml(value) + ' RMB';
-    }
+        $(document).on('click', '.delete-cart-product', function() {
+            const productId = $(this).data('productid');
+            const productName = $(this).attr('data-name') || '';
+            if (!confirm('A jeni i sigurt që dëshironi ta largoni "' + productName + '" nga shporta?')) return;
 
-    $(document).on('click', '.product-info-btn', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+            $.ajax({
+                url: url + 'admin/dashboard/delete_cart_product',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    product_id: productId
+                },
+                success: function(res) {
+                    if (!res || res.status === false) return;
+                    shoppingCart = Array.isArray(res.cart) ? res.cart : [];
+                    updateCartSummary();
+                    if (shoppingCart.length === 0) $('#viewCartModal').modal('hide');
+                    else renderCartProducts();
+                }
+            });
+        });
 
-        const productId = $(this).data('productid');
-        if (!productId) return;
-        $('#productInfoContent').html('<div class="py-3">Duke ngarkuar...</div>');
-        $('#productInfoModal').modal('show');
-               
-        $.ajax({
-            url: url + 'admin/products/product_information/' + productId,
-            type: 'GET',
-            dataType: 'json',
-            success: function (res) {
-                if (!res || res.status === false) {
-                    $('#productInfoContent').html(
-                        '<div class="alert alert-warning mb-0">Nuk ka informata për këtë produkt.</div>'
-                    );
+        $(document).on('click', '#cancelCartBtn', function() {
+            if (shoppingCart.length === 0) return;
+            if (!confirm('A jeni i sigurt që dëshironi ta anuloni të gjithë shportën?')) return;
+
+            $.ajax({
+                url: url + 'admin/dashboard/clear_cart',
+                type: 'POST',
+                dataType: 'json',
+                success: function(res) {
+                    if (!res || res.status === false) return;
+                    shoppingCart = [];
+                    currentCartProduct = null;
+                    $('#viewCartModal').modal('hide');
+                    updateCartSummary();
+                }
+            });
+        });
+
+        $(document).on('keydown', '#cart_quantity, #cart_price', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#confirmAddToCart').trigger('click');
+            }
+        });
+
+        $(document).on(
+            'click',
+            '#finishCartBtn',
+            function() {
+
+                if (shoppingCart.length === 0) {
                     return;
                 }
 
-                const data = res.data ? res.data : res;
+                window.location.href =
+                    url + 'admin/invoices?from_cart=1';
 
-                const product = data.product_info || {};
-                const purchases = Array.isArray(data.purchases) ? data.purchases : [];
+            }
+        );
 
-                let totalQuantity = 0;
-                let totalValue = 0;
 
-                let rowsHtml = '';
+        // ===== single image modal =====
+        function cacheBust(u) {
+            if (!u) return u;
+            const sep = u.includes("?") ? "&" : "?";
+            return u + sep + "cb=" + Date.now();
+        }
 
-                if (Array.isArray(purchases) && purchases.length > 0) {
+        // ===== move appended modals to body =====
+        function moveModalsOutside() {
+            $('#productListing .modal').each(function() {
+                $('body').append(this);
+            });
+        }
 
-                    rowsHtml = purchases.map(function (item, index) {
-                                            
-                    const qtyRaw = item.product_quantity || 0;
-                    const priceRaw = item.product_buying_price || 0;
+        // ===== product information modal (works for initial products + search products) =====
+        function escapeHtml(value) {
+            if (value === null || value === undefined || value === '') return '-';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-                    const qty = parseFloat(qtyRaw) || 0;
-                    const price = parseFloat(priceRaw) || 0;
-                    const rowTotal = qty * price;
-                    const date = item.created_at.split(' ')[0];
+        function money(value) {
+            if (value === null || value === undefined || value === '') return '-';
+            return escapeHtml(value) + ' RMB';
+        }
 
-                    totalQuantity += qty;
-                    totalValue += rowTotal;
-                    return `
+        $(document).on('click', '.product-info-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const productId = $(this).data('productid');
+            if (!productId) return;
+            $('#productInfoContent').html('<div class="py-3">Duke ngarkuar...</div>');
+            $('#productInfoModal').modal('show');
+
+            $.ajax({
+                url: url + 'admin/products/product_information/' + productId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    if (!res || res.status === false) {
+                        $('#productInfoContent').html(
+                            '<div class="alert alert-warning mb-0">Nuk ka informata për këtë produkt.</div>'
+                        );
+                        return;
+                    }
+
+                    const data = res.data ? res.data : res;
+
+                    const product = data.product_info || {};
+                    const purchases = Array.isArray(data.purchases) ? data.purchases : [];
+
+                    let totalQuantity = 0;
+                    let totalValue = 0;
+
+                    let rowsHtml = '';
+
+                    if (Array.isArray(purchases) && purchases.length > 0) {
+
+                        rowsHtml = purchases.map(function(item, index) {
+
+                            const qtyRaw = item.product_quantity || 0;
+                            const priceRaw = item.product_buying_price || 0;
+
+                            const qty = parseFloat(qtyRaw) || 0;
+                            const price = parseFloat(priceRaw) || 0;
+                            const rowTotal = qty * price;
+                            const date = item.created_at.split(' ')[0];
+
+                            totalQuantity += qty;
+                            totalValue += rowTotal;
+                            return `
                         <tr>
                             <td>${index + 1}</td>
                             <td>${escapeHtml(item.shop_name)}</td>
@@ -1123,33 +1288,33 @@ document.addEventListener("DOMContentLoaded", function () {
                             </td>
                         </tr>
                     `;
-                    }).join('');
-                } else {
-                    // fallback për endpoint të vjetër që kthen vetëm një objekt
-                    const qtyRaw = product.product_quantity || 0;
-                    const priceRaw = product.product_buying_price || 0;
+                        }).join('');
+                    } else {
+                        // fallback për endpoint të vjetër që kthen vetëm një objekt
+                        const qtyRaw = product.product_quantity || 0;
+                        const priceRaw = product.product_buying_price || 0;
 
-                    const qty = parseFloat(qtyRaw) || 0;
-                    const price = parseFloat(priceRaw) || 0;
-                    const rowTotal = qty * price;
+                        const qty = parseFloat(qtyRaw) || 0;
+                        const price = parseFloat(priceRaw) || 0;
+                        const rowTotal = qty * price;
 
-                    totalQuantity = qty;
-                    totalValue = rowTotal;
+                        totalQuantity = qty;
+                        totalValue = rowTotal;
 
-                    // rowsHtml = `
-                    //     <tr>
-                    //         <td>1</td>
-                    //         <td>${escapeHtml(product.shop_name)}</td>
-                    //         <td>${escapeHtml(qtyRaw)}</td>
-                    //         <td>${money(priceRaw)}</td>
-                    //         <td>${rowTotal ? money(rowTotal.toFixed(2)) : '-'}</td>
-                    //         <td>${escapeHtml(product.invoice_number)}</td>
-                    //         <td>${escapeHtml(product.created_at)}</td>
-                    //     </tr>
-                    // `;
-                }
+                        // rowsHtml = `
+                        //     <tr>
+                        //         <td>1</td>
+                        //         <td>${escapeHtml(product.shop_name)}</td>
+                        //         <td>${escapeHtml(qtyRaw)}</td>
+                        //         <td>${money(priceRaw)}</td>
+                        //         <td>${rowTotal ? money(rowTotal.toFixed(2)) : '-'}</td>
+                        //         <td>${escapeHtml(product.invoice_number)}</td>
+                        //         <td>${escapeHtml(product.created_at)}</td>
+                        //     </tr>
+                        // `;
+                    }
 
-                $('#productInfoContent').html(`
+                    $('#productInfoContent').html(`
                     <div class="text-left">
                         <div class="row mb-3">
                             <div class="col-md-4 mb-2">
@@ -1193,381 +1358,381 @@ document.addEventListener("DOMContentLoaded", function () {
                         </div>
                     </div>
                 `);
-            },
-            error: function () {
-                $('#productInfoContent').html(
-                    '<div class="alert alert-danger mb-0">Gabim. Nuk u lexuan informatat e produktit.</div>'
-                );
-            }
+                },
+                error: function() {
+                    $('#productInfoContent').html(
+                        '<div class="alert alert-danger mb-0">Gabim. Nuk u lexuan informatat e produktit.</div>'
+                    );
+                }
+            });
         });
-    });
 
         let currentProductInfoId = null;
 
-    $(document).on('click', '.product-info-btn', function (e) {
-        currentProductInfoId = $(this).data('productid');
-    });
+        $(document).on('click', '.product-info-btn', function(e) {
+            currentProductInfoId = $(this).data('productid');
+        });
 
-    $(document).on('click', '#openAddProductOrderModal', function () {
+        $(document).on('click', '#openAddProductOrderModal', function() {
 
-    if (!currentProductInfoId) {
-        alert('Produkti nuk u gjet.');
-        return;
-    }
+            if (!currentProductInfoId) {
+                alert('Produkti nuk u gjet.');
+                return;
+            }
 
-        $('#order_product_id').val(currentProductInfoId);
+            $('#order_product_id').val(currentProductInfoId);
 
-        $('#order_shop_name').val('');
-        $('#order_product_quantity').val('');
-        $('#order_product_buying_price').val('');
-        $('#order_invoice_number').val('');
+            $('#order_shop_name').val('');
+            $('#order_product_quantity').val('');
+            $('#order_product_buying_price').val('');
+            $('#order_invoice_number').val('');
 
-        $('#addProductOrderError').addClass('d-none').html('');
+            $('#addProductOrderError').addClass('d-none').html('');
 
-        $('#addProductOrderModal').modal('show');
-    });
+            $('#addProductOrderModal').modal('show');
+        });
 
-    $(document).on('submit', '#addProductOrderForm', function (e) {
-        e.preventDefault();
+        $(document).on('submit', '#addProductOrderForm', function(e) {
+            e.preventDefault();
 
-        const productId = $('#order_product_id').val();
-        const shopName = $('#order_shop_name').val().trim();
-        const quantity = $('#order_product_quantity').val().trim();
-        const buyingPrice = $('#order_product_buying_price').val().trim();
-        const invoiceNumber = $('#order_invoice_number').val().trim();
+            const productId = $('#order_product_id').val();
+            const shopName = $('#order_shop_name').val().trim();
+            const quantity = $('#order_product_quantity').val().trim();
+            const buyingPrice = $('#order_product_buying_price').val().trim();
+            const invoiceNumber = $('#order_invoice_number').val().trim();
 
-        if (!shopName || !quantity || !buyingPrice) {
-            $('#addProductOrderError')
-                .removeClass('d-none')
-                .html('Ju lutem plotësoni të gjitha fushat.');
-            return;
-        }
-
-        $.ajax({
-            url: url + 'admin/products/add_product_information',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                product_id: productId,
-                shop_name: shopName,
-                product_quantity: quantity,
-                product_buying_price: buyingPrice,
-                invoice_number: invoiceNumber
-            },
-            success: function (res) {
-
-                if (!res || res.status === false) {
-                    $('#addProductOrderError')
-                        .removeClass('d-none')
-                        .html(res.message || 'Porosia nuk u ruajt.');
-                    return;
-                }
-
-                $('#addProductOrderModal').modal('hide');
-
-                $('.product-info-btn[data-productid="' + productId + '"]').trigger('click');
-            },
-            error: function () {
+            if (!shopName || !quantity || !buyingPrice) {
                 $('#addProductOrderError')
                     .removeClass('d-none')
-                    .html('Gabim gjatë ruajtjes së porosisë.');
+                    .html('Ju lutem plotësoni të gjitha fushat.');
+                return;
             }
-        });
-    });
 
-    $(document).on('click', '.edit-product-info-row', function () {
+            $.ajax({
+                url: url + 'admin/products/add_product_information',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    product_id: productId,
+                    shop_name: shopName,
+                    product_quantity: quantity,
+                    product_buying_price: buyingPrice,
+                    invoice_number: invoiceNumber
+                },
+                success: function(res) {
 
-        $('#edit_product_info_id').val($(this).data('id'));
-        $('#edit_shop_name').val($(this).data('shop'));
-        $('#edit_product_quantity').val($(this).data('quantity'));
-        $('#edit_product_buying_price').val($(this).data('price'));
-        $('#edit_invoice_number').val($(this).data('invoice'));
+                    if (!res || res.status === false) {
+                        $('#addProductOrderError')
+                            .removeClass('d-none')
+                            .html(res.message || 'Porosia nuk u ruajt.');
+                        return;
+                    }
 
-        $('#editProductInfoError').addClass('d-none').html('');
+                    $('#addProductOrderModal').modal('hide');
 
-        $('#editProductInfoModal').modal('show');
-    });
-
-
-    $(document).on('submit', '#editProductInfoForm', function (e) {
-        e.preventDefault();
-
-        const id = $('#edit_product_info_id').val();
-        const shopName = $('#edit_shop_name').val().trim();
-        const quantity = $('#edit_product_quantity').val().trim();
-        const buyingPrice = $('#edit_product_buying_price').val().trim();
-        const invoiceNumber = $('#edit_invoice_number').val().trim();
-
-        if (!id || !shopName || !quantity || !buyingPrice) {
-            $('#editProductInfoError')
-                .removeClass('d-none')
-                .html('Ju lutem plotësoni fushat obligative.');
-            return;
-        }
-
-        $.ajax({
-            url: url + 'admin/products/update_product_information',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                id: id,
-                shop_name: shopName,
-                product_quantity: quantity,
-                product_buying_price: buyingPrice,
-                invoice_number: invoiceNumber
-            },
-            success: function (res) {
-                if (!res || res.status === false) {
-                    $('#editProductInfoError')
+                    $('.product-info-btn[data-productid="' + productId + '"]').trigger('click');
+                },
+                error: function() {
+                    $('#addProductOrderError')
                         .removeClass('d-none')
-                        .html(res.message || 'Rreshti nuk u përditësua.');
-                    return;
+                        .html('Gabim gjatë ruajtjes së porosisë.');
                 }
+            });
+        });
 
-                $('#editProductInfoModal').modal('hide');
+        $(document).on('click', '.edit-product-info-row', function() {
 
-                $('.product-info-btn[data-productid="' + currentProductInfoId + '"]').trigger('click');
-            },
-            error: function () {
+            $('#edit_product_info_id').val($(this).data('id'));
+            $('#edit_shop_name').val($(this).data('shop'));
+            $('#edit_product_quantity').val($(this).data('quantity'));
+            $('#edit_product_buying_price').val($(this).data('price'));
+            $('#edit_invoice_number').val($(this).data('invoice'));
+
+            $('#editProductInfoError').addClass('d-none').html('');
+
+            $('#editProductInfoModal').modal('show');
+        });
+
+
+        $(document).on('submit', '#editProductInfoForm', function(e) {
+            e.preventDefault();
+
+            const id = $('#edit_product_info_id').val();
+            const shopName = $('#edit_shop_name').val().trim();
+            const quantity = $('#edit_product_quantity').val().trim();
+            const buyingPrice = $('#edit_product_buying_price').val().trim();
+            const invoiceNumber = $('#edit_invoice_number').val().trim();
+
+            if (!id || !shopName || !quantity || !buyingPrice) {
                 $('#editProductInfoError')
                     .removeClass('d-none')
-                    .html('Gabim gjatë përditësimit.');
+                    .html('Ju lutem plotësoni fushat obligative.');
+                return;
             }
+
+            $.ajax({
+                url: url + 'admin/products/update_product_information',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: id,
+                    shop_name: shopName,
+                    product_quantity: quantity,
+                    product_buying_price: buyingPrice,
+                    invoice_number: invoiceNumber
+                },
+                success: function(res) {
+                    if (!res || res.status === false) {
+                        $('#editProductInfoError')
+                            .removeClass('d-none')
+                            .html(res.message || 'Rreshti nuk u përditësua.');
+                        return;
+                    }
+
+                    $('#editProductInfoModal').modal('hide');
+
+                    $('.product-info-btn[data-productid="' + currentProductInfoId + '"]').trigger('click');
+                },
+                error: function() {
+                    $('#editProductInfoError')
+                        .removeClass('d-none')
+                        .html('Gabim gjatë përditësimit.');
+                }
+            });
         });
-    });
 
 
-    $(document).on('click', '.delete-product-info-row', function () {
+        $(document).on('click', '.delete-product-info-row', function() {
 
-        const id = $(this).data('id');
+            const id = $(this).data('id');
 
-        if (!id) {
-            alert('Rreshti nuk u gjet.');
-            return;
+            if (!id) {
+                alert('Rreshti nuk u gjet.');
+                return;
+            }
+
+            if (!confirm('A jeni i sigurt që dëshironi ta fshini këtë rresht?')) {
+                return;
+            }
+
+            $.ajax({
+                url: url + 'admin/products/delete_product_information',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: id
+                },
+                success: function(res) {
+                    if (!res || res.status === false) {
+                        alert(res.message || 'Rreshti nuk u fshi.');
+                        return;
+                    }
+
+                    $('.product-info-btn[data-productid="' + currentProductInfoId + '"]').trigger('click');
+                },
+                error: function() {
+                    alert('Gabim gjatë fshirjes.');
+                }
+            });
+        });
+
+
+
+        productListing.addEventListener("click", function(e) {
+
+            const el = e.target;
+
+            if (!el.classList.contains("img-fluid")) return;
+
+            const id = el.getAttribute("imgId");
+
+            const listImg = document.getElementById("imageresource_" + id);
+
+            const src =
+                listImg.getAttribute("src") ||
+                listImg.getAttribute("data-src");
+
+            const modalImg = document.getElementById("imagemodal_img");
+
+            const freshUrl = cacheBust(src);
+
+            // fshehe imazhin derisa te ngarkohet
+            modalImg.style.opacity = "0";
+
+            const preloadImg = new Image();
+
+            preloadImg.onload = function() {
+
+                modalImg.src = freshUrl;
+
+                // shfaqe pasi u ngarkua
+                modalImg.style.opacity = "1";
+
+                const card = el.closest(".product-card");
+
+                document.getElementById("imagemodal_title").textContent =
+                    card?.getAttribute("data-product-name") || "";
+
+                $("#imagemodal").modal("show");
+            };
+
+            preloadImg.src = freshUrl;
+        });
+
+        // ===== print/select dropdown =====
+        updateButtonContainerWidth();
+        window.addEventListener("resize", updateButtonContainerWidth);
+
+        function updateButtonContainerWidth() {
+            const overlayRow = document.querySelector("#productListing");
+            if (overlayRow && selectedBtnContainer) {
+                selectedBtnContainer.style.width = `${overlayRow.offsetWidth}px`;
+            }
         }
 
-        if (!confirm('A jeni i sigurt që dëshironi ta fshini këtë rresht?')) {
-            return;
-        }
+        window.onClickButton = function(option) {
+            stateDropdown = option;
 
-        $.ajax({
-            url: url + 'admin/products/delete_product_information',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                id: id
-            },
-            success: function (res) {
-                if (!res || res.status === false) {
-                    alert(res.message || 'Rreshti nuk u fshi.');
-                    return;
+            productsList.forEach(value => {
+                const printButton = document.getElementById("printButton_" + value.id);
+                const editButton = document.getElementById("editButton_" + value.id);
+                const deleteButton = document.getElementById("deleteButton_" + value.id);
+                const productCard = document.querySelector(
+                    `.product-card[data-product-id-main="${value.id}"]`
+                );
+                if (!productCard) return;
+
+                if (option === "print") {
+                    if (printButton) printButton.style.display = "block";
+                    if (editButton) editButton.style.display = "none";
+                    if (deleteButton) deleteButton.style.display = "none";
+                    productCard.removeEventListener("click", handleProductCardClick);
+                } else if (option === "select") {
+                    if (printButton) printButton.style.display = "none";
+                    if (editButton) editButton.style.display = "none";
+                    if (deleteButton) deleteButton.style.display = "none";
+
+                    if (!productCard.hasAttribute("data-select-bound")) {
+                        productCard.setAttribute("data-select-bound", "1");
+                        productCard.addEventListener("click", handleProductCardClick);
+                    }
+                } else {
+                    if (printButton) printButton.style.display = "none";
+                    if (editButton) editButton.style.display = "block";
+                    if (deleteButton) deleteButton.style.display = "block";
+                    productCard.removeEventListener("click", handleProductCardClick);
                 }
 
-                $('.product-info-btn[data-productid="' + currentProductInfoId + '"]').trigger('click');
-            },
-            error: function () {
-                alert('Gabim gjatë fshirjes.');
+                productCard.classList.remove("selected");
+            });
+
+            if (option !== "select" && selectedBtnContainer) {
+                selectedBtnContainer.style.display = "none";
+                selectedProducts.length = 0;
             }
+        };
+
+        function handleProductCardClick(e) {
+            if (stateDropdown !== "select") return;
+
+            const card = e.currentTarget;
+            const id = parseInt(card.getAttribute("data-product-id-main"), 10);
+
+            card.classList.toggle("selected");
+
+            if (card.classList.contains("selected")) {
+                if (!selectedProducts.includes(id)) selectedProducts.push(id);
+            } else {
+                const i = selectedProducts.indexOf(id);
+                if (i > -1) selectedProducts.splice(i, 1);
+            }
+
+            if (!selectedBtnContainer) return;
+
+            if (selectedProducts.length > 0) {
+                selectedBtnContainer.style.display = "block";
+                updateButtonContainerWidth();
+            } else {
+                selectedBtnContainer.style.display = "none";
+            }
+        }
+
+        // attach to initial cards
+        document.querySelectorAll(".product-card").forEach(card => {
+            card.setAttribute("data-select-bound", "1");
+            card.addEventListener("click", handleProductCardClick);
+        });
+
+        // ===== print selected =====
+        function makeRequestToBackEnd(products) {
+            if (Array.isArray(products)) products = products.join(",");
+            if (!products) return;
+
+            const form = document.createElement("form");
+            form.setAttribute("method", "get");
+            form.setAttribute("action", `${window.base_url}admin/printproduct/print_selected_products`);
+
+            const hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", "products");
+            hiddenField.setAttribute("value", products);
+
+            form.appendChild(hiddenField);
+            form.style.display = "none";
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        gatherBtn.addEventListener("click", function(ev) {
+            ev.preventDefault();
+            const ids = selectedProducts.join(",");
+            if (!ids) return;
+            makeRequestToBackEnd(ids);
         });
     });
 
-    
+    /* delete / undelete modal link binding (same as before) */
+    $(document).ready(function() {
+        $('#confirmDeleteModal').on('show.bs.modal', function(e) {
+            var productID = $(e.relatedTarget).data('productid');
+            var categoryID = $(e.relatedTarget).data('categoryid');
+            var deleteButton = $(this).find('#deleteProductLink');
+            deleteButton.attr(
+                'href',
+                '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID + '/'
+            );
+        });
+    });
 
-  productListing.addEventListener("click", function (e) {
+    $(document).ready(function() {
+        $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
+            var productID = $(e.relatedTarget).data('productid');
+            var categoryID = $(e.relatedTarget).data('categoryid');
+            var undeleteButton = $(this).find('#UNdeleteProductLink');
+            undeleteButton.attr(
+                'href',
+                '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID + '/'
+            );
+        });
+    });
 
-      const el = e.target;
+    // ===== focus glow for search bar =====
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchContainer = document.getElementById("searchContainer");
+        const searchInput = document.getElementById("searchInput");
+        const searchIcon = document.getElementById("searchIcon");
 
-      if (!el.classList.contains("img-fluid")) return;
-
-      const id = el.getAttribute("imgId");
-
-      const listImg = document.getElementById("imageresource_" + id);
-
-      const src =
-          listImg.getAttribute("src") ||
-          listImg.getAttribute("data-src");
-
-      const modalImg = document.getElementById("imagemodal_img");
-
-      const freshUrl = cacheBust(src);
-
-      // fshehe imazhin derisa te ngarkohet
-      modalImg.style.opacity = "0";
-
-      const preloadImg = new Image();
-
-      preloadImg.onload = function () {
-
-          modalImg.src = freshUrl;
-
-          // shfaqe pasi u ngarkua
-          modalImg.style.opacity = "1";
-
-          const card = el.closest(".product-card");
-
-          document.getElementById("imagemodal_title").textContent =
-              card?.getAttribute("data-product-name") || "";
-
-          $("#imagemodal").modal("show");
-      };
-
-      preloadImg.src = freshUrl;
-  });
-
-  // ===== print/select dropdown =====
-  updateButtonContainerWidth();
-  window.addEventListener("resize", updateButtonContainerWidth);
-
-  function updateButtonContainerWidth() {
-    const overlayRow = document.querySelector("#productListing");
-    if (overlayRow && selectedBtnContainer) {
-      selectedBtnContainer.style.width = `${overlayRow.offsetWidth}px`;
-    }
-  }
-
-  window.onClickButton = function (option) {
-    stateDropdown = option;
-
-    productsList.forEach(value => {
-      const printButton = document.getElementById("printButton_" + value.id);
-      const editButton = document.getElementById("editButton_" + value.id);
-      const deleteButton = document.getElementById("deleteButton_" + value.id);
-      const productCard = document.querySelector(
-        `.product-card[data-product-id-main="${value.id}"]`
-      );
-      if (!productCard) return;
-
-      if (option === "print") {
-        if (printButton) printButton.style.display = "block";
-        if (editButton) editButton.style.display = "none";
-        if (deleteButton) deleteButton.style.display = "none";
-        productCard.removeEventListener("click", handleProductCardClick);
-      } else if (option === "select") {
-        if (printButton) printButton.style.display = "none";
-        if (editButton) editButton.style.display = "none";
-        if (deleteButton) deleteButton.style.display = "none";
-
-        if (!productCard.hasAttribute("data-select-bound")) {
-          productCard.setAttribute("data-select-bound", "1");
-          productCard.addEventListener("click", handleProductCardClick);
+        function addFocus() {
+            searchContainer.classList.add("focused");
         }
-      } else {
-        if (printButton) printButton.style.display = "none";
-        if (editButton) editButton.style.display = "block";
-        if (deleteButton) deleteButton.style.display = "block";
-        productCard.removeEventListener("click", handleProductCardClick);
-      }
 
-      productCard.classList.remove("selected");
+        function removeFocus() {
+            searchContainer.classList.remove("focused");
+        }
+
+        searchInput.addEventListener("focus", addFocus);
+        searchInput.addEventListener("blur", removeFocus);
+        searchIcon.addEventListener("focus", addFocus);
+        searchIcon.addEventListener("blur", removeFocus);
     });
-
-    if (option !== "select" && selectedBtnContainer) {
-      selectedBtnContainer.style.display = "none";
-      selectedProducts.length = 0;
-    }
-  };
-
-  function handleProductCardClick(e) {
-    if (stateDropdown !== "select") return;
-
-    const card = e.currentTarget;
-    const id = parseInt(card.getAttribute("data-product-id-main"), 10);
-
-    card.classList.toggle("selected");
-
-    if (card.classList.contains("selected")) {
-      if (!selectedProducts.includes(id)) selectedProducts.push(id);
-    } else {
-      const i = selectedProducts.indexOf(id);
-      if (i > -1) selectedProducts.splice(i, 1);
-    }
-
-    if (!selectedBtnContainer) return;
-
-    if (selectedProducts.length > 0) {
-      selectedBtnContainer.style.display = "block";
-      updateButtonContainerWidth();
-    } else {
-      selectedBtnContainer.style.display = "none";
-    }
-  }
-
-  // attach to initial cards
-  document.querySelectorAll(".product-card").forEach(card => {
-    card.setAttribute("data-select-bound", "1");
-    card.addEventListener("click", handleProductCardClick);
-  });
-
-  // ===== print selected =====
-  function makeRequestToBackEnd(products) {
-    if (Array.isArray(products)) products = products.join(",");
-    if (!products) return;
-
-    const form = document.createElement("form");
-    form.setAttribute("method", "get");
-    form.setAttribute("action", `${window.base_url}admin/printproduct/print_selected_products`);
-
-    const hiddenField = document.createElement("input");
-    hiddenField.setAttribute("type", "hidden");
-    hiddenField.setAttribute("name", "products");
-    hiddenField.setAttribute("value", products);
-
-    form.appendChild(hiddenField);
-    form.style.display = "none";
-    document.body.appendChild(form);
-    form.submit();
-  }
-
-  gatherBtn.addEventListener("click", function (ev) {
-    ev.preventDefault();
-    const ids = selectedProducts.join(",");
-    if (!ids) return;
-    makeRequestToBackEnd(ids);
-  });
-});
-
-/* delete / undelete modal link binding (same as before) */
-$(document).ready(function() {
-    $('#confirmDeleteModal').on('show.bs.modal', function(e) {
-        var productID = $(e.relatedTarget).data('productid');
-        var categoryID = $(e.relatedTarget).data('categoryid');
-        var deleteButton = $(this).find('#deleteProductLink');
-        deleteButton.attr(
-            'href',
-            '<?php echo base_url("admin/products/delete_product/"); ?>' + categoryID + '/' + productID + '/'
-        );
-    });
-});
-
-$(document).ready(function() {
-    $('#confirmUNDeleteModal').on('show.bs.modal', function(e) {
-        var productID = $(e.relatedTarget).data('productid');
-        var categoryID = $(e.relatedTarget).data('categoryid');
-        var undeleteButton = $(this).find('#UNdeleteProductLink');
-        undeleteButton.attr(
-            'href',
-            '<?php echo base_url("admin/products/un_delete_product/"); ?>' + categoryID + '/' + productID + '/'
-        );
-    });
-});
-
-// ===== focus glow for search bar =====
-document.addEventListener("DOMContentLoaded", function () {
-  const searchContainer = document.getElementById("searchContainer");
-  const searchInput = document.getElementById("searchInput");
-  const searchIcon = document.getElementById("searchIcon");
-
-  function addFocus() {
-    searchContainer.classList.add("focused");
-  }
-  function removeFocus() {
-    searchContainer.classList.remove("focused");
-  }
-
-  searchInput.addEventListener("focus", addFocus);
-  searchInput.addEventListener("blur", removeFocus);
-  searchIcon.addEventListener("focus", addFocus);
-  searchIcon.addEventListener("blur", removeFocus);
-});
-
 </script>

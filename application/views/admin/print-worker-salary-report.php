@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Raporti i pagës - <?php echo html_escape($worker['workers_name']); ?></title>
@@ -11,7 +12,9 @@
             color: #000;
         }
 
-        h2, h3, p {
+        h2,
+        h3,
+        p {
             margin: 0 0 10px 0;
         }
 
@@ -51,7 +54,8 @@
             margin-bottom: 25px;
         }
 
-        table th, table td {
+        table th,
+        table td {
             border: 1px solid #000;
             padding: 8px;
             text-align: left;
@@ -79,6 +83,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="top-actions no-print">
@@ -158,11 +163,11 @@
                         <td><?php echo date('d-m-Y', strtotime($absence['created_at'])); ?></td>
                         <td>
                             <?php
-                                if (!empty($absence['absence_type']) && $absence['absence_type'] == 'hour') {
-                                    echo number_format((float)$absence['hours'], 2) . ' orë';
-                                } else {
-                                    echo number_format((float)$absence['days'], 2) . ' ditë';
-                                }
+                            if (!empty($absence['absence_type']) && $absence['absence_type'] == 'hour') {
+                                echo number_format((float)$absence['hours'], 2) . ' orë';
+                            } else {
+                                echo number_format((float)$absence['days'], 2) . ' ditë';
+                            }
                             ?>
                         </td>
                         <td><?php echo html_escape($absence['note']); ?></td>
@@ -259,10 +264,11 @@
     </table>
 
 </body>
+
 </html>
 
 <script>
-window.onload = function() {
-    window.print();
-};
+    window.onload = function() {
+        window.print();
+    };
 </script>

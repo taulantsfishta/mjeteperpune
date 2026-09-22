@@ -45,25 +45,25 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var absenceType = document.getElementById('absence_type');
-    var helpText = document.getElementById('absence_help_text');
-    var valueLabel = document.getElementById('absence_value_label');
-    var valueInput = document.getElementById('absence_value');
+    document.addEventListener('DOMContentLoaded', function() {
+        var absenceType = document.getElementById('absence_type');
+        var helpText = document.getElementById('absence_help_text');
+        var valueLabel = document.getElementById('absence_value_label');
+        var valueInput = document.getElementById('absence_value');
 
-    function updateAbsenceFields() {
-        if (absenceType.value === 'hour') {
-            valueLabel.textContent = 'Numri i orëve';
-            valueInput.placeholder = 'P.sh. 1, 2, 3...';
-            helpText.textContent = 'Vendos numrin e orëve që do t’i llogaritni si mungesë.';
-        } else {
-            valueLabel.textContent = 'Numri i ditëve';
-            valueInput.placeholder = 'P.sh. 1 ose 0.5';
-            helpText.textContent = 'Mund të vendosësh 1 ditë, 0.5 ditë, 2 ditë, etj.';
+        function updateAbsenceFields() {
+            if (absenceType.value === 'hour') {
+                valueLabel.textContent = 'Numri i orëve';
+                valueInput.placeholder = 'P.sh. 1, 2, 3...';
+                helpText.textContent = 'Vendos numrin e orëve që do t’i llogaritni si mungesë.';
+            } else {
+                valueLabel.textContent = 'Numri i ditëve';
+                valueInput.placeholder = 'P.sh. 1 ose 0.5';
+                helpText.textContent = 'Mund të vendosësh 1 ditë, 0.5 ditë, 2 ditë, etj.';
+            }
         }
-    }
 
-    absenceType.addEventListener('change', updateAbsenceFields);
-    updateAbsenceFields();
-});
+        absenceType.addEventListener('change', updateAbsenceFields);
+        updateAbsenceFields();
+    });
 </script>

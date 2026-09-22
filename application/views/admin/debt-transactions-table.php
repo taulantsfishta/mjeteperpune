@@ -31,118 +31,118 @@
         <tbody>
 
 
-        <?php if (!empty($transactions)): ?>
+            <?php if (!empty($transactions)): ?>
 
 
-            <?php foreach ($transactions as $transaction): ?>
+                <?php foreach ($transactions as $transaction): ?>
 
 
-                <tr>
+                    <tr>
 
 
-                    <!-- DATA -->
+                        <!-- DATA -->
 
-                    <td>
+                        <td>
 
-                        <?php echo date(
-                            'd.m.Y H:i',
-                            strtotime(
-                                $transaction['created_at']
-                            )
-                        ); ?>
+                            <?php echo date(
+                                'd.m.Y H:i',
+                                strtotime(
+                                    $transaction['created_at']
+                                )
+                            ); ?>
 
-                    </td>
-
-
-
-                    <!-- LLOJI -->
-
-                    <td>
-
-                        <?php if (
-                            $transaction['type'] == 'debt'
-                        ): ?>
-
-                            <span class="label label-danger">
-
-                                Detyrim
-
-                            </span>
-
-                        <?php else: ?>
-
-                            <span class="label label-success">
-
-                                Pagesë
-
-                            </span>
-
-                        <?php endif; ?>
-
-                    </td>
+                        </td>
 
 
 
-                    <!-- PERSHKRIMI -->
+                        <!-- LLOJI -->
 
-                    <td>
+                        <td>
 
-                        <?php echo htmlspecialchars(
-                            $transaction['description'] ?? '',
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ); ?>
+                            <?php if (
+                                $transaction['type'] == 'debt'
+                            ): ?>
 
-                    </td>
+                                <span class="label label-danger">
 
+                                    Detyrim
 
+                                </span>
 
-                    <!-- SHUMA -->
+                            <?php else: ?>
 
-                    <td>
+                                <span class="label label-success">
 
-                        <?php if (
-                            $transaction['type'] == 'debt'
-                        ): ?>
+                                    Pagesë
 
-                            <strong style="color:#d9534f;">
+                                </span>
 
-                                +
+                            <?php endif; ?>
 
-                                <?php echo number_format(
-                                    (float)$transaction['amount'],
-                                    2,
-                                    '.',
-                                    ','
-                                ); ?> €
-
-                            </strong>
+                        </td>
 
 
-                        <?php else: ?>
+
+                        <!-- PERSHKRIMI -->
+
+                        <td>
+
+                            <?php echo htmlspecialchars(
+                                $transaction['description'] ?? '',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>
+
+                        </td>
 
 
-                            <strong style="color:#5cb85c;">
 
-                                -
+                        <!-- SHUMA -->
 
-                                <?php echo number_format(
-                                    (float)$transaction['amount'],
-                                    2,
-                                    '.',
-                                    ','
-                                ); ?> €
+                        <td>
 
-                            </strong>
+                            <?php if (
+                                $transaction['type'] == 'debt'
+                            ): ?>
+
+                                <strong style="color:#d9534f;">
+
+                                    +
+
+                                    <?php echo number_format(
+                                        (float)$transaction['amount'],
+                                        2,
+                                        '.',
+                                        ','
+                                    ); ?> €
+
+                                </strong>
 
 
-                        <?php endif; ?>
+                            <?php else: ?>
 
-                    </td>
 
-                    <!-- FATURA -->
-                    <td>
-                        <?php
+                                <strong style="color:#5cb85c;">
+
+                                    -
+
+                                    <?php echo number_format(
+                                        (float)$transaction['amount'],
+                                        2,
+                                        '.',
+                                        ','
+                                    ); ?> €
+
+                                </strong>
+
+
+                            <?php endif; ?>
+
+                        </td>
+
+                        <!-- FATURA -->
+                        <td>
+                            <?php
                             $invoiceId = (int) ($transaction['invoice_id'] ?? 0);
 
                             // Për transaksionet e vjetra që e kanë
@@ -158,58 +158,56 @@
                             ) {
                                 $invoiceId = (int) $matches[1];
                             }
-                        ?>
+                            ?>
 
-                        <?php if (
-                            $transaction['type'] === 'debt' &&
-                            $invoiceId > 0
-                        ): ?>
+                            <?php if (
+                                $transaction['type'] === 'debt' &&
+                                $invoiceId > 0
+                            ): ?>
 
-                            <a
-                                href="<?php echo base_url(
-                                    'admin/invoices/print_pdf?id=' . $invoiceId
-                                ); ?>"
-                                target="_blank"
-                                rel="noopener"
-                                class="btn btn-info btn-sm"
-                            >
-                                <i class="fa fa-download"></i>
-                                Shkarko faturën
-                            </a>
+                                <a
+                                    href="<?php echo base_url(
+                                                'admin/invoices/print_pdf?id=' . $invoiceId
+                                            ); ?>"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="btn btn-info btn-sm">
+                                    <i class="fa fa-download"></i>
+                                    Shkarko faturën
+                                </a>
 
-                        <?php else: ?>
+                            <?php else: ?>
 
-                            <span class="text-muted">—</span>
+                                <span class="text-muted">—</span>
 
-                        <?php endif; ?>
+                            <?php endif; ?>
+                        </td>
+
+
+                    </tr>
+
+
+                <?php endforeach; ?>
+
+
+            <?php else: ?>
+
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="text-center"
+                        style="padding:25px;">
+
+                        Nuk ka transaksione.
+
                     </td>
-
 
                 </tr>
 
 
-            <?php endforeach; ?>
-
-
-        <?php else: ?>
-
-
-            <tr>
-
-                <td
-                    colspan="5"
-                    class="text-center"
-                    style="padding:25px;"
-                >
-
-                    Nuk ka transaksione.
-
-                </td>
-
-            </tr>
-
-
-        <?php endif; ?>
+            <?php endif; ?>
 
 
         </tbody>
@@ -232,7 +230,6 @@ if ($per_page > 0) {
     $totalPages = (int) ceil(
         $total_transactions / $per_page
     );
-
 }
 
 if ($totalPages < 1) {
@@ -254,8 +251,7 @@ if ($totalPages < 1) {
             type="button"
             class="btn btn-default debt-page-btn"
             data-page="<?php echo $page - 1; ?>"
-            <?php echo $page <= 1 ? 'disabled' : ''; ?>
-        >
+            <?php echo $page <= 1 ? 'disabled' : ''; ?>>
 
             <i class="fa fa-angle-left"></i>
 
@@ -291,8 +287,7 @@ if ($totalPages < 1) {
             type="button"
             class="btn btn-default debt-page-btn"
             data-page="<?php echo $page + 1; ?>"
-            <?php echo $page >= $totalPages ? 'disabled' : ''; ?>
-        >
+            <?php echo $page >= $totalPages ? 'disabled' : ''; ?>>
 
             Tjetra
 

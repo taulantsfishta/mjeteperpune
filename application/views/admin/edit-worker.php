@@ -1,9 +1,8 @@
-
 <style>
     input[type="text"] {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 100%;
-}
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 100%;
+    }
 </style>
 <!-- .row -->
 <div class="row">
@@ -13,9 +12,9 @@
                 <div class="col-sm-4 col-xs-4">
                     <form method="post" action="<?php echo base_url('admin/workers/edit_worker/' . $worker['id']); ?>">
                         <div class="form-group">
-                            <label for="pershkrimi" class="col-sm-3 control-label col-form-label" >Emri i punëtorit</label>
+                            <label for="pershkrimi" class="col-sm-3 control-label col-form-label">Emri i punëtorit</label>
                             <input type="text" class="form-control" id="pershkrimi" name="worker_name" placeholder="" value="<?= set_value('worker_name', isset($worker['workers_name']) ? $worker['workers_name'] : ''); ?>" required>
-                            <label for="base_salary" class="col-sm-3 control-label col-form-label" >Paga bazë</label>
+                            <label for="base_salary" class="col-sm-3 control-label col-form-label">Paga bazë</label>
                             <input type="number" class="form-control" id="base_salary" style="font-size: 100%;" name="base_salary" placeholder="" value="<?= set_value('base_salary', isset($worker['base_salary']) ? $worker['base_salary'] : ''); ?>" required>
                         </div>
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />

@@ -31,35 +31,40 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
 </head>
 
 <style>
-    #mainImg{
-        width:120px;
-        height:120px;
+    #mainImg {
+        width: 120px;
+        height: 120px;
     }
 
-    #alert{
-        width:100%;
-        color:#7396CE;
+    #alert {
+        width: 100%;
+        color: #7396CE;
     }
-    #name{
-        width:100%;
+
+    #name {
+        width: 100%;
     }
-    #password{
-        width:100%;
+
+    #password {
+        width: 100%;
     }
-    #submitBtn{
-        width:100%;
-        color:white;
-        background:#7396CE;
+
+    #submitBtn {
+        width: 100%;
+        color: white;
+        background: #7396CE;
     }
-    #loading{
+
+    #loading {
         align: center;
     }
-    #mainDiv{
+
+    #mainDiv {
         align: center;
     }
-    
-    #install_progress{
-        margin-left: 20px; 
+
+    #install_progress {
+        margin-left: 20px;
         display: none;
     }
 </style>
@@ -79,7 +84,7 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
                     <img src="<?php echo base_url(); ?>optimum/mjete_per_puneee.jpeg" id='mainImg' alt=''>
                     <br><br>
                     Miresevini<br> <strong style="color:#7396CE">Programi MJETE PËR PUNË</strong>. Shkruaj emrin dhe fjalekalimin per te hyre ne program.
-                    <br/>
+                    <br />
                     <div align="center">
                         <?php if (isset($page) && $page == "logout") : ?>
                             <div class="alert hide_msg pull" id='alert'> <i class="fa fa-check-circle"></i> Logout Successfully &nbsp;
@@ -87,12 +92,12 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
                             </div>
                         <?php endif ?>
                         <?php if ($this->session->flashdata('login_error')): ?>
-                        <div class="alert hide_msg pull" id='alert'> <i class="fa fa-check-circle" style="font-size:15px;"></i> <?= $this->session->flashdata('login_error'); ?> &nbsp;
+                            <div class="alert hide_msg pull" id='alert'> <i class="fa fa-check-circle" style="font-size:15px;"></i> <?= $this->session->flashdata('login_error'); ?> &nbsp;
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-                        </div>
+                            </div>
                         <?php endif; ?>
                     </div>
-                    <br/>
+                    <br />
                     <form class="form-horizontal form-material" id="login-form" action="<?php echo base_url('auth/log'); ?>" method="post">
 
                         <div class="form-group">
@@ -114,7 +119,7 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
                         <button class="btn style1 btn-lg btn-block text-uppercase waves-effect waves-light" type="button" id="submitBtn">
                             KYQU
                         </button>
-                        <div id="loading"><img id="install_progress" src="<?php echo base_url() ?>optimum/images/loading.gif" alt=''/></div>
+                        <div id="loading"><img id="install_progress" src="<?php echo base_url() ?>optimum/images/loading.gif" alt='' /></div>
 
                 </div>
                 <br><br><br><br><br><br><br><br><br>
@@ -172,17 +177,17 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
             $('#install_progress').show();
             // Disable button and change its text
             $(this).text('Logging in...').attr('disabled', 'disabled');
-            
+
             // Manually submit the form
             $('#login-form').submit();
         });
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Hide alerts after a delay
             $('.hide_msg').delay(2000).slideUp();
 
             // Trigger login on Enter key
-            $('#login-form input').on('keydown', function (e) {
+            $('#login-form input').on('keydown', function(e) {
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     e.preventDefault(); // Prevent form from submitting normally
                     $('#submitBtn').click(); // Trigger your custom login logic
@@ -191,7 +196,7 @@ $system_title = $this->db->get_where('settings', array('type' => 'system_title')
         });
     </script>
 
-    
+
 
 </body>
 

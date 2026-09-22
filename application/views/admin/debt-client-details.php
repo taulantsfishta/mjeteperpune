@@ -43,8 +43,7 @@
 <button
     type="button"
     class="btn btn-default"
-    onclick="history.back();"
->
+    onclick="history.back();">
     <i class="fa fa-arrow-left"></i>
     Kthehu te klientët
 </button>
@@ -159,10 +158,9 @@
             <form
                 method="post"
                 action="<?php echo base_url(
-                    'admin/invoices/add_debt_transaction/' .
-                    $client['id']
-                ); ?>"
-            >
+                            'admin/invoices/add_debt_transaction/' .
+                                $client['id']
+                        ); ?>">
 
 
                 <div class="form-group">
@@ -174,8 +172,7 @@
                     <select
                         name="type"
                         class="form-control"
-                        required
-                    >
+                        required>
 
                         <option value="debt">
                             Shto detyrimin
@@ -202,8 +199,7 @@
                         step="0.01"
                         min="0.01"
                         class="form-control"
-                        required
-                    >
+                        required>
 
                 </div>
 
@@ -217,16 +213,14 @@
                     <textarea
                         name="description"
                         class="form-control"
-                        rows="3"
-                    ></textarea>
+                        rows="3"></textarea>
 
                 </div>
 
 
                 <button
                     type="submit"
-                    class="btn btn-success btn-block"
-                >
+                    class="btn btn-success btn-block">
 
                     <i class="fa fa-save"></i>
 
@@ -256,8 +250,7 @@
                     flex-wrap:wrap;
                     gap:10px;
                     margin-bottom:15px;
-                "
-            >
+                ">
 
                 <h4 style="margin:0;">
                     Historia e transaksioneve
@@ -269,22 +262,19 @@
                 <form
                     method="post"
                     action="<?php echo base_url(
-                        'admin/invoices/print_debt'
-                    ); ?>"
+                                'admin/invoices/print_debt'
+                            ); ?>"
                     target="_blank"
-                    style="margin:0;"
-                >
+                    style="margin:0;">
 
                     <input
                         type="hidden"
                         name="client_id"
-                        value="<?php echo $client['id']; ?>"
-                    >
+                        value="<?php echo $client['id']; ?>">
 
                     <button
                         type="submit"
-                        class="btn btn-primary btn-sm"
-                    >
+                        class="btn btn-primary btn-sm">
 
                         <i class="fa fa-print"></i>
 
@@ -326,81 +316,79 @@
 
 
 <script>
-
-$(document).ready(function () {
-
-
-    /*
-     * AJAX PAGINATION
-     *
-     * Kapim klikimin e butonave Para / Tjetra.
-     */
-    $(document).on(
-        'click',
-        '.debt-page-btn',
-        function () {
-
-            var page = $(this).data('page');
+    $(document).ready(function() {
 
 
-            /*
-             * Mos bëj request nëse butoni
-             * është disabled.
-             */
-            if ($(this).prop('disabled')) {
-                return;
-            }
+        /*
+         * AJAX PAGINATION
+         *
+         * Kapim klikimin e butonave Para / Tjetra.
+         */
+        $(document).on(
+            'click',
+            '.debt-page-btn',
+            function() {
+
+                var page = $(this).data('page');
 
 
-            if (!page || page < 1) {
-                return;
-            }
-
-
-            $('#transactionsContainer')
-                .addClass('loading');
-
-
-            $.ajax({
-
-                url: '<?php echo base_url(
-                    "admin/invoices/debt_transactions_ajax/" .
-                    $client["id"]
-                ); ?>',
-
-                type: 'GET',
-
-                data: {
-                    page: page
-                },
-
-
-                success: function (response) {
-
-                    $('#transactionsContainer')
-                        .html(response)
-                        .removeClass('loading');
-
-                },
-
-
-                error: function () {
-
-                    $('#transactionsContainer')
-                        .removeClass('loading');
-
-                    alert(
-                        'Ndodhi një gabim gjatë ngarkimit të transaksioneve.'
-                    );
-
+                /*
+                 * Mos bëj request nëse butoni
+                 * është disabled.
+                 */
+                if ($(this).prop('disabled')) {
+                    return;
                 }
 
-            });
 
-        }
-    );
+                if (!page || page < 1) {
+                    return;
+                }
 
 
-});
+                $('#transactionsContainer')
+                    .addClass('loading');
 
+
+                $.ajax({
+
+                    url: '<?php echo base_url(
+                                "admin/invoices/debt_transactions_ajax/" .
+                                    $client["id"]
+                            ); ?>',
+
+                    type: 'GET',
+
+                    data: {
+                        page: page
+                    },
+
+
+                    success: function(response) {
+
+                        $('#transactionsContainer')
+                            .html(response)
+                            .removeClass('loading');
+
+                    },
+
+
+                    error: function() {
+
+                        $('#transactionsContainer')
+                            .removeClass('loading');
+
+                        alert(
+                            'Ndodhi një gabim gjatë ngarkimit të transaksioneve.'
+                        );
+
+                    }
+
+                });
+
+            }
+        );
+
+
+    });
 </script>

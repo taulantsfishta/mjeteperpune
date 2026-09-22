@@ -37,9 +37,9 @@
                                 <td><?php echo $dimension['font_size_code'] ?></td>
                                 <td><?php echo $dimension['font_size_name'] ?></td>
                                 <td>
-                                <a href="<?php echo base_url('admin/printproduct/edit_page_dimension/' . $dimension['id']); ?>"><button type="button" class="btn btn-info btn-circle btn-xs"><i class="fa fa-edit"></i></button></a>
-                                <a href="<?php echo base_url('admin/printproduct/delete_page_dimension/' . $dimension['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-dimensionid="<?php echo $dimension['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a>
-                            </td>
+                                    <a href="<?php echo base_url('admin/printproduct/edit_page_dimension/' . $dimension['id']); ?>"><button type="button" class="btn btn-info btn-circle btn-xs"><i class="fa fa-edit"></i></button></a>
+                                    <a href="<?php echo base_url('admin/printproduct/delete_page_dimension/' . $dimension['id']); ?>" data-toggle="modal" data-target="#confirmDeleteModal" data-dimensionid="<?php echo $dimension['id']; ?>"><button type="button" class="btn btn-danger btn-circle btn-xs"><i class="icon-trash"></i></button></a>
+                                </td>
                             </tr>
 
                         <?php endforeach ?>

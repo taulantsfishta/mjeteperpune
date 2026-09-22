@@ -1,8 +1,8 @@
 <style>
     input[type="text"] {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 100%;
-}
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 100%;
+    }
 </style>
 <div class="row">
     <div class="col-md-12">
@@ -28,7 +28,7 @@
                             <input type="text" class="form-control" id="madhesia-fontit-te-kodit" name="font_size_code" placeholder="MADHESIA E FONTIT TE KODIT" value="<?php echo $dimension['font_size_code']; ?>" required>
                         </div>
                         <div class="form-group">
-                        <label for="width" class="col-sm-3 control-label col-form-label">MADHESIA E FONTIT TE EMRIT</label>
+                            <label for="width" class="col-sm-3 control-label col-form-label">MADHESIA E FONTIT TE EMRIT</label>
                             <input type="text" class="form-control" id="madhesia-fontit-te-emrit" name="font_size_name" placeholder="MADHESIA E FONTIT TE EMRIT" value="<?php echo $dimension['font_size_name']; ?>" required>
                         </div>
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />

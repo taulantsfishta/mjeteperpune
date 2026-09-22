@@ -1,30 +1,34 @@
 <style>
-@media print {
+    @media print {
 
-    body * {
-        visibility: hidden;
+        body * {
+            visibility: hidden;
+        }
+
+        .print-area,
+        .print-area * {
+            visibility: visible;
+        }
+
+        .print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        header,
+        nav,
+        .sidebar,
+        .footer {
+            display: none !important;
+        }
+
     }
-
-    .print-area, .print-area * {
-        visibility: visible;
-    }
-
-    .print-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
-
-    .no-print {
-        display: none !important;
-    }
-
-    header, nav, .sidebar, .footer {
-    display: none !important;
-}
-
-}
 </style>
 <div class="container-fluid">
 
@@ -69,11 +73,11 @@
     </div>
 
     <div class="mb-3">
-    <button onclick="printReport()" class="btn btn-success">
-        Printo raportin per punetoret
+        <button onclick="printReport()" class="btn btn-success">
+            Printo raportin per punetoret
         </button>
     </div>
-    
+
     <div class="card print-area">
         <div class="text-center mb-3">
             <h3>Raporti mujor i pagave</h3>
@@ -83,7 +87,7 @@
         </div>
         <div class="card-header">
             <strong>Raporti për muajin <?php echo str_pad($selected_month, 2, '0', STR_PAD_LEFT) . '/' . $selected_year; ?></strong>
-    </div>
+        </div>
 
         <div class="card-body">
             <?php if (!empty($report_rows)): ?>
@@ -148,7 +152,7 @@
 
 
 <script>
-function printReport() {
-    window.print();
-}
+    function printReport() {
+        window.print();
+    }
 </script>

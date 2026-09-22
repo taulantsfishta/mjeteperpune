@@ -21,9 +21,9 @@
                         &nbsp;
 
                         <button type="button"
-                                class="close"
-                                data-dismiss="alert"
-                                aria-label="Close">
+                            class="close"
+                            data-dismiss="alert"
+                            aria-label="Close">
                             <span aria-hidden="true">×</span>
                         </button>
                     </div>
@@ -31,8 +31,8 @@
 
 
                 <form method="post"
-                      action="<?php echo base_url('admin/user/add') ?>"
-                      class="form-horizontal">
+                    action="<?php echo base_url('admin/user/add') ?>"
+                    class="form-horizontal">
 
 
                     <!-- EMRI I PERDORUESIT -->
@@ -46,10 +46,10 @@
                         <div class="col-sm-12">
 
                             <input type="text"
-                                   name="first_name"
-                                   class="form-control"
-                                   data-validation-required-message="Kerkohet emri i perdoruesit"
-                                   required>
+                                name="first_name"
+                                class="form-control"
+                                data-validation-required-message="Kerkohet emri i perdoruesit"
+                                required>
 
                         </div>
 
@@ -67,10 +67,10 @@
                         <div class="col-sm-12">
 
                             <input type="password"
-                                   name="password"
-                                   class="form-control"
-                                   data-validation-required-message="Kerkohet fjalekalimi"
-                                   required>
+                                name="password"
+                                class="form-control"
+                                data-validation-required-message="Kerkohet fjalekalimi"
+                                required>
 
                         </div>
 
@@ -84,10 +84,10 @@
                         <span>PREFIXI PER ROLET E PERDORUESIT</span>
 
                         <input type="text"
-                               name="prefix_user"
-                               id="prefix_user"
-                               class="form-control"
-                               placeholder="FK,PR ETC" required>
+                            name="prefix_user"
+                            id="prefix_user"
+                            class="form-control"
+                            placeholder="FK,PR ETC" required>
 
                     </div>
 
@@ -104,10 +104,10 @@
                         <span>ADMIN </span>
 
                         <input type="radio"
-                               name="role"
-                               id="adminCheck"
-                               value="admin"
-                               checked='checked'>
+                            name="role"
+                            id="adminCheck"
+                            value="admin"
+                            checked='checked'>
 
                         <br><br>
 
@@ -117,9 +117,9 @@
                         <span>AGJENT </span>
 
                         <input type="radio"
-                               name="role"
-                               id="salesCheck"
-                               value="sales">
+                            name="role"
+                            id="salesCheck"
+                            value="sales">
 
                         <br><br>
 
@@ -129,9 +129,9 @@
                         <span>PËRDORUES </span>
 
                         <input type="radio"
-                               name="role"
-                               id="userCheck"
-                               value="user">
+                            name="role"
+                            id="userCheck"
+                            value="user">
 
                         <br><br>
 
@@ -146,9 +146,9 @@
 
 
                             <input type="checkbox"
-                                   value="0"
-                                   name="role_action[]"
-                                   id="selectAllCheckbox">
+                                value="0"
+                                name="role_action[]"
+                                id="selectAllCheckbox">
 
                             &nbsp;&nbsp;TE GJITHA
 
@@ -158,9 +158,9 @@
                             <?php foreach ($category as $index => $cat) : ?>
 
                                 <input type="checkbox"
-                                       value="<?php echo $cat['id']; ?>"
-                                       name="role_action[]"
-                                       onchange="handleOtherCheckboxChange(this)">
+                                    value="<?php echo $cat['id']; ?>"
+                                    name="role_action[]"
+                                    onchange="handleOtherCheckboxChange(this)">
 
                                 &nbsp;&nbsp;<?php echo $cat['name']; ?>
 
@@ -175,9 +175,9 @@
                             Shfaq Cmimet:&nbsp;
 
                             <input type="checkbox"
-                                   name="price_status"
-                                   class="js-switch"
-                                   checked='checked'>
+                                name="price_status"
+                                class="js-switch"
+                                checked='checked'>
 
 
                         </div>
@@ -190,8 +190,8 @@
                     <!-- CSRF token -->
 
                     <input type="hidden"
-                           name="<?= $this->security->get_csrf_token_name(); ?>"
-                           value="<?= $this->security->get_csrf_hash(); ?>" />
+                        name="<?= $this->security->get_csrf_token_name(); ?>"
+                        value="<?= $this->security->get_csrf_hash(); ?>" />
 
 
                     <!-- RUAJ -->
@@ -201,7 +201,7 @@
                         <div class="col-sm-offset-3 col-sm-5">
 
                             <button type="submit"
-                                    class="btn btn-success btn-rounded btn-sm">
+                                class="btn btn-success btn-rounded btn-sm">
 
                                 <i class="fa fa-plus"></i>
                                 &nbsp;&nbsp;Ruaj
@@ -222,64 +222,61 @@
 
 
 <script>
-
-$(document).ready(function () {
-
-
-    // Kur ndryshohet roli
-    $('input[name="role"]').on('change', function () {
+    $(document).ready(function() {
 
 
-        var role = $('input[name="role"]:checked').val();
+        // Kur ndryshohet roli
+        $('input[name="role"]').on('change', function() {
 
 
-        // ==========================
-        // PERDORUES
-        // ==========================
-
-        if (role === 'user') {
+            var role = $('input[name="role"]:checked').val();
 
 
-            // Fsheh prefixin
-            $('#prefixField').hide();
+            // ==========================
+            // PERDORUES
+            // ==========================
+
+            if (role === 'user') {
 
 
-            // Pastron prefixin
-            $('#prefix_user').val('');
+                // Fsheh prefixin
+                $('#prefixField').hide();
 
 
-            // Shfaq kategorite
-            $('#ifYes').show();
+                // Pastron prefixin
+                $('#prefix_user').val('');
 
 
-        }
+                // Shfaq kategorite
+                $('#ifYes').show();
 
 
-        // ==========================
-        // ADMIN OSE AGJENT
-        // ==========================
-
-        else {
+            }
 
 
-            // Shfaq prefixin
-            $('#prefixField').show();
+            // ==========================
+            // ADMIN OSE AGJENT
+            // ==========================
+            else {
 
 
-            // Fsheh kategorite
-            $('#ifYes').hide();
+                // Shfaq prefixin
+                $('#prefixField').show();
 
 
-        }
+                // Fsheh kategorite
+                $('#ifYes').hide();
+
+
+            }
+
+
+        });
+
+
+        // Kontrollo rolin kur hapet faqja
+        $('input[name="role"]:checked').trigger('change');
 
 
     });
-
-
-    // Kontrollo rolin kur hapet faqja
-    $('input[name="role"]:checked').trigger('change');
-
-
-});
-
 </script>

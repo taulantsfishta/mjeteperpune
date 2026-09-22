@@ -15,12 +15,11 @@
                         type="text"
                         name="name"
                         class="form-control"
-                        required
-                    >
+                        required>
 
                 </div>
 
-                
+
                 <div class="form-group">
 
                     <label>Adresa</label>
@@ -28,8 +27,7 @@
                     <input
                         type="text"
                         name="address"
-                        class="form-control"
-                    >
+                        class="form-control">
 
                 </div>
 
@@ -41,8 +39,7 @@
                     <input
                         type="text"
                         name="phone"
-                        class="form-control"
-                    >
+                        class="form-control">
 
                 </div>
 
@@ -57,16 +54,14 @@
                         class="form-control"
                         step="0.01"
                         min="0"
-                        value="0"
-                    >
+                        value="0">
 
                 </div>
 
 
                 <button
                     type="submit"
-                    class="btn btn-success"
-                >
+                    class="btn btn-success">
                     Ruaj klientin
                 </button>
 

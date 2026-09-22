@@ -1,8 +1,8 @@
 <style>
     input[type="text"] {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 100%;
-}
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 100%;
+    }
 </style>
 <div class="row">
     <div class="col-md-12">
@@ -15,7 +15,7 @@
                         <div class="alert alert-danger delete_msg pull" style="width: 100%"> <i class="fa fa-times"></i> <?php echo $error_msg; ?> &nbsp;
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
                         </div>
-                        <?php unset($_SESSION['error_msg']);?>                
+                        <?php unset($_SESSION['error_msg']); ?>
                     <?php endif ?>
                 </div>
                 <div class="col-sm-12 col-xs-12">

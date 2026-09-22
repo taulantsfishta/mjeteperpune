@@ -25,8 +25,7 @@
                                 name="total_amount"
                                 class="form-control"
                                 value="<?php echo number_format((float)$loan['total_amount'], 2, '.', ''); ?>"
-                                required
-                            >
+                                required>
                         </div>
 
                         <div class="form-group">
@@ -39,8 +38,7 @@
                                 name="monthly_amount"
                                 class="form-control"
                                 value="<?php echo number_format((float)$loan['monthly_amount'], 2, '.', ''); ?>"
-                                required
-                            >
+                                required>
                         </div>
 
                         <div class="form-group">
@@ -52,8 +50,7 @@
 
                                     <option
                                         value="<?php echo $m; ?>"
-                                        <?php echo ((int)$loan['start_month'] === $m) ? 'selected' : ''; ?>
-                                    >
+                                        <?php echo ((int)$loan['start_month'] === $m) ? 'selected' : ''; ?>>
                                         <?php echo str_pad($m, 2, '0', STR_PAD_LEFT); ?>
                                     </option>
 
@@ -70,8 +67,7 @@
                                 name="start_year"
                                 class="form-control"
                                 value="<?php echo (int)$loan['start_year']; ?>"
-                                required
-                            >
+                                required>
                         </div>
 
                         <div class="form-group">
@@ -80,8 +76,7 @@
                             <textarea
                                 name="note"
                                 class="form-control"
-                                rows="4"
-                            ><?php echo html_escape($loan['note']); ?></textarea>
+                                rows="4"><?php echo html_escape($loan['note']); ?></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -90,8 +85,7 @@
 
                         <a
                             href="<?php echo base_url('admin/workers/worker_detail/' . $worker['id']); ?>"
-                            class="btn btn-secondary"
-                        >
+                            class="btn btn-secondary">
                             Kthehu mbrapa
                         </a>
 

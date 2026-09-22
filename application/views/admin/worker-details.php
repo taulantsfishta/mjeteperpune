@@ -65,9 +65,9 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row mb-3">
-        
+
         <div class="col-md-3 mb-3">
             <?php if ($salary_summary['status'] == 'open'): ?>
                 <a href="<?php echo base_url('admin/workers/add_payment/' . $worker['id'] . '?month=' . $selected_month . '&year=' . $selected_year); ?>" class="btn btn-success btn-block">
@@ -111,7 +111,7 @@
                     Shto huazim me këste
                 </button>
             <?php endif; ?>
-            </div>
+        </div>
     </div>
 
 
@@ -161,7 +161,7 @@
                 <h4><?php echo number_format($salary_summary['total_loans'], 2); ?> €</h4>
             </div>
         </div>
-       
+
         <?php if ((float)$salary_summary['carry_forward'] != 0): ?>
             <div class="col-md-3 mb-3">
                 <div class="card p-3">
@@ -176,7 +176,7 @@
                 </div>
             </div>
         <?php endif; ?>
-        
+
         <div class="col-md-3 mb-3">
             <div class="card p-3">
                 <h5>Paguar gjatë muajit per punetorin nga kompania</h5>
@@ -223,11 +223,11 @@
 
                                     <td>
                                         <?php
-                                            if (!empty($absence['absence_type']) && $absence['absence_type'] == 'hour') {
-                                                echo number_format((float)$absence['hours'], 2) . ' orë';
-                                            } else {
-                                                echo number_format((float)$absence['days'], 2) . ' ditë';
-                                            }
+                                        if (!empty($absence['absence_type']) && $absence['absence_type'] == 'hour') {
+                                            echo number_format((float)$absence['hours'], 2) . ' orë';
+                                        } else {
+                                            echo number_format((float)$absence['days'], 2) . ' ditë';
+                                        }
                                         ?>
                                     </td>
 
@@ -235,13 +235,13 @@
                                     <td>
                                         <?php if ($salary_summary['status'] == 'open'): ?>
                                             <a href="<?php echo base_url('admin/workers/edit_absence/' . $worker['id'] . '/' . $absence['id']); ?>"
-                                            class="btn btn-sm btn-primary">
+                                                class="btn btn-sm btn-primary">
                                                 Edito
                                             </a>
 
                                             <a href="<?php echo base_url('admin/workers/delete_absence/' . $worker['id'] . '/' . $absence['id']); ?>"
-                                            class="btn btn-sm btn-danger"
-                                            onclick="return confirm('A jeni të sigurt që doni ta fshini këtë mungesë?');">
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('A jeni të sigurt që doni ta fshini këtë mungesë?');">
                                                 Fshij
                                             </a>
                                         <?php else: ?>
@@ -286,13 +286,13 @@
                                     <td>
                                         <?php if ($salary_summary['status'] == 'open'): ?>
                                             <a href="<?php echo base_url('admin/workers/edit_loan/' . $worker['id'] . '/' . $loan['id']); ?>"
-                                            class="btn btn-sm btn-primary">
+                                                class="btn btn-sm btn-primary">
                                                 Edito
                                             </a>
 
                                             <a href="<?php echo base_url('admin/workers/delete_loan/' . $worker['id'] . '/' . $loan['id']); ?>"
-                                            class="btn btn-sm btn-danger"
-                                            onclick="return confirm('A jeni të sigurt që doni ta fshini këtë huazim?');">
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('A jeni të sigurt që doni ta fshini këtë huazim?');">
                                                 Fshij
                                             </a>
                                         <?php else: ?>
@@ -336,49 +336,47 @@
                             <?php foreach ($installment_loans as $loan): ?>
                                 <tr>
                                     <?php foreach ($installment_loans as $loan): ?>
-                                        <tr>
-                                            <td><?php echo number_format($loan['total_amount'], 2); ?> €</td>
-                                            <td><?php echo number_format($loan['monthly_amount'], 2); ?> €</td>
-                                            <td><?php echo str_pad($loan['start_month'], 2, '0', STR_PAD_LEFT) . '/' . $loan['start_year']; ?></td>
-                                            <td><?php echo str_pad($loan['end_month'], 2, '0', STR_PAD_LEFT) . '/' . $loan['end_year']; ?></td>
-                                            <td><?php echo number_format($loan['month_deduction'], 2); ?> €</td>
-                                            <td><?php echo number_format($loan['paid_until_this_month'], 2); ?> €</td>
-                                            <td><?php echo number_format($loan['remaining_after_this_month'], 2); ?> €</td>
-                                            <td><?php echo html_escape($loan['note']); ?></td>
-                                            <td>
-    <?php if ($salary_summary['status'] == 'open'): ?>
+                                <tr>
+                                    <td><?php echo number_format($loan['total_amount'], 2); ?> €</td>
+                                    <td><?php echo number_format($loan['monthly_amount'], 2); ?> €</td>
+                                    <td><?php echo str_pad($loan['start_month'], 2, '0', STR_PAD_LEFT) . '/' . $loan['start_year']; ?></td>
+                                    <td><?php echo str_pad($loan['end_month'], 2, '0', STR_PAD_LEFT) . '/' . $loan['end_year']; ?></td>
+                                    <td><?php echo number_format($loan['month_deduction'], 2); ?> €</td>
+                                    <td><?php echo number_format($loan['paid_until_this_month'], 2); ?> €</td>
+                                    <td><?php echo number_format($loan['remaining_after_this_month'], 2); ?> €</td>
+                                    <td><?php echo html_escape($loan['note']); ?></td>
+                                    <td>
+                                        <?php if ($salary_summary['status'] == 'open'): ?>
 
-        <a
-            href="<?php echo base_url('admin/workers/edit_installment_loan/' . $worker['id'] . '/' . $loan['id']); ?>"
-            class="btn btn-sm btn-primary"
-        >
-            Edito
-        </a>
+                                            <a
+                                                href="<?php echo base_url('admin/workers/edit_installment_loan/' . $worker['id'] . '/' . $loan['id']); ?>"
+                                                class="btn btn-sm btn-primary">
+                                                Edito
+                                            </a>
 
-        <a
-            href="<?php echo base_url('admin/workers/delete_installment_loan/' . $worker['id'] . '/' . $loan['id']); ?>"
-            class="btn btn-sm btn-danger"
-            onclick="return confirm('A jeni të sigurt që doni ta fshini këtë huazim me këste?');"
-        >
-            Fshij
-        </a>
+                                            <a
+                                                href="<?php echo base_url('admin/workers/delete_installment_loan/' . $worker['id'] . '/' . $loan['id']); ?>"
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('A jeni të sigurt që doni ta fshini këtë huazim me këste?');">
+                                                Fshij
+                                            </a>
 
-    <?php else: ?>
+                                        <?php else: ?>
 
-        <button type="button" class="btn btn-sm btn-secondary" disabled>
-            Edito
-        </button>
+                                            <button type="button" class="btn btn-sm btn-secondary" disabled>
+                                                Edito
+                                            </button>
 
-        <button type="button" class="btn btn-sm btn-secondary" disabled>
-            Fshij
-        </button>
+                                            <button type="button" class="btn btn-sm btn-secondary" disabled>
+                                                Fshij
+                                            </button>
 
-    <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -407,18 +405,19 @@
                         <tbody>
                             <?php foreach ($payments as $payment): ?>
                                 <tr>
-                                    <td><?php echo date('d-m-Y H:i:s', strtotime($payment['created_at'])); ?></td>                                    <td><?php echo number_format($payment['amount'], 2); ?> €</td>
+                                    <td><?php echo date('d-m-Y H:i:s', strtotime($payment['created_at'])); ?></td>
+                                    <td><?php echo number_format($payment['amount'], 2); ?> €</td>
                                     <td><?php echo html_escape($payment['note']); ?></td>
-                                   <td>
+                                    <td>
                                         <?php if ($salary_summary['status'] == 'open'): ?>
                                             <a href="<?php echo base_url('admin/workers/edit_payment/' . $worker['id'] . '/' . $payment['id']); ?>"
-                                            class="btn btn-sm btn-primary">
+                                                class="btn btn-sm btn-primary">
                                                 Edito
                                             </a>
 
                                             <a href="<?php echo base_url('admin/workers/delete_payment/' . $worker['id'] . '/' . $payment['id']); ?>"
-                                            class="btn btn-sm btn-danger"
-                                            onclick="return confirm('A jeni të sigurt që doni ta fshini këtë pagesë?');">
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('A jeni të sigurt që doni ta fshini këtë pagesë?');">
                                                 Fshij
                                             </a>
                                         <?php else: ?>

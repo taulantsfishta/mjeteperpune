@@ -1,4 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
+<?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
 
 // *************************************************************************
@@ -23,6 +23,7 @@
 //LOCATION : application - controller - Dashboard.php
 require_once 'vendor/autoload.php'; // Require the PhpSpreadsheet library
 require_once('tcpdf/tcpdf.php');
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
@@ -34,16 +35,17 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 
 
-class Invoices extends CI_Controller {
+class Invoices extends CI_Controller
+{
 
-	public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
         check_login_user();
         $this->load->model('common_model');
         $db = $this->load->database();
-
     }
-	 
+
     public function index()
     {
         if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
@@ -77,7 +79,6 @@ class Invoices extends CI_Controller {
                         ->where('is_deleted', 0)
                         ->get()
                         ->result_array();
-
                 }
 
                 // 2) WILDCARD
@@ -109,7 +110,6 @@ class Invoices extends CI_Controller {
                         ->order_by('category_id', 'ASC')
                         ->get()
                         ->result_array();
-
                 }
 
                 // 3) TEXT
@@ -129,33 +129,32 @@ class Invoices extends CI_Controller {
                         ->select('products.id,products.name,products.code,products.price,products.image')
                         ->from('products')
                         ->group_start()
-                            ->like('name', $term, 'after')
-                            ->or_where(
-                                "name REGEXP " .
+                        ->like('name', $term, 'after')
+                        ->or_where(
+                            "name REGEXP " .
                                 $this->db->escape($regex),
-                                null,
-                                false
-                            )
+                            null,
+                            false
+                        )
                         ->group_end()
                         ->where('is_deleted', 0)
                         ->order_by(
                             "(name LIKE " .
-                            $this->db->escape($likePrefix) .
-                            ") DESC",
+                                $this->db->escape($likePrefix) .
+                                ") DESC",
                             null,
                             false
                         )
                         ->order_by(
                             "(name REGEXP " .
-                            $this->db->escape($regex) .
-                            ") DESC",
+                                $this->db->escape($regex) .
+                                ") DESC",
                             null,
                             false
                         )
                         ->order_by('category_id', 'ASC')
                         ->get()
                         ->result_array();
-
                 }
 
 
@@ -199,7 +198,6 @@ class Invoices extends CI_Controller {
                                 ->where('id', $productId)
                                 ->get()
                                 ->row_array();
-
                         }
 
 
@@ -220,12 +218,12 @@ class Invoices extends CI_Controller {
                             'id' => $productId,
 
                             'name' =>
-                                isset($item['name'])
+                            isset($item['name'])
                                 ? $item['name']
                                 : '',
 
                             'code' =>
-                                isset($item['code'])
+                            isset($item['code'])
                                 ? $item['code']
                                 : '',
 
@@ -234,17 +232,15 @@ class Invoices extends CI_Controller {
                             'price' => $price,
 
                             'total' =>
-                                $quantity * $price,
+                            $quantity * $price,
 
                             'image' =>
-                                isset($product['image'])
+                            isset($product['image'])
                                 ? $product['image']
                                 : ''
 
                         ];
-
                     }
-
                 }
 
 
@@ -256,7 +252,6 @@ class Invoices extends CI_Controller {
                 $this->session->unset_userdata(
                     'shopping_cart'
                 );
-
             }
 
 
@@ -276,10 +271,7 @@ class Invoices extends CI_Controller {
                 'admin/index',
                 $data
             );
-
-        }
-
-        else {
+        } else {
 
             $data = array();
 
@@ -293,12 +285,12 @@ class Invoices extends CI_Controller {
                 'errors/html/error_404',
                 $data
             );
-
         }
     }
 
-    public function sheet_invoice(){
-        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
+    public function sheet_invoice()
+    {
+        if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
             // Validate POST data existence
             if (isset($_POST['date'], $_POST['product_name'], $_POST['code'], $_POST['quantity'], $_POST['price'], $_POST['total_product_price'], $_POST['total_price_invoice'])) {
                 // Get form data
@@ -314,8 +306,8 @@ class Invoices extends CI_Controller {
                 $images = $_POST['image'];
                 $total_product_prices = $_POST['total_product_price'];
                 $total_sum = $_POST['total_price_invoice'];
-                $prepayment = $_POST['prepayment_price_invoice'] != '' ? number_format($_POST['prepayment_price_invoice'],2, '.', '') : '0.00';
-                $final_sum_to_pay = $_POST['total_price_left_invoice'] != '' ? number_format($_POST['total_price_left_invoice'],2, '.', '') : '0.00';
+                $prepayment = $_POST['prepayment_price_invoice'] != '' ? number_format($_POST['prepayment_price_invoice'], 2, '.', '') : '0.00';
+                $final_sum_to_pay = $_POST['total_price_left_invoice'] != '' ? number_format($_POST['total_price_left_invoice'], 2, '.', '') : '0.00';
 
                 $_POST['adminID'] = $this->session->userdata('id');
                 $adminName = $this->session->userdata('prefix_user');
@@ -329,46 +321,48 @@ class Invoices extends CI_Controller {
                 $pdf->SetTitle('FATURA');
                 $pdf->SetSubject('FATURA');
                 $pdf->SetKeywords('FATURA, PDF, Example');
-        
+
                 // Set default header data
-        
+
                 // Set header and footer fonts
-                $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-                $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-        
+                $pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+                $pdf->setFooterFont(array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+
                 // Set default monospaced font
                 $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-        
+
                 // Set margins
                 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
                 $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
                 $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-        
+
                 // Set auto page breaks
                 $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-        
+
                 // Set image scale factor
                 $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-        
+
                 // Set font
                 $pdf->SetFont('dejavusans', '', 10);
-        
+
                 // Add a page
                 $pdf->AddPage();
 
-                if(isset($_POST['id'])){
+                if (isset($_POST['id'])) {
                     $clientInvoice = $this->updateClientInvoice($_POST);
-                }else{
+                } else {
                     $clientInvoice = $this->saveClientInvoice($_POST);
                 }
-                
+
 
                 if ($_POST['submit_type'] == 'printo_faturen') {
 
                     $invoiceId = $clientInvoice['id'];
 
                     // pastro output-in nëse ka diçka
-                    if (ob_get_length()) { ob_end_clean(); }
+                    if (ob_get_length()) {
+                        ob_end_clean();
+                    }
 
                     $printUrl = base_url('admin/invoices/print_pdf?id=' . $invoiceId);
 
@@ -391,7 +385,7 @@ class Invoices extends CI_Controller {
                         </style>
                     </head>
                     <body>
-                        <iframe id="pdfFrame" src="'.htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8").'"></iframe>
+                        <iframe id="pdfFrame" src="' . htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8") . '"></iframe>
 
                         <script>
                             const iframe = document.getElementById("pdfFrame");
@@ -408,8 +402,7 @@ class Invoices extends CI_Controller {
                     </html>';
 
                     exit;
-                }
-                else if($_POST['submit_type'] == 'printo_faturen_excel'){
+                } else if ($_POST['submit_type'] == 'printo_faturen_excel') {
                     $spreadsheet = new Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
 
@@ -451,15 +444,15 @@ class Invoices extends CI_Controller {
                         $sheet->setCellValue("C$row", strtoupper($product_names[$i]));
                         $sheet->setCellValue("D$row", $quantities[$i]);
                         $sheet->setCellValue("E$row", $prices[$i]);
-                        if($images[$i] !== ''){
+                        if ($images[$i] !== '') {
 
-                            $this->imageUrl($startRow,$images[$i],$i,$sheet,$row);
+                            $this->imageUrl($startRow, $images[$i], $i, $sheet, $row);
                         }
                         $sheet->setCellValue("F$row", number_format($total_product_prices[$i], 2));
                         $total_sum += floatval($total_product_prices[$i]);
                     }
 
-                    
+
                     // === TOTAL ROW ===
                     $totalRow = $startRow + count($product_names);
                     $sheet->mergeCells("A{$totalRow}:E{$totalRow}");
@@ -525,7 +518,7 @@ class Invoices extends CI_Controller {
                     ]);
 
                     // Autosize columns
-                    foreach (['B', 'D', 'E', ] as $col) {
+                    foreach (['B', 'D', 'E',] as $col) {
                         $sheet->getColumnDimension($col)->setAutoSize(true);
                     }
                     $sheet->getColumnDimension('A')->setWidth(5); // Adjust width as needed 
@@ -536,15 +529,15 @@ class Invoices extends CI_Controller {
 
                     // === OUTPUT TO BROWSER ===
                     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    header('Content-Disposition: attachment;filename="'.$client_name.'-'.'FATURA-'.$clientInvoice['id'].'.xlsx"');
+                    header('Content-Disposition: attachment;filename="' . $client_name . '-' . 'FATURA-' . $clientInvoice['id'] . '.xlsx"');
                     header('Cache-Control: max-age=0');
 
                     $writer = new Xlsx($spreadsheet);
                     $writer->save('php://output');
 
                     exit;
-                }else if($_POST['submit_type'] == 'ruaj_faturen'){
-                    $clientData = $this->db->select('*')->from('invoices')->where('id',$clientInvoice['id'])->order_by('id', 'desc')->limit(1)->get()->row_array();
+                } else if ($_POST['submit_type'] == 'ruaj_faturen') {
+                    $clientData = $this->db->select('*')->from('invoices')->where('id', $clientInvoice['id'])->order_by('id', 'desc')->limit(1)->get()->row_array();
                     exit(json_encode($clientData));
                 }
             } else {
@@ -560,14 +553,15 @@ class Invoices extends CI_Controller {
     }
 
 
-    public function imageUrl($startRow, $image, $i, $sheet, $row) {
+    public function imageUrl($startRow, $image, $i, $sheet, $row)
+    {
         $image = stripslashes($image);
         $row = $startRow + $i;
-        
+
         if (strpos($image, 'localhost') !== false) {
             // Local server: convert to file path
             $localPath = str_replace('http://localhost', $_SERVER['DOCUMENT_ROOT'], $image);
-            
+
             if (file_exists($localPath)) {
                 $drawing = new Drawing();
                 $drawing->setName('Product Image');
@@ -577,55 +571,54 @@ class Invoices extends CI_Controller {
                 $drawing->setCoordinates("G{$row}");
                 $drawing->setOffsetX(20);
                 $drawing->setWorksheet($sheet);
-            
+
                 $sheet->getRowDimension($row)->setRowHeight(30);
             } else {
                 $sheet->setCellValue("G{$row}", 'Image not found');
             }
-        }else{
-
-        $baseImageUrl =  stripslashes(base_url().'optimum/products_images/');
-        $image = str_replace($baseImageUrl,"", $image);
-        // Construct the full URL for production
-        $fullImageUrl = $baseImageUrl . $image;
-    
-    
-        // Download image temporarily
-        $tempDir = sys_get_temp_dir();
-        $filename = uniqid() . '_' . $image;
-        $localPath = $tempDir . '/' . $filename;
-    
-        // Try to fetch the image
-        $imageContents = @file_get_contents($fullImageUrl);
-        if ($imageContents !== false) {
-            file_put_contents($localPath, $imageContents);
-    
-            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-            $drawing->setName('Product Image');
-            $drawing->setDescription('Product Image');
-            $drawing->setPath($localPath);
-            $drawing->setHeight(35);
-            $drawing->setCoordinates("G{$row}");
-            $drawing->setOffsetX(20);
-            $drawing->setWorksheet($sheet);
-            $sheet->getRowDimension($row)->setRowHeight(30);
         } else {
-            // Handle missing image
-            $sheet->setCellValue("G{$row}", 'Image not found');
+
+            $baseImageUrl =  stripslashes(base_url() . 'optimum/products_images/');
+            $image = str_replace($baseImageUrl, "", $image);
+            // Construct the full URL for production
+            $fullImageUrl = $baseImageUrl . $image;
+
+
+            // Download image temporarily
+            $tempDir = sys_get_temp_dir();
+            $filename = uniqid() . '_' . $image;
+            $localPath = $tempDir . '/' . $filename;
+
+            // Try to fetch the image
+            $imageContents = @file_get_contents($fullImageUrl);
+            if ($imageContents !== false) {
+                file_put_contents($localPath, $imageContents);
+
+                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                $drawing->setName('Product Image');
+                $drawing->setDescription('Product Image');
+                $drawing->setPath($localPath);
+                $drawing->setHeight(35);
+                $drawing->setCoordinates("G{$row}");
+                $drawing->setOffsetX(20);
+                $drawing->setWorksheet($sheet);
+                $sheet->getRowDimension($row)->setRowHeight(30);
+            } else {
+                // Handle missing image
+                $sheet->setCellValue("G{$row}", 'Image not found');
+            }
         }
-        
-        
-    } 
-}
+    }
 
 
 
-    private function saveClientInvoice($dataClientInvoice=[]){
+    private function saveClientInvoice($dataClientInvoice = [])
+    {
         $data = [];
         $newRowData = [];
         $data['client_name'] = strtoupper($dataClientInvoice['client_name']);
         $data['address'] = strtoupper($dataClientInvoice['address']);
-        $data['phone'] = isset($dataClientInvoice['phone'])? trim($dataClientInvoice['phone']): '';
+        $data['phone'] = isset($dataClientInvoice['phone']) ? trim($dataClientInvoice['phone']) : '';
         $data['date'] = $dataClientInvoice['date'];
         $data['comment'] = $dataClientInvoice['comment'];
         $data['total_price_invoice'] = $dataClientInvoice['total_price_invoice'];
@@ -635,7 +628,7 @@ class Invoices extends CI_Controller {
         $data['total_product_price'] = $dataClientInvoice['total_product_price'];
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
-            $newRowData[] = ['product_name' => strtoupper($value),'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image'=>$dataClientInvoice['image'][$key]];
+            $newRowData[] = ['product_name' => strtoupper($value), 'code' => $dataClientInvoice['code'][$key], 'quantity' => $dataClientInvoice['quantity'][$key], 'price' => $dataClientInvoice['price'][$key], 'total_product_price' => $dataClientInvoice['total_product_price'][$key], 'image' => $dataClientInvoice['image'][$key]];
         }
 
         $insertData = [
@@ -656,12 +649,13 @@ class Invoices extends CI_Controller {
         return $lastIdOfInvoice;
     }
 
-    private function updateClientInvoice($dataClientInvoice=[]){
+    private function updateClientInvoice($dataClientInvoice = [])
+    {
         $data = [];
         $newRowData = [];
         $data['client_name'] = strtoupper($dataClientInvoice['client_name']);
         $data['address'] = strtoupper($dataClientInvoice['address']);
-        $data['phone'] = isset($dataClientInvoice['phone'])? trim($dataClientInvoice['phone']) : '';
+        $data['phone'] = isset($dataClientInvoice['phone']) ? trim($dataClientInvoice['phone']) : '';
         $data['date'] = $dataClientInvoice['date'];
         $data['total_price_invoice'] = $dataClientInvoice['total_price_invoice'];
         $data['comment'] = $dataClientInvoice['comment'];
@@ -670,7 +664,7 @@ class Invoices extends CI_Controller {
         $data['total_price_left_invoice'] = $dataClientInvoice['total_price_left_invoice'];
 
         foreach ($dataClientInvoice['product_name'] as $key => $value) {
-            $newRowData[] = ['product_name' => strtoupper($value),'code' => $dataClientInvoice['code'][$key],'quantity' => $dataClientInvoice['quantity'][$key],'price' => $dataClientInvoice['price'][$key],'total_product_price' => $dataClientInvoice['total_product_price'][$key],'image' => $dataClientInvoice['image'][$key]];
+            $newRowData[] = ['product_name' => strtoupper($value), 'code' => $dataClientInvoice['code'][$key], 'quantity' => $dataClientInvoice['quantity'][$key], 'price' => $dataClientInvoice['price'][$key], 'total_product_price' => $dataClientInvoice['total_product_price'][$key], 'image' => $dataClientInvoice['image'][$key]];
         }
 
         $updateData = [
@@ -688,7 +682,10 @@ class Invoices extends CI_Controller {
         ];
         $data = $this->security->xss_clean($data);
         $original = $this->db->where('id', (int)$dataClientInvoice['id'])->get('invoices')->row_array();
-        if (!$original || (int)$original['user_id'] !== (int)$this->session->userdata('id')) { show_error('Nuk keni qasje për të ndryshuar këtë faturë.', 403); return []; }
+        if (!$original || (int)$original['user_id'] !== (int)$this->session->userdata('id')) {
+            show_error('Nuk keni qasje për të ndryshuar këtë faturë.', 403);
+            return [];
+        }
         $updateData['user_id'] = $original['user_id'];
         $this->common_model->edit_option($updateData, $dataClientInvoice['id'], 'invoices');
         return ['id' => $dataClientInvoice['id']];
@@ -742,8 +739,9 @@ class Invoices extends CI_Controller {
             ->get()->result_array();
     }
 
-    public function created(){
-        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
+    public function created()
+    {
+        if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
             $_SESSION['title_name'] = 'FATURAT E KRIJUARA';
             $data['page_title'] = 'FATURAT E KRIJUARA';
             $selectedUserId = $this->invoice_selected_user();
@@ -765,16 +763,17 @@ class Invoices extends CI_Controller {
         }
     }
 
-    public function get_invoice_data(){
-        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
-                $data = array();
-                $_SESSION['title_name'] = 'FATURA';
-                $data['page_title'] = 'FATURA';
-                $query = $this->db->select('*')->from('invoices')->where('id', (int)$this->input->get('id'));
-                if ($this->session->userdata('role') !== 'admin') $query->where('user_id', (int)$this->session->userdata('id'));
-                $invoiceData = $query->get()->row_array();  
-                echo json_encode($invoiceData);  
-                return;
+    public function get_invoice_data()
+    {
+        if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
+            $data = array();
+            $_SESSION['title_name'] = 'FATURA';
+            $data['page_title'] = 'FATURA';
+            $query = $this->db->select('*')->from('invoices')->where('id', (int)$this->input->get('id'));
+            if ($this->session->userdata('role') !== 'admin') $query->where('user_id', (int)$this->session->userdata('id'));
+            $invoiceData = $query->get()->row_array();
+            echo json_encode($invoiceData);
+            return;
         } else {
             $data = array();
             $data['heading'] = 'Mesazhi';
@@ -784,12 +783,13 @@ class Invoices extends CI_Controller {
     }
 
 
-    public function get_invoices(){
-        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
-                $data = array();
-                $invoiceData = $this->db->select('*')->from('invoices')->where('user_id', $this->invoice_selected_user())->order_by('created_at', 'desc')->get()->result_array();
-                echo json_encode($this->attach_invoice_debt_status($invoiceData));  
-                return;
+    public function get_invoices()
+    {
+        if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
+            $data = array();
+            $invoiceData = $this->db->select('*')->from('invoices')->where('user_id', $this->invoice_selected_user())->order_by('created_at', 'desc')->get()->result_array();
+            echo json_encode($this->attach_invoice_debt_status($invoiceData));
+            return;
         } else {
             $data = array();
             $data['heading'] = 'Mesazhi';
@@ -798,16 +798,19 @@ class Invoices extends CI_Controller {
         }
     }
 
-    
+
     public function delete_invoice($invoiceId)
     {
-        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
+        if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
             $invoiceToDelete = $this->db->where('id', (int)$invoiceId)->get('invoices')->row_array();
-            if (!$invoiceToDelete || ($this->session->userdata('role') !== 'admin' && (int)$invoiceToDelete['user_id'] !== (int)$this->session->userdata('id'))) { show_404(); return; }
+            if (!$invoiceToDelete || ($this->session->userdata('role') !== 'admin' && (int)$invoiceToDelete['user_id'] !== (int)$this->session->userdata('id'))) {
+                show_404();
+                return;
+            }
             $this->common_model->delete($invoiceId, 'invoices');
             $categories = $this->db->select()->from('invoices')->get()->result_array();
             $_SESSION['invoices'] = $categories;
-            redirect(base_url(). 'admin/invoices/created');
+            redirect(base_url() . 'admin/invoices/created');
         } else {
             $data = array();
             $data['heading'] = 'Mesazhi';
@@ -816,110 +819,115 @@ class Invoices extends CI_Controller {
         }
     }
 
-    public function appendImageProduct(){
+    public function appendImageProduct()
+    {
         $invoices = $this->db->select('*')->from('invoices')->get()->result_array();
         foreach ($invoices as $key => $value) {
-            $row_data = json_decode($value['row_data'],1);
-            $row_data_1 = []; 
+            $row_data = json_decode($value['row_data'], 1);
+            $row_data_1 = [];
 
-                foreach ($row_data as $key => $value_1) {
-                    $productImage = $this->db->select('image')->from('products')->where('code',$value_1['code'])->get()->row_array();
-                    $row_data_1 []= ['product_name' => $value_1['product_name'],'code' => $value_1['code'],'quantity' => $value_1['quantity'],'price' => $value_1['price'],'total_product_price' => $value_1['total_product_price'],'image'=>isset($productImage['image']) ? $productImage['image'] : ''];
-                }
-                $this->common_model->edit_option(['row_data'=>json_encode($row_data_1)], $value['id'], 'invoices');
+            foreach ($row_data as $key => $value_1) {
+                $productImage = $this->db->select('image')->from('products')->where('code', $value_1['code'])->get()->row_array();
+                $row_data_1[] = ['product_name' => $value_1['product_name'], 'code' => $value_1['code'], 'quantity' => $value_1['quantity'], 'price' => $value_1['price'], 'total_product_price' => $value_1['total_product_price'], 'image' => isset($productImage['image']) ? $productImage['image'] : ''];
             }
+            $this->common_model->edit_option(['row_data' => json_encode($row_data_1)], $value['id'], 'invoices');
+        }
     }
 
 
     public function print_pdf()
-        {
-            if (in_array($this->session->userdata('role'), ['user'])) {
-                show_404();
-            }
+    {
+        if (in_array($this->session->userdata('role'), ['user'])) {
+            show_404();
+        }
 
-            $id = $this->input->get('id');
-            if (!$id) {
-                show_404();
-            }
+        $id = $this->input->get('id');
+        if (!$id) {
+            show_404();
+        }
 
-            $invoice = $this->db->select('*')
-                ->from('invoices')
-                ->where('id', $id)
-                ->get()
-                ->row_array();
+        $invoice = $this->db->select('*')
+            ->from('invoices')
+            ->where('id', $id)
+            ->get()
+            ->row_array();
 
-            if (!$invoice || ($this->session->userdata('role') !== 'admin' && (int)$invoice['user_id'] !== (int)$this->session->userdata('id'))) {
-                show_404(); return;
-            }
+        if (!$invoice || ($this->session->userdata('role') !== 'admin' && (int)$invoice['user_id'] !== (int)$this->session->userdata('id'))) {
+            show_404();
+            return;
+        }
 
-            // dekodo rreshtat
-            $rows = json_decode($invoice['row_data'], true) ?: [];
+        // dekodo rreshtat
+        $rows = json_decode($invoice['row_data'], true) ?: [];
 
-            // emrat nga DB
-            $client_name = $invoice['client_name'];
-            $address     = $invoice['address'];
-            $phone     = $invoice['phone'];
-            $date        = $invoice['date'];
-            $comment     = $invoice['comment'];
-            $phone       = isset($invoice['phone']) ? $invoice['phone'] : '';
-            $total_sum   = $invoice['total_price_invoice'];
-            $prepayment  = $invoice['prepayment_price_invoice'];
-            $final_sum_to_pay = $invoice['total_price_left_invoice'];
+        // emrat nga DB
+        $client_name = $invoice['client_name'];
+        $address     = $invoice['address'];
+        $phone     = $invoice['phone'];
+        $date        = $invoice['date'];
+        $comment     = $invoice['comment'];
+        $phone       = isset($invoice['phone']) ? $invoice['phone'] : '';
+        $total_sum   = $invoice['total_price_invoice'];
+        $prepayment  = $invoice['prepayment_price_invoice'];
+        $final_sum_to_pay = $invoice['total_price_left_invoice'];
 
-            // admin short code
-            $adminName = $this->session->userdata('prefix_user');
+        // admin short code
+        $adminName = $this->session->userdata('prefix_user');
 
-            // TCPDF setup (njësoj si tek sheet_invoice më herët)
-            $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        // TCPDF setup (njësoj si tek sheet_invoice më herët)
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
-            $pdf->SetCreator(PDF_CREATOR);
-            $pdf->SetAuthor('MJETEPERPUNE');
-            $pdf->SetTitle('FATURA');
-            $pdf->SetSubject('FATURA');
-            $pdf->SetKeywords('FATURA, PDF');
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('MJETEPERPUNE');
+        $pdf->SetTitle('FATURA');
+        $pdf->SetSubject('FATURA');
+        $pdf->SetKeywords('FATURA, PDF');
 
-            $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-            $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-            $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-            $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-            $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-            $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-            $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-            $pdf->SetFont('dejavusans', '', 10);
+        $pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+        $pdf->setFooterFont(array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+        $pdf->SetFont('dejavusans', '', 8);
 
-            $pdf->AddPage();
+        $pdf->AddPage();
 
-            $html = '
-                <h1>FATURA: '.$adminName.'-'.$invoice['id'].'</h1>
+        $html = '
+                <h1>FATURA: ' . $adminName . '-' . $invoice['id'] . '</h1>
                 <p><strong>KLIENTI:</strong> ' . strtoupper($client_name) . '</p>
                 <p><strong>ADRESA:</strong> ' . strtoupper($address) . '</p>';
 
-            if (!empty($phone)) {
-                $html .= '<p><strong>TELEFONI:</strong> ' . htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') . '</p>';
-            }
+        if (!empty($phone)) {
+            $html .= '<p><strong>TELEFONI:</strong> ' . htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') . '</p>';
+        }
 
-            $html .= '
+        $html .= '
                 <p><strong>DATA:</strong> ' . htmlspecialchars($date) . '</p>
                 <style>
-                <style>
-                    table {
+                    .invoice-products {
                         width: 100%;
+                        font-size: 12px;
                     }
-                    th, td {
+                    .invoice-products th, .invoice-products td {
                         border: 1px solid black;
-                        line-height: 30px;
+                        font-size: 12px;
+                        line-height: 1.15;
                     }
-                    th {
+                    .invoice-products th {
                         background-color: #f2f2f2;
+                        font-weight: bold;
                     }
-                    .total_sum{
-                        font-size:14px;
+                    .invoice-products .total_sum td {
+                        font-size: 9px;
+                        font-weight: bold;
                     }
                 </style>
-                <table>
+                <table class="invoice-products" cellpadding="2" cellspacing="0">
                     <thead>
-                        <tr style="height:100%;">
+                        <tr>
                             <th style="width:8%;"> #</th>
                             <th style="width:10%;"> KODI</th>
                             <th style="width:47%;"> EMRI I PRODUKTIT</th>
@@ -931,9 +939,9 @@ class Invoices extends CI_Controller {
                     <tbody style="border-right:none;">
             ';
 
-            foreach ($rows as $i => $r) {
-                $html .= '
-                    <tr style="height:100%;">
+        foreach ($rows as $i => $r) {
+            $html .= '
+                    <tr>
                         <td style="width:8%;">' . ($i + 1) . '.</td>
                         <td style="width:10%;"> ' . ($r['code']) . '</td>
                         <td style="width:47%;"> ' . strtoupper($r['product_name']) . '</td>
@@ -942,11 +950,10 @@ class Invoices extends CI_Controller {
                         <td style="width:15%;"> ' . ($r['total_product_price']) . '</td>
                     </tr>
                 ';
-            }
+        }
 
-            $html .= '
+        $html .= '
                 </tbody>
-                <br/>
                 <tfoot>
                     <tr class="total_sum">
                         <td colspan="5">TOTALI</td>
@@ -955,8 +962,8 @@ class Invoices extends CI_Controller {
                 </tfoot>
             ';
 
-            if ($prepayment > 0) {
-                $html .= '
+        if ($prepayment > 0) {
+            $html .= '
                 <tfoot>
                     <tr class="total_sum">
                         <td colspan="5">PARAPAGESË</td>
@@ -969,99 +976,101 @@ class Invoices extends CI_Controller {
                         <td><b> ' . htmlspecialchars($final_sum_to_pay) . '</b></td>
                     </tr>
                 </tfoot>';
-            }
+        }
 
-            if (!empty($comment)) {
-                $commentClean = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
-                $html .= '
+        if (!empty($comment)) {
+            $commentClean = nl2br(htmlspecialchars($comment, ENT_QUOTES, 'UTF-8'));
+            $html .= '
                     <p>Koment: </p><br><span class="comment">' . $commentClean . '<hr></span>';
-            }
+        }
 
-            $html .= '</table>';
+        $html .= '</table>';
 
-            $pdf->writeHTML($html, true, false, true, false, '');
+        $pdf->writeHTML($html, true, false, true, false, '');
 
-            // Jep PDF direkt, pa ruajtje ne disk
-            $pdf->Output($client_name.'-FATURA-'.$invoice['id'].'.pdf', 'I');
+        // Jep PDF direkt, pa ruajtje ne disk
+        $pdf->Output($client_name . '-FATURA-' . $invoice['id'] . '.pdf', 'I');
     }
 
     public function print_product_invoice($productId)
     {
-        if (in_array($this->session->userdata('role'), ['admin','sales'])) {
+        if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
             $product = $this->db->select('id, name, code, price, image')->from('products')->where('id', $productId)->get()->row_array();
             if (!$product) {
                 show_404();
             }
 
-                $products['client_name'] = 'QYTETAR';
-                $products['address'] = 'KOSOVE';
-                $products['phone'] = '';
-                $products['date'] = current_datetime();
-                $products['comment'] = '';
-                $products['product_name'][] = $product['name'];
-                $products['code'][] = $product['code'];
-                $products['quantity'][] = '1';
-                $products['price'][] = $product['price'];
-                $products['image'][]   = $product['image'];
-                $products['total_product_price'][]= $product['price'];
-                $products['total_sum'] = $product['price'];
-                $products['prepayment'] = '0.00';
-                $products['final_sum_to_pay'] = '0.00';
-                $products['total_price_invoice'] = $product['price'];
+            $products['client_name'] = 'QYTETAR';
+            $products['address'] = 'KOSOVE';
+            $products['phone'] = '';
+            $products['date'] = current_datetime();
+            $products['comment'] = '';
+            $products['product_name'][] = $product['name'];
+            $products['code'][] = $product['code'];
+            $products['quantity'][] = '1';
+            $products['price'][] = $product['price'];
+            $products['image'][]   = $product['image'];
+            $products['total_product_price'][] = $product['price'];
+            $products['total_sum'] = $product['price'];
+            $products['prepayment'] = '0.00';
+            $products['final_sum_to_pay'] = '0.00';
+            $products['total_price_invoice'] = $product['price'];
 
-                $products['prepayment_price_invoice'] = $products['prepayment_price_invoice'] != '' ? number_format($products['prepayment_price_invoice'],2, '.', '') : '0.00';
-                $products['total_price_left_invoice'] = $products['total_price_left_invoice'] != '' ? number_format($products['total_price_left_invoice'],2, '.', '') : '0.00';
+            $products['prepayment_price_invoice'] = $products['prepayment_price_invoice'] != '' ? number_format($products['prepayment_price_invoice'], 2, '.', '') : '0.00';
+            $products['total_price_left_invoice'] = $products['total_price_left_invoice'] != '' ? number_format($products['total_price_left_invoice'], 2, '.', '') : '0.00';
 
-                $products['adminID'] = $this->session->userdata('id');
+            $products['adminID'] = $this->session->userdata('id');
 
-                $adminName = $this->session->userdata('prefix_user');
-                // Create new PDF document
-                $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-                $drawing = new Drawing();
+            $adminName = $this->session->userdata('prefix_user');
+            // Create new PDF document
+            $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+            $drawing = new Drawing();
 
-                // Set document information
-                $pdf->SetCreator(PDF_CREATOR);
-                $pdf->SetAuthor('MJETEPERPUNE');
-                $pdf->SetTitle('FATURA');
-                $pdf->SetSubject('FATURA');
-                $pdf->SetKeywords('FATURA, PDF, Example');
-        
-                // Set default header data
-        
-                // Set header and footer fonts
-                $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-                $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-        
-                // Set default monospaced font
-                $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-        
-                // Set margins
-                $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-                $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-                $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-        
-                // Set auto page breaks
-                $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-        
-                // Set image scale factor
-                $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-        
-                // Set font
-                $pdf->SetFont('dejavusans', '', 10);
-        
-                // Add a page
-                $pdf->AddPage();
+            // Set document information
+            $pdf->SetCreator(PDF_CREATOR);
+            $pdf->SetAuthor('MJETEPERPUNE');
+            $pdf->SetTitle('FATURA');
+            $pdf->SetSubject('FATURA');
+            $pdf->SetKeywords('FATURA, PDF, Example');
 
-                $clientInvoice = $this->saveClientInvoice($products);
+            // Set default header data
 
-                $invoiceId = $clientInvoice['id'];
+            // Set header and footer fonts
+            $pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+            $pdf->setFooterFont(array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
-                    // pastro output-in nëse ka diçka
-                if (ob_get_length()) { ob_end_clean(); }
+            // Set default monospaced font
+            $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
-                $printUrl = base_url('admin/invoices/print_pdf?id=' . $invoiceId);
+            // Set margins
+            $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+            $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+            $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 
-                echo '<!DOCTYPE html>
+            // Set auto page breaks
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+            // Set image scale factor
+            $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+            // Set font
+            $pdf->SetFont('dejavusans', '', 10);
+
+            // Add a page
+            $pdf->AddPage();
+
+            $clientInvoice = $this->saveClientInvoice($products);
+
+            $invoiceId = $clientInvoice['id'];
+
+            // pastro output-in nëse ka diçka
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+
+            $printUrl = base_url('admin/invoices/print_pdf?id=' . $invoiceId);
+
+            echo '<!DOCTYPE html>
                 <html>
                 <head>
                     <meta charset="utf-8">
@@ -1080,7 +1089,7 @@ class Invoices extends CI_Controller {
                     </style>
                 </head>
                 <body>
-                    <iframe id="pdfFrame" src="'.htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8").'"></iframe>
+                    <iframe id="pdfFrame" src="' . htmlspecialchars($printUrl, ENT_QUOTES, "UTF-8") . '"></iframe>
 
                     <script>
                         const iframe = document.getElementById("pdfFrame");
@@ -1096,10 +1105,8 @@ class Invoices extends CI_Controller {
                 </body>
                 </html>';
 
-                exit;
-        
-
-        }   
+            exit;
+        }
     }
 
     public function debt_invoices()
@@ -1507,15 +1514,14 @@ class Invoices extends CI_Controller {
 
             foreach ($clients as $client) {
 
-                ?>
+?>
 
                 <tr
                     class="clickable-row"
                     data-href="<?php echo base_url(
-                        'admin/invoices/debt_client/' . $client['id']
-                    ); ?>"
-                    style="cursor:pointer;"
-                >
+                                    'admin/invoices/debt_client/' . $client['id']
+                                ); ?>"
+                    style="cursor:pointer;">
 
                     <td data-label="ID">
 
@@ -1556,9 +1562,8 @@ class Invoices extends CI_Controller {
 
                 </tr>
 
-                <?php
+            <?php
             }
-
         } else {
 
             ?>
@@ -1568,8 +1573,7 @@ class Invoices extends CI_Controller {
                 <td
                     colspan="3"
                     class="text-center"
-                    style="padding:30px;"
-                >
+                    style="padding:30px;">
 
                     Nuk u gjet asnjë klient.
 
@@ -1577,7 +1581,7 @@ class Invoices extends CI_Controller {
 
             </tr>
 
-            <?php
+<?php
         }
     }
 
@@ -1938,7 +1942,6 @@ class Invoices extends CI_Controller {
                         ','
                     ) .
                     ' €';
-
             } else {
 
                 $type = 'PAGESË';
@@ -2038,13 +2041,13 @@ class Invoices extends CI_Controller {
                     <td align="right">
 
                         ' .
-                        number_format(
-                            $totalDebt,
-                            2,
-                            '.',
-                            ','
-                        ) .
-                        ' €
+            number_format(
+                $totalDebt,
+                2,
+                '.',
+                ','
+            ) .
+            ' €
 
                     </td>
 
@@ -2083,8 +2086,8 @@ class Invoices extends CI_Controller {
         */
         $pdf->Output(
             'Historia-Detyrimit-' .
-            $client['name'] .
-            '.pdf',
+                $client['name'] .
+                '.pdf',
             'I'
         );
 
@@ -2142,12 +2145,12 @@ class Invoices extends CI_Controller {
             <iframe
                 id="pdfFrame"
                 src="' .
-                htmlspecialchars(
-                    $printUrl,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) .
-                '"
+            htmlspecialchars(
+                $printUrl,
+                ENT_QUOTES,
+                'UTF-8'
+            ) .
+            '"
             ></iframe>
 
             <script>
@@ -2245,7 +2248,7 @@ class Invoices extends CI_Controller {
             ->like('name', $search)
             ->or_like('address', $search)
             ->or_like('phone', $search)
-        ->group_end();
+            ->group_end();
         $this->db->order_by('name', 'ASC');
         $this->db->limit(10);
 
@@ -2256,7 +2259,7 @@ class Invoices extends CI_Controller {
     // =============================================================
     // TRANSFERO FATURËN SI DETYRIM TË KLIENTIT
     // =============================================================
-    
+
     public function invoice_to_debt()
     {
         $reply = function ($status, $message, $httpCode = 200, $extra = []) {
@@ -2285,8 +2288,10 @@ class Invoices extends CI_Controller {
             return $reply(false, 'Fatura nuk u gjet.', 404);
         }
 
-        if ($this->session->userdata('role') === 'sales' &&
-            (int) $invoice['user_id'] !== (int) $this->session->userdata('id')) {
+        if (
+            $this->session->userdata('role') === 'sales' &&
+            (int) $invoice['user_id'] !== (int) $this->session->userdata('id')
+        ) {
             return $reply(false, 'Nuk keni qasje në këtë faturë.', 403);
         }
 
@@ -2365,9 +2370,12 @@ class Invoices extends CI_Controller {
             }
             $this->db->trans_commit();
 
-            return $reply(true,
+            return $reply(
+                true,
                 'Detyrimi prej ' . number_format($newAmount, 2) . ' € u regjistrua me sukses.',
-                200, ['client_id' => $clientId, 'action' => 'created']);
+                200,
+                ['client_id' => $clientId, 'action' => 'created']
+            );
         }
 
         $clientId = (int) $existing['client_id'];
@@ -2419,11 +2427,13 @@ class Invoices extends CI_Controller {
             return $reply(false, 'Detyrimi nuk u përditësua.', 500);
         }
 
-        return $reply(true,
+        return $reply(
+            true,
             'Detyrimi i faturës u përditësua nga ' .
-            number_format($oldAmount, 2) . ' € në ' .
-            number_format($newAmount, 2) . ' €.',
-            200, ['client_id' => $clientId, 'action' => 'updated']);
+                number_format($oldAmount, 2) . ' € në ' .
+                number_format($newAmount, 2) . ' €.',
+            200,
+            ['client_id' => $clientId, 'action' => 'updated']
+        );
     }
-
 }

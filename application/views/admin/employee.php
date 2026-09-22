@@ -1,11 +1,16 @@
 <style>
-  #date {
-    width: 100%; /* Makes the input span the entire container width */
-    height: 40px; /* Adjust height as needed */
-    cursor: pointer; /* Ensures the cursor changes to pointer for better UX */
-    text-align: center; /* Centers the text inside the input */
-    font-size: 16px; /* Adjust font size for better usability */
-  }
+    #date {
+        width: 100%;
+        /* Makes the input span the entire container width */
+        height: 40px;
+        /* Adjust height as needed */
+        cursor: pointer;
+        /* Ensures the cursor changes to pointer for better UX */
+        text-align: center;
+        /* Centers the text inside the input */
+        font-size: 16px;
+        /* Adjust font size for better usability */
+    }
 </style>
 <div class="row">
     <div class="col-md-12">
@@ -15,13 +20,13 @@
             <div class="alert alert-success" style="width: 100%"> <i class="fa fa-times"></i> <?php echo $msg; ?> &nbsp;
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
             </div>
-            <?php unset($_SESSION['msg']);?>                
+            <?php unset($_SESSION['msg']); ?>
         <?php endif ?>
         <?php if (isset($error_msg)) : ?>
             <div class="alert alert-danger delete_msg pull" style="width: 100%"> <i class="fa fa-times"></i> <?php echo $error_msg; ?> &nbsp;
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
             </div>
-            <?php unset($_SESSION['error_msg']);?>                
+            <?php unset($_SESSION['error_msg']); ?>
         <?php endif ?>
     </div>
     <div class="col-md-12">
@@ -38,10 +43,10 @@
                             <input type="text" class="form-control" id="pershkrimi" name="salary" placeholder="" required style='font-size:15px;'>
                         </div>
                         <div class="form-group">
-                            <label for="date"><b>Fillimi I Punës:</b></label><br/>
-                            <input type="date" id="date" name="month_year" value="<?= date('Y-m-d') ?>"  class="col-sm-12 col-xs-12" required>
+                            <label for="date"><b>Fillimi I Punës:</b></label><br />
+                            <input type="date" id="date" name="month_year" value="<?= date('Y-m-d') ?>" class="col-sm-12 col-xs-12" required>
                         </div>
-                            <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
+                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
                         <br><br>
                         <div class="form-group">
                             <button type="submit" class="col-sm-12 col-xs-12 btn btn-block btn-info">Ruaj</button>

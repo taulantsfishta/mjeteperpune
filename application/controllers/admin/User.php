@@ -15,14 +15,14 @@ class User extends CI_Controller
     public function index()
     {
         if ($this->session->userdata('role') == 'admin') {
-        $data = array();
-        $_SESSION['title_name'] = 'PËRDORUES I RI';
-        $data['page_title'] = 'Perdoruesi';
-        $data['power'] = $this->common_model->get_all_power('user_power');
-        $data['category'] = $this->common_model->get_all_category('category');
-        $data['main_content'] = $this->load->view('admin/user/add', $data, TRUE);
-        $this->load->view('admin/index', $data);
-        }else{
+            $data = array();
+            $_SESSION['title_name'] = 'PËRDORUES I RI';
+            $data['page_title'] = 'Perdoruesi';
+            $data['power'] = $this->common_model->get_all_power('user_power');
+            $data['category'] = $this->common_model->get_all_category('category');
+            $data['main_content'] = $this->load->view('admin/user/add', $data, TRUE);
+            $this->load->view('admin/index', $data);
+        } else {
             $data = array();
             $data['heading'] = 'Mesazhi';
             $data['message'] = "Nuk keni qasje ne kete faqe";
@@ -55,7 +55,7 @@ class User extends CI_Controller
                             'status' => 1,
                             'price_status' => $priceStatus,
                             'role' => $_POST['role'],
-                            'prefix_user' =>$_POST['prefix_user'],
+                            'prefix_user' => $_POST['prefix_user'],
                             'created_at' => current_datetime()
                         );
 
@@ -76,12 +76,12 @@ class User extends CI_Controller
                 $this->session->set_flashdata('error_msg', 'Te dhenat mungojne');
                 redirect(base_url('admin/user'));
             }
-        }else{
-                $data = array();
-                $data['heading'] = 'Mesazhi';
-                $data['message'] = "Nuk keni qasje ne kete faqe";
-                $this->load->view('errors/html/error_404', $data);
-            }
+        } else {
+            $data = array();
+            $data['heading'] = 'Mesazhi';
+            $data['message'] = "Nuk keni qasje ne kete faqe";
+            $this->load->view('errors/html/error_404', $data);
+        }
     }
 
     public function all_user_list()
@@ -93,7 +93,7 @@ class User extends CI_Controller
             $data['count'] = $this->common_model->get_user_total();
             $data['main_content'] = $this->load->view('admin/user/users', $data, TRUE);
             $this->load->view('admin/index', $data);
-        }else{
+        } else {
             $data = array();
             $data['heading'] = 'Mesazhi';
             $data['message'] = "Nuk keni qasje ne kete faqe";
@@ -130,17 +130,15 @@ class User extends CI_Controller
                 $this->common_model->edit_option($data, $id, 'user');
                 $this->session->set_flashdata('msg', 'Information Updated Successfully');
                 redirect(base_url('admin/user/all_user_list'));
-        }
+            }
 
             $data['user'] = $this->common_model->get_single_user_info($id);
             $data['user']->password = $this->safe_b64decode($data['user']->password);
             $data['prefix_user'] = $this->common_model->get_prefix_user($id);
-                        log_message('error','prefix'.json_encode($data['prefix_user']));
             $data['view_category'] = json_decode($data['user']->view_category, 1);
             $data['user_role'] = $this->common_model->get_user_role($id);
             $data['power'] = $this->common_model->select('user_power');
             $data['category'] = $this->common_model->get_all_category('category');
-            // $data['country'] = $this->common_model->select('country');
             $data['main_content'] = $this->load->view('admin/user/edit_user', $data, TRUE);
             $data['page_title'] = 'Ndrysho informatat';
             $this->load->view('admin/index', $data);
@@ -255,20 +253,20 @@ class User extends CI_Controller
         return base64_decode($data);
     }
 
-    public function login_history(){
+    public function login_history()
+    {
         if ($this->session->userdata('role') == 'admin') {
-        $data = array();
-        $_SESSION['title_name'] = "HISTORIKU I PËRDORUESVE";
-        $data['page_title'] = 'Historiku I Perdoruesve';
-        $data['login_history'] = $this->db->select()->from('login_history')->order_by('id','DESC')->get()->result_array();
-        $data['main_content'] = $this->load->view('admin/login-history', $data, TRUE);
-        $this->load->view('admin/index', $data);
-        }else{
+            $data = array();
+            $_SESSION['title_name'] = "HISTORIKU I PËRDORUESVE";
+            $data['page_title'] = 'Historiku I Perdoruesve';
+            $data['login_history'] = $this->db->select()->from('login_history')->order_by('id', 'DESC')->get()->result_array();
+            $data['main_content'] = $this->load->view('admin/login-history', $data, TRUE);
+            $this->load->view('admin/index', $data);
+        } else {
             $data = array();
             $data['heading'] = 'Mesazhi';
             $data['message'] = "Nuk keni qasje ne kete faqe";
             $this->load->view('errors/html/error_404', $data);
         }
-
     }
 }

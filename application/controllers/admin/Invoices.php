@@ -2436,4 +2436,85 @@ class Invoices extends CI_Controller
             ['client_id' => $clientId, 'action' => 'updated']
         );
     }
+
+
+    public function edit_debt_client($clientId)
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $clientId = (int) $clientId;
+
+        // Merr të dhënat e klientit
+        $client = $this->db
+            ->where('id', $clientId)
+            ->get('debt_clients')
+            ->row_array();
+
+        if (!$client) {
+            show_404();
+            return;
+        }
+
+        // Ruaj ndryshimet
+        if ($this->input->method(TRUE) === 'POST') {
+
+            $name = trim(
+                (string) $this->input->post('name', TRUE)
+            );
+
+            $address = trim(
+                (string) $this->input->post('address', TRUE)
+            );
+
+            $phone = trim(
+                (string) $this->input->post('phone', TRUE)
+            );
+
+            if ($name === '') {
+
+                $this->session->set_flashdata(
+                    'error',
+                    'Emri i klientit është i obligueshëm.'
+                );
+
+                redirect(
+                    'admin/invoices/edit_debt_client/' . $clientId
+                );
+
+                return;
+            }
+
+            // Përditëso vetëm të dhënat informuese
+            $clientData = [
+                'name' => strtoupper($name),
+                'address' => $address !== '' ? $address : null,
+                'phone' => $phone !== '' ? $phone : null
+            ];
+
+            $this->db
+                ->where('id', $clientId)
+                ->update('debt_clients', $clientData);
+
+            // Kthehu te lista e detyrimeve
+            redirect('admin/invoices/debt_invoices');
+
+            return;
+        }
+
+        // Shfaq faqen e editimit
+        $data['client'] = $client;
+
+        $data['page_title'] = 'EDITO KLIENTIN';
+
+        $data['main_content'] = $this->load->view(
+            'admin/edit_debt_client_data',
+            $data,
+            TRUE
+        );
+
+        $this->load->view('admin/index', $data);
+    }
 }

@@ -176,6 +176,10 @@
                                 Detyrimi Total
                             </th>
 
+                            <th>
+                                Veprimi
+                            </th>
+
                         </tr>
 
                     </thead>
@@ -223,6 +227,21 @@
                                             ); ?> €
 
                                         </span>
+
+                                    </td>
+                                    <td data-label="Veprimi" class="text-center">
+
+                                        <a
+                                            href="<?php echo base_url(
+                                                        'admin/invoices/edit_debt_client/' . $client['id']
+                                                    ); ?>"
+                                            class="btn btn-primary btn-sm"
+                                            onclick="event.stopPropagation();">
+
+                                            <i class="fa fa-pencil"></i>
+                                            Veprim
+
+                                        </a>
 
                                     </td>
 

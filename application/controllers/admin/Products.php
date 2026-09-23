@@ -14,12 +14,12 @@ class Products extends CI_Controller
 
     public function get_product($id)
     {
-            $data = array();
-            $product = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('id', $id)->get()->row_array();
-            $data['product'] = $product;
-            $data['page_title'] = 'Ndrysho Produktin';
-            $data['main_content'] = $this->load->view('admin/edit-products', $data, TRUE);
-            $this->load->view('admin/index', $data);
+        $data = array();
+        $product = $this->db->select('products.id,products.name,products.image,products.code,products.price')->from('products')->where('id', $id)->get()->row_array();
+        $data['product'] = $product;
+        $data['page_title'] = 'Ndrysho Produktin';
+        $data['main_content'] = $this->load->view('admin/edit-products', $data, TRUE);
+        $this->load->view('admin/index', $data);
     }
 
     public function add($category_id)
@@ -39,7 +39,7 @@ class Products extends CI_Controller
 
         if (!empty($lastUsedCode['code'])) {
 
-            $codeNumber = substr($lastUsedCode['code'],strlen($category_id) + 1);
+            $codeNumber = substr($lastUsedCode['code'], strlen($category_id) + 1);
             $nextCode = $category_id . '-' . (((int)$codeNumber) + 1);
         } else {
             $nextCode = $category_id . '-1';
@@ -52,7 +52,7 @@ class Products extends CI_Controller
                 'page_title' => 'Shto Produktin'
             ];
 
-            $data['main_content'] = $this->load->view('admin/add-products',$data,TRUE);
+            $data['main_content'] = $this->load->view('admin/add-products', $data, TRUE);
             $this->load->view('admin/index', $data);
             return;
         }
@@ -68,9 +68,10 @@ class Products extends CI_Controller
 
         $productData = $this->security->xss_clean($productData);
 
-        $newProduct = $this->common_model->insert($productData,'products');
+        $newProduct = $this->common_model->insert($productData, 'products');
 
-        if (!$newProduct) {$this->session->set_flashdata(    'error_msg',    'Ka ndodhur nje gabim gjate ruajtjes se produktit.');
+        if (!$newProduct) {
+            $this->session->set_flashdata('error_msg',    'Ka ndodhur nje gabim gjate ruajtjes se produktit.');
             redirect(
                 base_url() . 'admin/products/add/' . $category_id
             );
@@ -97,11 +98,11 @@ class Products extends CI_Controller
                 'updated_at' => current_datetime()
             ];
 
-            $productInformationData =$this->security->xss_clean(    $productInformationData);
-            $this->common_model->insert($productInformationData,'product_information');
+            $productInformationData = $this->security->xss_clean($productInformationData);
+            $this->common_model->insert($productInformationData, 'product_information');
         }
 
-        if ( !isset($_FILES['product_image']) || empty($_FILES['product_image']['name'])) {
+        if (!isset($_FILES['product_image']) || empty($_FILES['product_image']['name'])) {
             $this->session->set_flashdata(
                 'error_msg',
                 'Produkti u ruajt, por nuk ka imazh. Ju lutem shtoni imazhin.'
@@ -124,7 +125,7 @@ class Products extends CI_Controller
 
             $message .= ' Ju lutem rregulloni imazhin dhe provoni perseri.';
 
-            $this->session->set_flashdata( 'error_msg', $message);
+            $this->session->set_flashdata('error_msg', $message);
 
             redirect(
                 base_url() . 'admin/products/get_product/' . $productId
@@ -170,7 +171,7 @@ class Products extends CI_Controller
                         );
                     } else {
                         $this->session->set_flashdata('error_msg', $uploadImageOfEditedProduct['message']);
-                        redirect(base_url(). 'admin/products/get_product/' . $_POST['id']);
+                        redirect(base_url() . 'admin/products/get_product/' . $_POST['id']);
                     }
                 } else {
                     $data = array(
@@ -181,9 +182,9 @@ class Products extends CI_Controller
                 }
                 $data = $this->security->xss_clean($data);
                 $this->common_model->edit_option($data, $_POST['id'], 'products');
-                redirect(base_url(). 'admin/products/get_product/' . $_POST['id']);
+                redirect(base_url() . 'admin/products/get_product/' . $_POST['id']);
             } else {
-                redirect(base_url(). 'admin/dashboard');
+                redirect(base_url() . 'admin/dashboard');
             }
         } else {
             $data = array();
@@ -193,17 +194,17 @@ class Products extends CI_Controller
         }
     }
 
-    public function delete_product($category_id,$product_id,$is_main_page = false)
+    public function delete_product($category_id, $product_id, $is_main_page = false)
     {
         if ($this->session->userdata('role') == 'admin') {
             $data = array('is_deleted' => 1);
             $data = $this->security->xss_clean($data);
             $this->common_model->edit_option($data, $product_id, 'products');
 
-            if($is_main_page){
-                redirect(base_url(). 'admin/dashboard');
-            }else{
-                redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
+            if ($is_main_page) {
+                redirect(base_url() . 'admin/dashboard');
+            } else {
+                redirect(base_url() . 'admin/dashboard/get_category' . '/' . $category_id);
             }
         } else {
             $data = array();
@@ -213,17 +214,17 @@ class Products extends CI_Controller
         }
     }
 
-    public function un_delete_product($category_id,$product_id,$is_main_page = false)
+    public function un_delete_product($category_id, $product_id, $is_main_page = false)
     {
         if ($this->session->userdata('role') == 'admin') {
             $data = array('is_deleted' => 0);
             $data = $this->security->xss_clean($data);
             $this->common_model->edit_option($data, $product_id, 'products');
 
-            if($is_main_page){
-                redirect(base_url(). 'admin/dashboard');
-            }else{
-                redirect(base_url(). 'admin/dashboard/get_category' . '/' . $category_id);
+            if ($is_main_page) {
+                redirect(base_url() . 'admin/dashboard');
+            } else {
+                redirect(base_url() . 'admin/dashboard/get_category' . '/' . $category_id);
             }
         } else {
             $data = array();
@@ -234,7 +235,8 @@ class Products extends CI_Controller
     }
 
 
-    private function uploadImageOfNewProduct($category_id){
+    private function uploadImageOfNewProduct($category_id)
+    {
         $config['upload_path']          = 'optimum/products_images';
         $config['allowed_types']        = 'gif|jpg|png|jpeg';
         $config['max_size']             = 1000;
@@ -315,7 +317,6 @@ class Products extends CI_Controller
             ->order_by('created_at', 'DESC')
             ->get()
             ->result_array();
-        log_message('error','purchases: '.json_encode($purchases));
         echo json_encode([
             'status' => true,
             'data' => [
@@ -325,7 +326,7 @@ class Products extends CI_Controller
         ]);
     }
 
-    
+
     public function add_product_information()
     {
         $product_id = (int)$this->input->post('product_id');
@@ -339,7 +340,7 @@ class Products extends CI_Controller
             !$product_id ||
             $shop_name == '' ||
             $product_quantity == '' ||
-            $product_buying_price == '' 
+            $product_buying_price == ''
         ) {
             echo json_encode([
                 'status' => false,
@@ -471,5 +472,4 @@ class Products extends CI_Controller
             'message' => 'Rreshti u fshi me sukses.'
         ]);
     }
-    
 }

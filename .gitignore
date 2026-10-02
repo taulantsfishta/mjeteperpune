@@ -1,3 +1,6 @@
-application/logs/
-optimum/product_images/
-optimum/products_images/
+application/config/image_search.php
+.env
+.env.*
+*.log
+application/logs/*
+!application/logs/index.html

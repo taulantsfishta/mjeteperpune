@@ -278,12 +278,85 @@
     }
 </style>
 
-<div role="search" class="background-blur" id="searchContainer">
-    <label for="s1">Search for:</label>
-    <input type="text" id="searchInput" placeholder="Kerko...">
-    <button aria-label="Do search" id="searchIcon">
+<div
+    role="search"
+    class="background-blur"
+    id="searchContainer">
+
+    <label for="searchInput">
+        Search for:
+    </label>
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Kerko...">
+
+    <button
+        type="button"
+        aria-label="Kerko"
+        id="searchIcon">
+
         <i class="fa fa-search"></i>
+
     </button>
+
+
+    <button
+        type="button"
+        id="imageSearchButton"
+        title="Kerko me foto"
+        style="
+            border-left:1px solid #ddd;
+            border-radius:0;
+            padding-left:12px;
+            padding-right:12px;
+        ">
+
+        <i class="fa fa-camera"></i>
+
+    </button>
+
+
+    <input
+        type="file"
+        id="imageSearchInput"
+        accept="image/*"
+        style="display:none;">
+
+</div>
+
+<div
+    id="imageSearchPreviewContainer"
+    class="background-blur"
+    style="
+        display:none;
+        text-align:center;
+        margin-bottom:20px;
+    ">
+
+    <img
+        id="imageSearchPreview"
+        src=""
+        alt=""
+        style="
+            max-width:180px;
+            max-height:140px;
+            object-fit:contain;
+            border:1px solid #ddd;
+            border-radius:8px;
+            padding:5px;
+            background:#fff;
+        ">
+
+    <div
+        id="imageSearchStatus"
+        style="
+            margin-top:8px;
+            font-weight:600;
+        ">
+    </div>
+
 </div>
 
 <!-- Preview of captured image -->
@@ -422,6 +495,112 @@
         </div>
     </div>
 <?php } ?>
+
+<div
+    class="modal"
+    id="imageCropModal"
+    tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-lg modal-dialog-centered"
+        role="document">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    <i class="fa fa-crop"></i>
+                    Selekto produktin
+                </h5>
+
+                <button
+                    type="button"
+                    class="close"
+                    data-bs-dismiss="modal">
+
+                    <span>&times;</span>
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="modal-body"
+                style="
+                    padding:10px;
+                    background:#111;
+                ">
+
+                <div
+                    id="cropImageContainer"
+                    style="
+                        width:100%;
+                        height:65vh;
+                        max-height:650px;
+                        overflow:hidden;
+                    ">
+
+                    <img
+                        id="cropImage"
+                        src=""
+                        alt=""
+                        style="
+                            display:block;
+                            max-width:100%;
+                        ">
+
+                </div>
+
+            </div>
+
+
+            <div
+                style="
+                    padding:10px 15px;
+                    background:#f7f7f7;
+                    font-size:13px;
+                    text-align:center;
+                ">
+
+                Lëvize dhe zmadhoje fotografinë.
+                Vendose vetëm produktin që dëshiron brenda katrorit.
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Anulo
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    id="cropAndSearchButton">
+
+                    <i class="fa fa-search"></i>
+                    Kërko këtë produkt
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <div class="modal background-blur" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -790,6 +969,24 @@
         const productListing = document.getElementById("productListing");
         const loadingIndicator = document.getElementById("loadingIndicator");
 
+
+        const imageSearchButton =
+            document.getElementById('imageSearchButton');
+
+        const imageSearchInput =
+            document.getElementById('imageSearchInput');
+
+        const cropImage =
+            document.getElementById('cropImage');
+
+        const cropAndSearchButton =
+            document.getElementById('cropAndSearchButton');
+
+        let imageCropper = null;
+
+        let originalImageUrl = null;
+
+
         // ===== Ctrl+B toggles admin actions =====
         function onCtrlB(e) {
             if (e.ctrlKey && (e.key === 'b' || e.key === 'B')) {
@@ -1013,6 +1210,398 @@
             moveModalsOutside();
         }
 
+        async function searchProductsByImage(file) {
+
+            if (!file) {
+                return;
+            }
+
+
+            const allowedTypes = [
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ];
+
+
+            if (!allowedTypes.includes(file.type)) {
+
+                alert(
+                    'Lejohen vetem JPG, PNG dhe WEBP.'
+                );
+
+                return;
+            }
+
+
+            if (file.size > 5 * 1024 * 1024) {
+
+                alert(
+                    'Fotoja eshte shume e madhe. Maksimumi 5MB.'
+                );
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVIEW
+            |--------------------------------------------------------------------------
+            */
+
+            const previewUrl =
+                URL.createObjectURL(file);
+
+            imageSearchPreview.src =
+                previewUrl;
+
+            imageSearchPreviewContainer
+                .style.display = 'block';
+
+            imageSearchStatus.innerHTML =
+                '<i class="fa fa-spinner fa-spin"></i> Duke analizuar fotografinë...';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLEAR PRODUCTS
+            |--------------------------------------------------------------------------
+            */
+
+            productListing.innerHTML = '';
+
+            showLoadingIndicator();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | REQUEST
+            |--------------------------------------------------------------------------
+            */
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                'search_image',
+                file
+            );
+
+
+            try {
+
+                const response = await fetch(
+                    url + 'admin/dashboard/search_products_by_image', {
+                        method: 'POST',
+
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+
+                        body: formData
+                    }
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.status
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        'Gabim gjate kerkimit.'
+                    );
+                }
+
+
+                hideLoadingIndicator();
+
+
+                const products =
+                    Array.isArray(data.products) ?
+                    data.products : [];
+
+
+                if (
+                    products.length === 0
+                ) {
+
+                    imageSearchStatus.innerHTML =
+                        'Nuk u gjet produkt i ngjashem.';
+
+                    showNotFound();
+
+                    return;
+                }
+
+
+                imageSearchStatus.innerHTML =
+                    products.length +
+                    ' produkte te ngjashme u gjeten.';
+
+
+                /*
+                 * Per image search nuk kemi
+                 * infinite scroll.
+                 */
+                isSearching = false;
+                hasMore = false;
+
+                productsList.length = 0;
+
+                productsList.push(
+                    ...products
+                );
+
+
+                updateImageSearchListing(
+                    products
+                );
+
+
+            } catch (error) {
+
+                hideLoadingIndicator();
+
+                imageSearchStatus.innerHTML =
+                    '<span style="color:#d9534f;">' +
+                    escapeHtml(
+                        error.message
+                    ) +
+                    '</span>';
+
+            }
+        }
+
+        function updateImageSearchListing(products) {
+
+            if (
+                !products ||
+                products.length === 0
+            ) {
+                return;
+            }
+
+
+            const html =
+                products.map(
+                    product => `
+
+        <div
+            class="col-md-12 col-lg-3 product-col">
+
+            <div
+                class="card"
+                style="margin-bottom:10px;">
+
+
+                <div
+                    style="
+                        text-align:right;
+                        padding:8px 10px 0;
+                    ">
+
+                    <span
+                        style="
+                            background:#53d1b2;
+                            padding:4px 8px;
+                            border-radius:10px;
+                            font-size:12px;
+                            font-weight:bold;
+                        ">
+
+                        ${product.similarity_percent}%
+
+                    </span>
+
+                </div>
+
+
+                <img
+                    id="imageresource_${product.id}"
+                    imgId="${product.id}"
+                    style="
+                        margin-left:auto;
+                        margin-right:auto;
+                        display:block;
+                        width:90px;
+                        height:70px;
+                        object-fit:contain;
+                    "
+                    src="${url}optimum/products_images/${product.image}"
+                    class="img-fluid"
+                />
+
+
+                <div class="card-body">
+
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            mb-3
+                        ">
+
+                        <h5 class="mb-0">
+                            Kodi:
+                        </h5>
+
+                        <h5
+                            class="
+                                text-dark
+                                mb-0
+                            ">
+
+                            <b>
+                                ${escapeHtml(product.code)}
+                            </b>
+
+                        </h5>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            mb-3
+                        ">
+
+                        <h5 class="mb-0">
+                            Përshkrimi:
+                        </h5>
+
+                        <h5
+                            class="
+                                text-dark
+                                mb-0
+                            "
+                            style="
+                                margin-left:10px;
+                            ">
+
+                            <b>
+                                ${escapeHtml(product.name)}
+                            </b>
+
+                        </h5>
+
+                    </div>
+
+
+                    ${priceStatus == 1 ? `
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            mb-3
+                        ">
+
+                        <h5 class="mb-0">
+                            Çmimi:
+                        </h5>
+
+                        <h5
+                            class="
+                                text-dark
+                                mb-0
+                            ">
+
+                            <b>
+                                ${product.price}
+                                <i class="fa fa-euro"></i>
+                            </b>
+
+                        </h5>
+
+                    </div>
+
+                    ` : ''}
+
+
+                </div>
+
+
+                ${['admin', 'sales'].includes(role) ? `
+
+                    <div
+                        class="
+                            mt-2
+                            admin-actions
+                        ">
+
+                        ${role === 'admin' ? `
+
+                            <a
+                                href="${url}admin/products/get_product/${product.id}"
+                                target="_blank">
+
+                                <button
+                                    class="
+                                        btn
+                                        btn-primary
+                                        btn-block
+                                        mb-2
+                                    "
+                                    style="
+                                        background:#53d1b2;
+                                        font-size:14px;
+                                    ">
+
+                                    <i class="fa fa-edit"></i>
+
+                                    Ndrysho Produktin
+
+                                </button>
+
+                            </a>
+
+                        ` : ''}
+
+
+                        <button
+                            type="button"
+                            class="
+                                btn
+                                btn-warning
+                                btn-block
+                                add-to-cart-btn
+                            "
+                            data-productid="${product.id}"
+                            data-code="${escapeHtml(product.code)}"
+                            data-name="${escapeHtml(product.name)}"
+                            data-price="${product.price}">
+
+                            <i class="fa fa-shopping-cart"></i>
+
+                            Shportë
+
+                        </button>
+
+                    </div>
+
+                ` : ''}
+
+
+            </div>
+
+        </div>`
+                ).join('');
+
+
+            productListing.innerHTML =
+                html;
+        }
+
         function performSearch() {
             const searchQuery = searchInput.value.trim();
 
@@ -1037,11 +1626,334 @@
                 });
         }
 
+
+
         // Search triggers ONLY Enter / click (no live search)
         searchIcon.addEventListener("click", performSearch);
         searchInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") performSearch();
         });
+
+        imageSearchButton.addEventListener(
+            'click',
+            function() {
+
+                imageSearchInput.click();
+
+            }
+        );
+
+        imageSearchInput.addEventListener(
+            'change',
+            function() {
+
+                const file =
+                    this.files &&
+                    this.files.length ?
+                    this.files[0] :
+                    null;
+
+                if (!file) {
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Kontrollo qe eshte foto
+                |--------------------------------------------------------------------------
+                */
+
+                if (!file.type.startsWith('image/')) {
+
+                    alert('Ju lutem zgjidhni nje fotografi.');
+
+                    this.value = '';
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Largo URL e vjeter
+                |--------------------------------------------------------------------------
+                */
+
+                if (originalImageUrl) {
+
+                    URL.revokeObjectURL(
+                        originalImageUrl
+                    );
+
+                    originalImageUrl = null;
+                }
+
+
+                originalImageUrl =
+                    URL.createObjectURL(file);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Largo cropper te vjeter
+                |--------------------------------------------------------------------------
+                */
+
+                if (imageCropper) {
+
+                    imageCropper.destroy();
+
+                    imageCropper = null;
+                }
+
+
+                cropImage.src =
+                    originalImageUrl;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Hap modal
+                |--------------------------------------------------------------------------
+                */
+
+                $('#imageCropModal')
+                    .modal('show');
+
+
+                /*
+                 * Lejon zgjedhjen e fotos se njejte perseri.
+                 */
+                this.value = '';
+
+            }
+        );
+
+        $('#imageCropModal')
+            .on(
+                'shown.bs.modal',
+                function() {
+
+                    if (!cropImage.src) {
+                        return;
+                    }
+
+
+                    if (imageCropper) {
+
+                        imageCropper.destroy();
+
+                        imageCropper = null;
+                    }
+
+
+                    imageCropper =
+                        new Cropper(
+                            cropImage, {
+
+                                /*
+                                 * 0 = crop box mund te levize
+                                 */
+                                viewMode: 1,
+
+                                /*
+                                 * Crop box i lire.
+                                 * Nuk e detyrojme katror.
+                                 */
+                                aspectRatio: NaN,
+
+                                dragMode: 'move',
+
+                                autoCropArea: 0.65,
+
+                                responsive: true,
+
+                                background: false,
+
+                                guides: true,
+
+                                center: true,
+
+                                highlight: true,
+
+                                movable: true,
+
+                                zoomable: true,
+
+                                zoomOnTouch: true,
+
+                                zoomOnWheel: true,
+
+                                scalable: false,
+
+                                rotatable: true,
+
+                                cropBoxMovable: true,
+
+                                cropBoxResizable: true,
+
+                                toggleDragModeOnDblclick: false
+
+                            }
+                        );
+
+                }
+            );
+
+        cropAndSearchButton.addEventListener(
+            'click',
+            function() {
+
+                if (!imageCropper) {
+
+                    alert(
+                        'Fotografia nuk eshte gati.'
+                    );
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Merr vetem pjesen e selektuar
+                |--------------------------------------------------------------------------
+                */
+
+                const canvas =
+                    imageCropper.getCroppedCanvas({
+
+                        /*
+                         * Nuk ka nevoje te dergojme foto gjigante.
+                         * 1200px mjafton per image search.
+                         */
+                        maxWidth: 1200,
+                        maxHeight: 1200,
+
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high'
+
+                    });
+
+
+                if (!canvas) {
+
+                    alert(
+                        'Nuk mund te krijohet fotografia.'
+                    );
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Ndalo butonin derisa konvertohet
+                |--------------------------------------------------------------------------
+                */
+
+                cropAndSearchButton.disabled =
+                    true;
+
+                cropAndSearchButton.innerHTML =
+                    '<i class="fa fa-spinner fa-spin"></i> Duke përgatitur...';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Canvas -> Blob JPG
+                |--------------------------------------------------------------------------
+                */
+
+                canvas.toBlob(
+                    function(blob) {
+
+                        if (!blob) {
+
+                            cropAndSearchButton.disabled =
+                                false;
+
+                            cropAndSearchButton.innerHTML =
+                                '<i class="fa fa-search"></i> Kërko këtë produkt';
+
+                            alert(
+                                'Gabim gjate prerjes se fotos.'
+                            );
+
+                            return;
+                        }
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Krijo file qe funksioni yne ekzistues ta pranoje
+                        |--------------------------------------------------------------------------
+                        */
+
+                        const croppedFile =
+                            new File(
+                                [blob],
+                                'visual-search.jpg', {
+                                    type: 'image/jpeg'
+                                }
+                            );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Mbyll modal
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $('#imageCropModal')
+                            .modal('hide');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Dergo vetem crop-in te Gemini/Qdrant
+                        |--------------------------------------------------------------------------
+                        */
+
+                        searchProductsByImage(
+                            croppedFile
+                        );
+
+
+                        cropAndSearchButton.disabled =
+                            false;
+
+                        cropAndSearchButton.innerHTML =
+                            '<i class="fa fa-search"></i> Kërko këtë produkt';
+
+                    },
+
+                    'image/jpeg',
+
+                    /*
+                     * Quality 90%
+                     */
+                    0.90
+                );
+
+            }
+        );
+
+        $('#imageCropModal')
+            .on(
+                'hidden.bs.modal',
+                function() {
+
+                    if (imageCropper) {
+
+                        imageCropper.destroy();
+
+                        imageCropper = null;
+                    }
+
+                }
+            );
 
         // ===== infinite scroll (SEARCH-ONLY) =====
         function checkScrollLoadMore() {

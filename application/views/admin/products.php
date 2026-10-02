@@ -329,12 +329,47 @@
     </div>
 <?php endif ?>
 
-<div role="search" id="searchContainer" class="background-blur">
-    <label for="s1">Search for:</label>
-    <input type="text" id="searchInput" placeholder="Kerko...">
-    <button aria-label="Do search" id="searchIcon">
+<div
+    role="search"
+    id="searchContainer"
+    class="background-blur">
+
+    <label for="searchInput">
+        Search for:
+    </label>
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Kerko...">
+
+
+    <button
+        type="button"
+        aria-label="Kerko"
+        id="searchIcon">
+
         <i class="fa fa-search"></i>
+
     </button>
+
+
+    <button
+        type="button"
+        id="imageSearchButton"
+        title="Kerko me foto">
+
+        <i class="fa fa-camera"></i>
+
+    </button>
+
+
+    <input
+        type="file"
+        id="imageSearchInput"
+        accept="image/*"
+        style="display:none;">
+
 </div>
 
 <div class="col-md-12">
@@ -490,6 +525,109 @@
 <div id="loadingIndicator" style="display:none;text-align:center;padding:10px;">
     <div class="spinner"></div><br>
     <span>Me shume produkte..</span>
+</div>
+
+<div
+    class="modal"
+    id="imageCropModal"
+    tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-lg modal-dialog-centered"
+        role="document">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    <i class="fa fa-crop"></i>
+                    Selekto produktin
+                </h5>
+
+                <button
+                    type="button"
+                    class="close"
+                    data-bs-dismiss="modal">
+
+                    <span>&times;</span>
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="modal-body"
+                style="
+                    padding:10px;
+                    background:#111;
+                ">
+
+                <div
+                    style="
+                        width:100%;
+                        height:65vh;
+                        max-height:650px;
+                        overflow:hidden;
+                    ">
+
+                    <img
+                        id="cropImage"
+                        src=""
+                        style="
+                            display:block;
+                            max-width:100%;
+                        ">
+
+                </div>
+
+            </div>
+
+
+            <div
+                style="
+                    padding:10px;
+                    text-align:center;
+                    background:#f7f7f7;
+                ">
+
+                Selekto vetëm produktin që dëshiron të kërkosh.
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Anulo
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="cropAndSearchButton"
+                    class="btn btn-success">
+
+                    <i class="fa fa-search"></i>
+
+                    Kërko këtë produkt
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 <div class="modal" id="productInfoModal" tabindex="-1" role="dialog" aria-labelledby="productInfoModalLabel" aria-hidden="true">
@@ -721,6 +859,37 @@
         let hasMore = true; // HARD stop when no more data
         let getSearchResult = 0; // total matches from backend (if provided)
 
+        const currentCategoryId =
+            <?php echo (int)$category['id']; ?>;
+
+
+        const imageSearchButton =
+            document.getElementById(
+                'imageSearchButton'
+            );
+
+
+        const imageSearchInput =
+            document.getElementById(
+                'imageSearchInput'
+            );
+
+
+        const cropImage =
+            document.getElementById(
+                'cropImage'
+            );
+
+
+        const cropAndSearchButton =
+            document.getElementById(
+                'cropAndSearchButton'
+            );
+
+
+        let imageCropper = null;
+        let originalImageUrl = null;
+
         const limit = 20;
 
         // IMPORTANT: start after SSR products
@@ -886,6 +1055,374 @@
                 });
             }
         }
+
+        async function searchProductsByImage(file) {
+
+            if (!file) {
+                return;
+            }
+
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                'search_image',
+                file
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NDALO INFINITE SCROLL
+            |--------------------------------------------------------------------------
+            */
+
+            isSearching = false;
+            searchInProgress = true;
+            hasMore = false;
+
+            offset = 0;
+
+
+            productListing.innerHTML = "";
+
+            productsList.length = 0;
+
+
+            showLoadingIndicator();
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        url +
+                        'admin/dashboard/search_products_by_image_category/' +
+                        currentCategoryId, {
+                            method: 'POST',
+                            body: formData
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                hideLoadingIndicator();
+
+                searchInProgress = false;
+
+                if (!data.status) {
+
+                    console.log(
+                        'QDRANT DEBUG:',
+                        data
+                    );
+
+                    alert(
+                        data.message ||
+                        'Gabim gjate kerkimit me foto.'
+                    );
+
+                    return;
+                }
+
+                const products =
+                    Array.isArray(data.products) ?
+                    data.products : [];
+
+
+                if (products.length === 0) {
+
+                    productListing.innerHTML =
+                        `
+                <div class="col-12">
+                    <h4
+                        class="page-title"
+                        style="
+                            color:#d9534f;
+                            font-weight:600;
+                            margin-left:26px;
+                        ">
+                        NUK U GJET PRODUKT I NGJASHEM
+                        NE KETE KATEGORI!
+                    </h4>
+                </div>
+                `;
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MBUSH LISTEN
+                |--------------------------------------------------------------------------
+                */
+
+                productsList.push(
+                    ...products
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SHFAQ KARTELAT EKZISTUESE
+                |--------------------------------------------------------------------------
+                */
+
+                updateProductListing(
+                    products,
+                    currentCategoryId,
+                    ''
+                );
+
+
+                window.scrollTo(
+                    0,
+                    0
+                );
+
+
+            } catch (error) {
+
+                hideLoadingIndicator();
+
+                searchInProgress = false;
+
+
+                console.error(error);
+
+
+                alert(
+                    'Gabim gjate kerkimit me foto.'
+                );
+            }
+        }
+
+        imageSearchButton.addEventListener(
+            'click',
+            function() {
+
+                imageSearchInput.click();
+
+            }
+        );
+
+
+        imageSearchInput.addEventListener(
+            'change',
+            function() {
+
+                const file =
+                    this.files &&
+                    this.files.length ?
+                    this.files[0] :
+                    null;
+
+
+                if (!file) {
+                    return;
+                }
+
+
+                if (!file.type.startsWith('image/')) {
+
+                    alert(
+                        'Ju lutem zgjidhni nje fotografi.'
+                    );
+
+                    this.value = '';
+
+                    return;
+                }
+
+
+                if (originalImageUrl) {
+
+                    URL.revokeObjectURL(
+                        originalImageUrl
+                    );
+
+                    originalImageUrl = null;
+                }
+
+
+                originalImageUrl =
+                    URL.createObjectURL(file);
+
+
+                if (imageCropper) {
+
+                    imageCropper.destroy();
+
+                    imageCropper = null;
+                }
+
+
+                cropImage.src =
+                    originalImageUrl;
+
+
+                $('#imageCropModal')
+                    .modal('show');
+
+
+                this.value = '';
+
+            }
+        );
+
+        $('#imageCropModal')
+            .on(
+                'shown.bs.modal',
+                function() {
+
+                    if (!cropImage.src) {
+                        return;
+                    }
+
+
+                    if (imageCropper) {
+
+                        imageCropper.destroy();
+
+                        imageCropper = null;
+                    }
+
+
+                    imageCropper =
+                        new Cropper(
+                            cropImage, {
+                                viewMode: 1,
+
+                                aspectRatio: NaN,
+
+                                dragMode: 'move',
+
+                                autoCropArea: 0.65,
+
+                                responsive: true,
+
+                                background: false,
+
+                                guides: true,
+
+                                center: true,
+
+                                movable: true,
+
+                                zoomable: true,
+
+                                zoomOnTouch: true,
+
+                                zoomOnWheel: true,
+
+                                cropBoxMovable: true,
+
+                                cropBoxResizable: true,
+
+                                toggleDragModeOnDblclick: false
+                            }
+                        );
+                }
+            );
+
+        cropAndSearchButton.addEventListener(
+            'click',
+            function() {
+
+                if (!imageCropper) {
+                    return;
+                }
+
+
+                const canvas =
+                    imageCropper.getCroppedCanvas({
+                        maxWidth: 1200,
+                        maxHeight: 1200,
+
+                        imageSmoothingEnabled: true,
+
+                        imageSmoothingQuality: 'high'
+                    });
+
+
+                if (!canvas) {
+                    return;
+                }
+
+
+                cropAndSearchButton.disabled =
+                    true;
+
+
+                cropAndSearchButton.innerHTML =
+                    '<i class="fa fa-spinner fa-spin"></i> Duke kërkuar...';
+
+
+                canvas.toBlob(
+                    function(blob) {
+
+                        if (!blob) {
+
+                            cropAndSearchButton.disabled =
+                                false;
+
+                            return;
+                        }
+
+
+                        const croppedFile =
+                            new File(
+                                [blob],
+                                'visual-search.jpg', {
+                                    type: 'image/jpeg'
+                                }
+                            );
+
+
+                        $('#imageCropModal')
+                            .modal('hide');
+
+
+                        searchProductsByImage(
+                            croppedFile
+                        );
+
+
+                        cropAndSearchButton.disabled =
+                            false;
+
+
+                        cropAndSearchButton.innerHTML =
+                            '<i class="fa fa-search"></i> Kërko këtë produkt';
+
+                    },
+
+                    'image/jpeg',
+
+                    0.90
+                );
+            }
+        );
+
+        $('#imageCropModal')
+            .on(
+                'hidden.bs.modal',
+                function() {
+
+                    if (imageCropper) {
+
+                        imageCropper.destroy();
+
+                        imageCropper = null;
+                    }
+                }
+            );
 
         function performSearch() {
             const searchQuery = searchInput.value.trim();

@@ -479,34 +479,30 @@ class Dashboard extends CI_Controller
 
         $this->load->library('Product_image_search');
 
-        $embeddingResult =
+        $searchResult =
             $this->product_image_search
-            ->createImageEmbedding(
-                $file['tmp_name']
+            ->searchImageMultiObject(
+                $file['tmp_name'],
+                20,
+                null,
+                8
             );
 
         if (
-            !isset($embeddingResult['status']) ||
-            !$embeddingResult['status']
+            !isset($searchResult['status']) ||
+            !$searchResult['status']
         ) {
 
             http_response_code(500);
 
-            $message = 'Gabim gjate analizimit te fotos.';
+            $message =
+                isset($searchResult['message']) &&
+                !empty($searchResult['message'])
+                ? $searchResult['message']
+                : 'Gabim gjate analizimit te fotos.';
 
-            if (
-                isset($embeddingResult['message']) &&
-                !empty($embeddingResult['message'])
-            ) {
-
-                if (is_array($embeddingResult['message'])) {
-                    $message = json_encode(
-                        $embeddingResult['message']
-                    );
-                } else {
-                    $message =
-                        $embeddingResult['message'];
-                }
+            if (is_array($message)) {
+                $message = json_encode($message);
             }
 
             $data = [
@@ -518,14 +514,6 @@ class Dashboard extends CI_Controller
             echo json_encode($data);
             return;
         }
-
-
-        $searchResult =
-            $this->product_image_search
-            ->searchSimilar(
-                $embeddingResult['embedding'],
-                20
-            );
 
         if (
             !isset($searchResult['status']) ||
@@ -901,41 +889,41 @@ class Dashboard extends CI_Controller
         );
 
 
-        $embeddingResult =
+        $searchResult =
             $this->product_image_search
-            ->createImageEmbedding(
-                $file['tmp_name']
+            ->searchImageMultiObject(
+                $file['tmp_name'],
+                20,
+                (int)$categoryId,
+                8
             );
 
-
         if (
-            !isset($embeddingResult['status']) ||
-            !$embeddingResult['status']
+            !isset($searchResult['status']) ||
+            !$searchResult['status']
         ) {
 
-            $data['status'] = false;
-            $data['message'] =
-                'Gabim gjate analizimit te fotos.';
+            http_response_code(500);
+
+            $message =
+                isset($searchResult['message']) &&
+                !empty($searchResult['message'])
+                ? $searchResult['message']
+                : 'Gabim gjate analizimit te fotos.';
+
+            if (is_array($message)) {
+                $message = json_encode($message);
+            }
+
+            $data = [
+                'status' => false,
+                'message' => $message
+            ];
 
             header('Content-Type: application/json');
             echo json_encode($data);
             return;
         }
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | QDRANT - VETEM KATEGORIA AKTUALE
-    |--------------------------------------------------------------------------
-    */
-
-        $searchResult =
-            $this->product_image_search
-            ->searchSimilarByCategory(
-                $embeddingResult['embedding'],
-                $category_id,
-                20
-            );
 
 
         if (

@@ -348,48 +348,730 @@ PROMPT;
     | SAVE PRODUCT VECTOR
     |--------------------------------------------------------------------------
     */
+
+    /*
+|--------------------------------------------------------------------------
+| CREATE DETERMINISTIC QDRANT POINT ID
+|--------------------------------------------------------------------------
+|
+| Nje produkt mund te kete disa vectors:
+| full
+| object_1
+| object_2
+| ...
+|
+| Qdrant pranon UUID si point ID.
+|
+*/
+    private function createVectorPointId(
+        $productId,
+        $vectorType = 'full',
+        $objectIndex = 0
+    ) {
+        $seed =
+            (int)$productId .
+            '|' .
+            $vectorType .
+            '|' .
+            (int)$objectIndex;
+
+        $hash = md5($seed);
+
+        return
+            substr($hash, 0, 8) . '-' .
+            substr($hash, 8, 4) . '-' .
+            substr($hash, 12, 4) . '-' .
+            substr($hash, 16, 4) . '-' .
+            substr($hash, 20, 12);
+    }
+
     public function saveProductVector(
         $productId,
         array $embedding,
-        array $productData = []
+        array $productData = [],
+        $vectorType = 'full',
+        $objectIndex = 0
     ) {
+        $productId =
+            (int)$productId;
 
-        $url = rtrim($this->qdrantUrl, '/') .
+        $objectIndex =
+            (int)$objectIndex;
+
+        $pointId =
+            $this->createVectorPointId(
+                $productId,
+                $vectorType,
+                $objectIndex
+            );
+
+
+        $url =
+            rtrim($this->qdrantUrl, '/') .
             '/collections/' .
             $this->collection .
             '/points?wait=true';
 
+
         $payload = [
             'points' => [
                 [
-                    'id' => (int)$productId,
+                    /*
+                 * Qdrant point ID unik per secilin vector.
+                 */
+                    'id' => $pointId,
 
-                    'vector' => $embedding,
+                    'vector' =>
+                    $embedding,
 
                     'payload' => [
-                        'product_id' => (int)$productId,
-                        'code' => isset($productData['code'])
+
+                        /*
+                     * Ky mbetet ID reale e produktit.
+                     */
+                        'product_id' =>
+                        $productId,
+
+                        'code' =>
+                        isset($productData['code'])
                             ? $productData['code']
                             : null,
-                        'name' => isset($productData['name'])
+
+                        'name' =>
+                        isset($productData['name'])
                             ? $productData['name']
                             : null,
-                        'category_id' => isset($productData['category_id'])
+
+                        'category_id' =>
+                        isset($productData['category_id'])
                             ? (int)$productData['category_id']
                             : null,
-                        'image' => isset($productData['image'])
+
+                        'image' =>
+                        isset($productData['image'])
                             ? $productData['image']
+                            : null,
+
+                        /*
+                     * full / object
+                     */
+                        'vector_type' =>
+                        $vectorType,
+
+                        /*
+                     * 0 per full image.
+                     * 1,2,3... per objekte.
+                     */
+                        'object_index' =>
+                        $objectIndex,
+
+                        /*
+                     * Optional label nga Gemini.
+                     */
+                        'object_label' =>
+                        isset($productData['object_label'])
+                            ? $productData['object_label']
                             : null
                     ]
                 ]
             ]
         ];
 
+
         return $this->qdrantRequest(
             $url,
             'PUT',
             $payload
         );
+    }
+
+    /*
+|--------------------------------------------------------------------------
+| DELETE ALL VECTORS OF ONE PRODUCT
+|--------------------------------------------------------------------------
+|
+| Perdoret para reindeximit.
+| Fshin full + te gjitha object vectors e vjetra.
+|
+*/
+    public function deleteProductVectors($productId)
+    {
+        $productId = (int)$productId;
+
+        if ($productId <= 0) {
+            return [
+                'status' => false,
+                'message' => 'Product ID nuk eshte valid.'
+            ];
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 1. FSHI VECTORAT E RINJ SIPAS PAYLOAD
+    |--------------------------------------------------------------------------
+    */
+
+        $filterUrl =
+            rtrim($this->qdrantUrl, '/') .
+            '/collections/' .
+            $this->collection .
+            '/points/delete?wait=true';
+
+
+        $filterPayload = [
+            'filter' => [
+                'must' => [
+                    [
+                        'key' => 'product_id',
+                        'match' => [
+                            'value' => $productId
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+
+        $filterResult =
+            $this->qdrantRequest(
+                $filterUrl,
+                'POST',
+                $filterPayload
+            );
+
+
+        if (
+            !isset($filterResult['status']) ||
+            !$filterResult['status']
+        ) {
+            return [
+                'status' => false,
+                'message' =>
+                'Gabim gjate fshirjes se vectors sipas product_id.',
+                'debug' =>
+                $filterResult
+            ];
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 2. FSHI POINT-IN E VJETER NUMERIK
+    |--------------------------------------------------------------------------
+    |
+    | Sistemi i vjeter perdorte:
+    |
+    | Qdrant point ID = product_id
+    |
+    | Ky hap eshte vetem per migrim.
+    |
+    */
+
+        $legacyPayload = [
+            'points' => [
+                $productId
+            ]
+        ];
+
+
+        $legacyResult =
+            $this->qdrantRequest(
+                $filterUrl,
+                'POST',
+                $legacyPayload
+            );
+
+
+        /*
+     * Nese point-i i vjeter nuk ekziston,
+     * nuk eshte problem.
+     *
+     * Qellimi kryesor eshte qe filter delete
+     * te kete funksionuar.
+     */
+
+
+        return [
+            'status' => true,
+            'product_id' => $productId,
+            'filter_delete' => $filterResult,
+            'legacy_delete' => $legacyResult
+        ];
+    }
+
+    /*
+|--------------------------------------------------------------------------
+| INDEX PRODUCT IMAGE - MULTI OBJECT
+|--------------------------------------------------------------------------
+|
+| Per nje produkt krijon:
+|
+| 1. FULL IMAGE vector
+| 2. 0 ose disa OBJECT vectors
+|
+| Te gjitha kane te njejtin product_id ne payload,
+| por Qdrant point ID te ndryshme.
+|
+| Kjo mundeson:
+|
+| object <-> product
+| part   <-> whole
+| whole  <-> part
+| set    <-> part
+| part   <-> set
+|
+*/
+    public function indexProductImageMultiObject(
+        $productId,
+        $imagePath,
+        array $productData = [],
+        $maxObjects = 8
+    ) {
+        $productId = (int)$productId;
+        $maxObjects = (int)$maxObjects;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | VALIDIM
+    |--------------------------------------------------------------------------
+    */
+
+        if ($productId <= 0) {
+
+            return [
+                'status' => false,
+                'message' => 'Product ID nuk eshte valid.'
+            ];
+        }
+
+
+        if (
+            !file_exists($imagePath) ||
+            !is_file($imagePath)
+        ) {
+
+            return [
+                'status' => false,
+                'message' =>
+                'Fotoja e produktit nuk ekziston: ' .
+                    $imagePath
+            ];
+        }
+
+
+        if ($maxObjects <= 0) {
+            $maxObjects = 8;
+        }
+
+        if ($maxObjects > 12) {
+            $maxObjects = 12;
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | VECTORAT QE DO TE RUAJME
+    |--------------------------------------------------------------------------
+    |
+    | Fillimisht i krijojme ne memory.
+    |
+    | Vetem pasi FULL embedding te jete gati,
+    | fshijme vectorat e vjeter.
+    |
+    */
+
+        $vectorsToSave = [];
+
+        $tempFiles = [];
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 1. FULL IMAGE EMBEDDING
+    |--------------------------------------------------------------------------
+    */
+
+        $fullEmbedding =
+            $this->createImageEmbedding(
+                $imagePath
+            );
+
+
+        if (
+            !isset($fullEmbedding['status']) ||
+            !$fullEmbedding['status'] ||
+            empty($fullEmbedding['embedding'])
+        ) {
+
+            return [
+                'status' => false,
+                'message' =>
+                isset($fullEmbedding['message'])
+                    ? $fullEmbedding['message']
+                    : 'Nuk u krijua embedding per fotografinë komplet.'
+            ];
+        }
+
+
+        /*
+     * FULL IMAGE gjithmone ruhet.
+     */
+        $vectorsToSave[] = [
+
+            'type' =>
+            'full',
+
+            'object_index' =>
+            0,
+
+            'label' =>
+            'full_image',
+
+            'embedding' =>
+            $fullEmbedding['embedding']
+        ];
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 2. DETECT OBJECTS
+    |--------------------------------------------------------------------------
+    */
+
+        $detection =
+            $this->detectImageObjects(
+                $imagePath,
+                $maxObjects
+            );
+
+
+        if (
+            isset($detection['status']) &&
+            $detection['status'] &&
+            isset($detection['objects']) &&
+            is_array($detection['objects'])
+        ) {
+
+            $objectIndex = 1;
+
+
+            foreach (
+                $detection['objects']
+                as $object
+            ) {
+
+                if (
+                    !isset($object['box_2d']) ||
+                    !is_array($object['box_2d'])
+                ) {
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | CROP OBJECT
+            |--------------------------------------------------------------------------
+            */
+
+                $cropFile =
+                    $this->cropDetectedObject(
+                        $imagePath,
+                        $object['box_2d'],
+                        0.06
+                    );
+
+
+                if (!$cropFile) {
+                    continue;
+                }
+
+
+                $tempFiles[] =
+                    $cropFile;
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | EMBEDDING PER OBJECT
+            |--------------------------------------------------------------------------
+            */
+
+                $objectEmbedding =
+                    $this->createImageEmbedding(
+                        $cropFile
+                    );
+
+
+                if (
+                    !isset(
+                        $objectEmbedding['status']
+                    ) ||
+                    !$objectEmbedding['status'] ||
+                    empty($objectEmbedding['embedding'])
+                ) {
+
+                    /*
+                 * Nje objekt deshtoi.
+                 *
+                 * Nuk ndalojme krejt produktin.
+                 * Vazhdojme me objektet tjera.
+                 */
+                    continue;
+                }
+
+
+                $label =
+                    isset($object['label']) &&
+                    !empty($object['label'])
+                    ? $object['label']
+                    : 'object_' . $objectIndex;
+
+
+                $vectorsToSave[] = [
+
+                    'type' =>
+                    'object',
+
+                    'object_index' =>
+                    $objectIndex,
+
+                    'label' =>
+                    $label,
+
+                    'box_2d' =>
+                    $object['box_2d'],
+
+                    'embedding' =>
+                    $objectEmbedding['embedding']
+                ];
+
+
+                $objectIndex++;
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 3. CLEAN TEMP FILES
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($tempFiles as $tempFile) {
+
+            if (
+                $tempFile &&
+                file_exists($tempFile)
+            ) {
+
+                @unlink($tempFile);
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 4. FULL EMBEDDING ESHTE GATI
+    |
+    | TASH MUND T'I FSHIJME VECTORAT E VJETER
+    |--------------------------------------------------------------------------
+    */
+
+        $deleteResult =
+            $this->deleteProductVectors(
+                $productId
+            );
+
+
+        /*
+     * Nese Qdrant deshton gjate delete,
+     * mos vazhdo me gjysme indeksimi.
+     */
+        if (
+            !isset($deleteResult['status']) ||
+            !$deleteResult['status']
+        ) {
+
+            return [
+                'status' => false,
+                'message' =>
+                'Nuk u fshine vectorat e vjeter te produktit.',
+                'qdrant_debug' =>
+                $deleteResult
+            ];
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 5. SAVE ALL NEW VECTORS
+    |--------------------------------------------------------------------------
+    */
+
+        $savedVectors = 0;
+
+        $failedVectors = [];
+
+        $savedDetails = [];
+
+
+        foreach (
+            $vectorsToSave
+            as $vectorData
+        ) {
+
+            $saveData =
+                $productData;
+
+
+            /*
+         * Shtojme label-in e objektit ne payload.
+         */
+            $saveData['object_label'] =
+                $vectorData['label'];
+
+
+            $saveResult =
+                $this->saveProductVector(
+                    $productId,
+                    $vectorData['embedding'],
+                    $saveData,
+                    $vectorData['type'],
+                    $vectorData['object_index']
+                );
+
+
+            if (
+                isset($saveResult['status']) &&
+                $saveResult['status']
+            ) {
+
+                $savedVectors++;
+
+
+                $savedDetails[] = [
+
+                    'type' =>
+                    $vectorData['type'],
+
+                    'object_index' =>
+                    $vectorData['object_index'],
+
+                    'label' =>
+                    $vectorData['label']
+                ];
+            } else {
+
+                $failedVectors[] = [
+
+                    'type' =>
+                    $vectorData['type'],
+
+                    'object_index' =>
+                    $vectorData['object_index'],
+
+                    'label' =>
+                    $vectorData['label'],
+
+                    'error' =>
+                    isset($saveResult['message'])
+                        ? $saveResult['message']
+                        : 'Qdrant save error'
+                ];
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 6. SIGUROHU QE FULL IMAGE U RUAJT
+    |--------------------------------------------------------------------------
+    */
+
+        $fullSaved = false;
+
+
+        foreach ($savedDetails as $saved) {
+
+            if (
+                $saved['type'] === 'full' &&
+                (int)$saved['object_index'] === 0
+            ) {
+
+                $fullSaved = true;
+                break;
+            }
+        }
+
+
+        if (!$fullSaved) {
+
+            return [
+                'status' => false,
+
+                'message' =>
+                'Vectori kryesor FULL i produktit nuk u ruajt.',
+
+                'saved_vectors' =>
+                $savedVectors,
+
+                'failed_vectors' =>
+                $failedVectors
+            ];
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 7. SUCCESS
+    |--------------------------------------------------------------------------
+    */
+
+        return [
+
+            'status' =>
+            true,
+
+            'product_id' =>
+            $productId,
+
+            /*
+         * Numri total:
+         * FULL + OBJECTS
+         */
+            'vectors_saved' =>
+            $savedVectors,
+
+            /*
+         * Sa objekte reale u ruajten.
+         * FULL nuk numerohen ketu.
+         */
+            'objects_saved' =>
+            max(
+                0,
+                $savedVectors - 1
+            ),
+
+            /*
+         * Sa objekte Gemini detektoi,
+         * edhe nese ndonje crop deshtoi.
+         */
+            'objects_detected' => (
+                isset($detection['objects']) &&
+                is_array($detection['objects'])
+            )
+                ? count($detection['objects'])
+                : 0,
+
+            'vectors' =>
+            $savedDetails,
+
+            'failed_vectors' =>
+            $failedVectors
+        ];
     }
 
 
@@ -895,29 +1577,44 @@ PROMPT;
         $categoryId = null,
         $maxObjects = 8
     ) {
+        /*
+    |--------------------------------------------------------------------------
+    | BASIC VALIDATION
+    |--------------------------------------------------------------------------
+    */
+
         $limit = (int)$limit;
 
         if ($limit <= 0) {
             $limit = 20;
         }
 
+        $maxObjects = (int)$maxObjects;
+
+        if ($maxObjects <= 0) {
+            $maxObjects = 8;
+        }
+
+        if ($maxObjects > 12) {
+            $maxObjects = 12;
+        }
+
         /*
-     * Marrim me shume kandidata nga secili crop
-     * dhe ne fund zgjedhim top $limit.
+     * Nga secili embedding marrim me shume kandidata.
+     * Ne fund kthejme vetem top $limit.
      */
-        $perSearchLimit =
-            max(
-                20,
-                $limit
-            );
+        $perSearchLimit = max(50, $limit);
 
         $allSearches = [];
+        $tempFiles = [];
+
 
         /*
     |--------------------------------------------------------------------------
-    | 1. FULL IMAGE
+    | 1. FULL IMAGE EMBEDDING
     |--------------------------------------------------------------------------
     */
+
         $fullEmbedding =
             $this->createImageEmbedding(
                 $imagePath
@@ -925,7 +1622,8 @@ PROMPT;
 
         if (
             isset($fullEmbedding['status']) &&
-            $fullEmbedding['status']
+            $fullEmbedding['status'] &&
+            !empty($fullEmbedding['embedding'])
         ) {
             $allSearches[] = [
                 'type' => 'full',
@@ -935,28 +1633,50 @@ PROMPT;
             ];
         }
 
+
         /*
     |--------------------------------------------------------------------------
     | 2. DETECT OBJECTS
     |--------------------------------------------------------------------------
     */
+
         $detection =
             $this->detectImageObjects(
                 $imagePath,
                 $maxObjects
             );
 
-        $tempFiles = [];
 
         if (
             isset($detection['status']) &&
             $detection['status'] &&
+            isset($detection['objects']) &&
+            is_array($detection['objects']) &&
             !empty($detection['objects'])
         ) {
+
             foreach (
                 $detection['objects']
                 as $index => $object
             ) {
+
+                /*
+             * Pa box nuk kemi cfare crop-i te bejme.
+             */
+                if (
+                    !isset($object['box_2d']) ||
+                    !is_array($object['box_2d']) ||
+                    count($object['box_2d']) !== 4
+                ) {
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | CROP OBJECT
+            |--------------------------------------------------------------------------
+            */
 
                 $cropFile =
                     $this->cropDetectedObject(
@@ -965,31 +1685,42 @@ PROMPT;
                         0.06
                     );
 
+
                 if (!$cropFile) {
                     continue;
                 }
 
-                $tempFiles[] =
-                    $cropFile;
+
+                $tempFiles[] = $cropFile;
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | OBJECT EMBEDDING
+            |--------------------------------------------------------------------------
+            */
 
                 $embeddingResult =
                     $this->createImageEmbedding(
                         $cropFile
                     );
 
+
                 if (
-                    !isset(
-                        $embeddingResult['status']
-                    ) ||
-                    !$embeddingResult['status']
+                    !isset($embeddingResult['status']) ||
+                    !$embeddingResult['status'] ||
+                    empty($embeddingResult['embedding'])
                 ) {
                     continue;
                 }
 
+
                 $allSearches[] = [
                     'type' => 'object',
+
                     'label' =>
-                    isset($object['label'])
+                    isset($object['label']) &&
+                        trim($object['label']) !== ''
                         ? $object['label']
                         : 'object_' . ($index + 1),
 
@@ -1002,15 +1733,25 @@ PROMPT;
             }
         }
 
+
         /*
-     * Nese detection deshton,
-     * full image search vazhdon normalisht.
-     */
+    |--------------------------------------------------------------------------
+    | ASNJE EMBEDDING NUK U KRIJUA
+    |--------------------------------------------------------------------------
+    */
+
         if (empty($allSearches)) {
 
             foreach ($tempFiles as $file) {
-                @unlink($file);
+
+                if (
+                    $file &&
+                    file_exists($file)
+                ) {
+                    @unlink($file);
+                }
             }
+
 
             return [
                 'status' => false,
@@ -1018,6 +1759,7 @@ PROMPT;
                 'Nuk u krijua asnje embedding.'
             ];
         }
+
 
         /*
     |--------------------------------------------------------------------------
@@ -1027,10 +1769,14 @@ PROMPT;
 
         $merged = [];
 
-        foreach (
-            $allSearches
-            as $searchIndex => $search
-        ) {
+
+        foreach ($allSearches as $search) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | CATEGORY SEARCH / GLOBAL SEARCH
+        |--------------------------------------------------------------------------
+        */
 
             if ($categoryId !== null) {
 
@@ -1049,6 +1795,7 @@ PROMPT;
                     );
             }
 
+
             if (
                 !isset($result['status']) ||
                 !$result['status']
@@ -1056,7 +1803,15 @@ PROMPT;
                 continue;
             }
 
+
+            /*
+        |--------------------------------------------------------------------------
+        | QDRANT POINTS
+        |--------------------------------------------------------------------------
+        */
+
             $points = [];
+
 
             if (
                 isset(
@@ -1066,52 +1821,82 @@ PROMPT;
                     $result['data']['result']['points']
                 )
             ) {
+
                 $points =
                     $result['data']['result']['points'];
             }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | MERGE BY PRODUCT ID
+        |--------------------------------------------------------------------------
+        */
 
             foreach ($points as $point) {
 
                 $productId = null;
 
+
+                /*
+             * Per vectorat e rinj UUID:
+             * product_id merret nga payload.
+             */
                 if (
                     isset(
                         $point['payload']['product_id']
                     )
                 ) {
+
                     $productId =
                         (int)$point['payload']['product_id'];
-                } elseif (isset($point['id'])) {
+
+                    /*
+             * Vetem per legacy points numerike.
+             * Mos tentojme UUID ta kthejme ne integer.
+             */
+                } elseif (
+                    isset($point['id']) &&
+                    is_numeric($point['id'])
+                ) {
+
                     $productId =
                         (int)$point['id'];
                 }
 
+
                 if (!$productId) {
                     continue;
                 }
+
 
                 $score =
                     isset($point['score'])
                     ? (float)$point['score']
                     : 0;
 
+
                 /*
-             * Nese i njejti produkt gjendet
-             * nga full image dhe nga nje crop,
-             * mbajme score-in me te mire.
+             * I njejti produkt mund te gjendet:
+             *
+             * - nga full image
+             * - nga object 1
+             * - nga object 2
+             * - etj.
+             *
+             * Mbajme vetem score-in me te mire.
              */
                 if (
                     !isset($merged[$productId]) ||
                     $score >
-                    $merged[$productId]['score']
+                    (float)$merged[$productId]['score']
                 ) {
 
-                    $point['score'] =
-                        $score;
+                    $point['score'] = $score;
+
 
                     /*
-                 * Debug / informacion i dobishem.
-                 * Nuk pengon Qdrant payload.
+                 * Debug info.
                  */
                     $point['matched_from'] =
                         $search['type'];
@@ -1119,14 +1904,15 @@ PROMPT;
                     $point['matched_object'] =
                         $search['label'];
 
+
                     if (
-                        isset(
-                            $search['box_2d']
-                        )
+                        isset($search['box_2d'])
                     ) {
+
                         $point['matched_box'] =
                             $search['box_2d'];
                     }
+
 
                     $merged[$productId] =
                         $point;
@@ -1134,25 +1920,34 @@ PROMPT;
             }
         }
 
+
         /*
     |--------------------------------------------------------------------------
     | 4. CLEANUP TEMP CROPS
     |--------------------------------------------------------------------------
     */
+
         foreach ($tempFiles as $file) {
 
-            if (file_exists($file)) {
+            if (
+                $file &&
+                file_exists($file)
+            ) {
+
                 @unlink($file);
             }
         }
+
 
         /*
     |--------------------------------------------------------------------------
     | 5. SORT BY BEST SCORE
     |--------------------------------------------------------------------------
     */
+
         $points =
             array_values($merged);
+
 
         usort(
             $points,
@@ -1168,9 +1963,11 @@ PROMPT;
                     ? (float)$b['score']
                     : 0;
 
+
                 if ($scoreA == $scoreB) {
                     return 0;
                 }
+
 
                 return (
                     $scoreA > $scoreB
@@ -1178,9 +1975,13 @@ PROMPT;
             }
         );
 
+
         /*
-     * Vetem top rezultatet finale.
-     */
+    |--------------------------------------------------------------------------
+    | 6. FINAL TOP RESULTS
+    |--------------------------------------------------------------------------
+    */
+
         $points =
             array_slice(
                 $points,
@@ -1188,12 +1989,19 @@ PROMPT;
                 $limit
             );
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | RESPONSE
+    |--------------------------------------------------------------------------
+    */
+
         return [
             'status' => true,
 
             /*
-         * E ruajme strukturen ekzistuese
-         * qe Dashboard.php mos te ndryshoje shume.
+         * E ruajme strukturen qe Dashboard.php
+         * vazhdon te punoje pa ndryshime.
          */
             'data' => [
                 'result' => [
@@ -1202,16 +2010,30 @@ PROMPT;
             ],
 
             /*
-         * Vetem per debug.
+         * Debug info.
          */
             'multi_object_debug' => [
+
                 'detected_objects' =>
-                isset($detection['objects'])
+                isset($detection['objects']) &&
+                    is_array($detection['objects'])
                     ? $detection['objects']
                     : [],
 
+                'objects_detected' =>
+                isset($detection['objects']) &&
+                    is_array($detection['objects'])
+                    ? count($detection['objects'])
+                    : 0,
+
                 'searches_count' =>
-                count($allSearches)
+                count($allSearches),
+
+                'per_search_limit' =>
+                $perSearchLimit,
+
+                'final_results_count' =>
+                count($points)
             ]
         ];
     }
@@ -1387,6 +2209,26 @@ PROMPT;
 
         $payload = [
             'field_name' => 'category_id',
+            'field_schema' => 'integer'
+        ];
+
+        return $this->qdrantRequest(
+            $url,
+            'PUT',
+            $payload
+        );
+    }
+
+    public function createProductIdPayloadIndex()
+    {
+        $url =
+            rtrim($this->qdrantUrl, '/') .
+            '/collections/' .
+            $this->collection .
+            '/index?wait=true';
+
+        $payload = [
+            'field_name' => 'product_id',
             'field_schema' => 'integer'
         ];
 

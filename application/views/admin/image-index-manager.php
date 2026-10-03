@@ -272,7 +272,7 @@
 
                 formData.append(
                     'batch_size',
-                    '5'
+                    '2'
                 );
 
 
@@ -330,20 +330,27 @@
 
                             if (item.status) {
 
+                                let extra = '';
+
+                                if (
+                                    item.vectors_saved !== undefined
+                                ) {
+
+                                    extra =
+                                        ' | Vectorë: ' +
+                                        item.vectors_saved +
+                                        ' | Objekte: ' +
+                                        item.objects_saved +
+                                        '/' +
+                                        item.objects_detected;
+                                }
+
                                 log(
                                     '✓ ' +
                                     item.code +
                                     ' - ' +
-                                    item.name
-                                );
-
-                            } else {
-
-                                log(
-                                    '✗ ' +
-                                    item.code +
-                                    ' - ' +
-                                    item.message
+                                    item.name +
+                                    extra
                                 );
 
                             }
@@ -373,7 +380,7 @@
 
                     setTimeout(
                         runBatch,
-                        300
+                        800
                     );
 
                 }

@@ -872,6 +872,7 @@ class Products extends CI_Controller
     public function index_product_batch()
     {
         if ($this->session->userdata('role') != 'admin') {
+
             return $this->output
                 ->set_status_header(403)
                 ->set_content_type('application/json')
@@ -881,23 +882,44 @@ class Products extends CI_Controller
                 ]));
         }
 
+
         $this->load->library('Product_image_search');
 
+
         /*
-     * Per fillim: 5 foto per request.
-     * Mund ta rrisim me vone ne 10 ose 20.
-     */
-        $batchSize = (int)$this->input->post('batch_size');
+    |--------------------------------------------------------------------------
+    | BATCH SIZE
+    |--------------------------------------------------------------------------
+    |
+    | Me multi-object indexing secili produkt mund te krijoje
+    | disa Gemini requests.
+    |
+    | Per fillim mbajme batch te vogel.
+    |
+    */
+
+        $batchSize =
+            (int)$this->input->post('batch_size');
+
 
         if ($batchSize <= 0) {
+            $batchSize = 2;
+        }
+
+
+        if ($batchSize > 5) {
             $batchSize = 5;
         }
 
-        if ($batchSize > 20) {
-            $batchSize = 20;
-        }
 
-        $rows = $this->db
+        /*
+    |--------------------------------------------------------------------------
+    | MERR PRODUKTET QE PRESIN INDEKSIM
+    |--------------------------------------------------------------------------
+    */
+
+        $rows =
+            $this->db
             ->select('
             product_image_index.id AS index_id,
             product_image_index.product_id,
@@ -911,12 +933,28 @@ class Products extends CI_Controller
                 'products',
                 'products.id = product_image_index.product_id'
             )
-            ->where('product_image_index.indexed', 0)
-            ->where('products.is_deleted', 0)
-            ->order_by('product_image_index.id', 'ASC')
+            ->where(
+                'product_image_index.indexed',
+                0
+            )
+            ->where(
+                'products.is_deleted',
+                0
+            )
+            ->order_by(
+                'product_image_index.id',
+                'ASC'
+            )
             ->limit($batchSize)
             ->get()
             ->result_array();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | NUK KA ME PRODUKTE
+    |--------------------------------------------------------------------------
+    */
 
         if (empty($rows)) {
 
@@ -928,9 +966,11 @@ class Products extends CI_Controller
                     'processed' => 0,
                     'success_count' => 0,
                     'failed_count' => 0,
-                    'message' => 'Indeksimi ka perfunduar.'
+                    'message' =>
+                    'Indeksimi ka perfunduar.'
                 ]));
         }
+
 
         $processed = 0;
         $successCount = 0;
@@ -938,20 +978,30 @@ class Products extends CI_Controller
 
         $results = [];
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | PROCESSO SECILIN PRODUKT
+    |--------------------------------------------------------------------------
+    */
+
         foreach ($rows as $row) {
 
             $processed++;
+
 
             $imagePath =
                 FCPATH .
                 'optimum/products_images/' .
                 $row['image'];
 
+
             /*
         |--------------------------------------------------------------------------
         | FOTO NUK EKZISTON
         |--------------------------------------------------------------------------
         */
+
             if (
                 !file_exists($imagePath) ||
                 !is_file($imagePath)
@@ -960,140 +1010,132 @@ class Products extends CI_Controller
                 $errorMessage =
                     'Fotoja nuk ekziston ne server.';
 
+
                 $this->db
-                    ->where('id', $row['index_id'])
-                    ->update(
-                        'product_image_index',
-                        [
-                            'indexed' => 2,
-                            'error_message' => $errorMessage,
-                            'indexed_at' => null
-                        ]
-                    );
-
-                $failedCount++;
-
-                $results[] = [
-                    'product_id' => $row['product_id'],
-                    'code' => $row['code'],
-                    'status' => false,
-                    'message' => $errorMessage
-                ];
-
-                continue;
-            }
-
-            /*
-        |--------------------------------------------------------------------------
-        | GEMINI
-        |--------------------------------------------------------------------------
-        */
-            $embeddingResult =
-                $this->product_image_search
-                ->createImageEmbedding($imagePath);
-
-            if (!$embeddingResult['status']) {
-
-                $httpCode = isset(
-                    $embeddingResult['http_code']
-                )
-                    ? (int)$embeddingResult['http_code']
-                    : 0;
-
-                /*
-             * Rate limit ose problem i perkohshem.
-             * MOS e shenojme produktin si failed.
-             * E leme indexed = 0 qe ta provojme perseri.
-             */
-                if (
-                    $httpCode == 429 ||
-                    $httpCode == 500 ||
-                    $httpCode == 502 ||
-                    $httpCode == 503 ||
-                    $httpCode == 504
-                ) {
-
-                    return $this->output
-                        ->set_content_type('application/json')
-                        ->set_output(json_encode([
-                            'status' => false,
-                            'retryable' => true,
-                            'http_code' => $httpCode,
-                            'processed' => $processed - 1,
-                            'success_count' => $successCount,
-                            'failed_count' => $failedCount,
-                            'message' =>
-                            'Gemini eshte perkohesisht i zene ose eshte arritur limiti. Provohet perseri.',
-                            'results' => $results
-                        ]));
-                }
-
-                $errorMessage = isset(
-                    $embeddingResult['message']
-                )
-                    ? (
-                        is_array($embeddingResult['message'])
-                        ? json_encode($embeddingResult['message'])
-                        : $embeddingResult['message']
+                    ->where(
+                        'id',
+                        $row['index_id']
                     )
-                    : 'Gemini error';
-
-                $this->db
-                    ->where('id', $row['index_id'])
                     ->update(
                         'product_image_index',
                         [
                             'indexed' => 2,
-                            'error_message' => $errorMessage,
+                            'error_message' =>
+                            $errorMessage,
                             'indexed_at' => null
                         ]
                     );
 
+
                 $failedCount++;
 
+
                 $results[] = [
-                    'product_id' => $row['product_id'],
-                    'code' => $row['code'],
-                    'status' => false,
-                    'message' => $errorMessage
+                    'product_id' =>
+                    $row['product_id'],
+
+                    'code' =>
+                    $row['code'],
+
+                    'status' =>
+                    false,
+
+                    'message' =>
+                    $errorMessage
                 ];
+
 
                 continue;
             }
 
-            $embedding =
-                $embeddingResult['embedding'];
 
             /*
         |--------------------------------------------------------------------------
-        | QDRANT
+        | MULTI OBJECT INDEXING
         |--------------------------------------------------------------------------
+        |
+        | Ky funksion ben:
+        |
+        | - FULL image embedding
+        | - object detection
+        | - crop per secilin objekt
+        | - embedding per secilin objekt
+        | - fshin vectorat e vjeter
+        | - ruan vectorat e rinj
+        |
         */
-            $saveResult =
+
+            $indexResult =
                 $this->product_image_search
-                ->saveProductVector(
+                ->indexProductImageMultiObject(
                     $row['product_id'],
-                    $embedding,
+                    $imagePath,
                     [
-                        'name' => $row['name'],
-                        'code' => $row['code'],
+                        'name' =>
+                        $row['name'],
+
+                        'code' =>
+                        $row['code'],
+
                         'category_id' =>
-                        $row['category_id'],
-                        'image' => $row['image']
-                    ]
+                        (int)$row['category_id'],
+
+                        'image' =>
+                        $row['image']
+                    ],
+                    8
                 );
 
-            if (!$saveResult['status']) {
 
-                $httpCode = isset(
-                    $saveResult['http_code']
-                )
-                    ? (int)$saveResult['http_code']
-                    : 0;
+            /*
+        |--------------------------------------------------------------------------
+        | INDEXIMI DESHTOI
+        |--------------------------------------------------------------------------
+        */
+
+            if (
+                !isset($indexResult['status']) ||
+                !$indexResult['status']
+            ) {
 
                 /*
-             * Nese Qdrant ka problem te perkohshem,
-             * mos e sheno si failed.
+             * Mundohemi me marre HTTP code
+             * edhe nga debug structures.
+             */
+                $httpCode = 0;
+
+
+                if (
+                    isset($indexResult['http_code'])
+                ) {
+
+                    $httpCode =
+                        (int)$indexResult['http_code'];
+                } elseif (
+                    isset(
+                        $indexResult['qdrant_debug']['http_code']
+                    )
+                ) {
+
+                    $httpCode =
+                        (int)$indexResult['qdrant_debug']['http_code'];
+                } elseif (
+                    isset(
+                        $indexResult['qdrant_debug']['debug']['http_code']
+                    )
+                ) {
+
+                    $httpCode =
+                        (int)$indexResult['qdrant_debug']['debug']['http_code'];
+                }
+
+
+                /*
+             * Rate limit / problem i perkohshem.
+             *
+             * Mos e sheno si failed.
+             * Lere indexed = 0 qe batch-i
+             * ta provoje perseri.
              */
                 if (
                     $httpCode == 429 ||
@@ -1104,105 +1146,205 @@ class Products extends CI_Controller
                 ) {
 
                     return $this->output
-                        ->set_content_type('application/json')
-                        ->set_output(json_encode([
-                            'status' => false,
-                            'retryable' => true,
-                            'http_code' => $httpCode,
-                            'processed' => $processed - 1,
-                            'success_count' => $successCount,
-                            'failed_count' => $failedCount,
-                            'message' =>
-                            'Problem i perkohshem me Qdrant.',
-                            'results' => $results
-                        ]));
+                        ->set_content_type(
+                            'application/json'
+                        )
+                        ->set_output(
+                            json_encode([
+                                'status' => false,
+
+                                'retryable' => true,
+
+                                'http_code' =>
+                                $httpCode,
+
+                                'processed' =>
+                                $processed - 1,
+
+                                'success_count' =>
+                                $successCount,
+
+                                'failed_count' =>
+                                $failedCount,
+
+                                'message' =>
+                                'Sherbimi i indeksimit eshte perkohesisht i zene. Provohet perseri.',
+
+                                'results' =>
+                                $results
+                            ])
+                        );
                 }
 
-                $errorMessage = isset(
-                    $saveResult['message']
-                )
+
+                /*
+             * Gabim permanent.
+             */
+                $errorMessage =
+                    isset($indexResult['message'])
                     ? (
-                        is_array($saveResult['message'])
-                        ? json_encode($saveResult['message'])
-                        : $saveResult['message']
+                        is_array(
+                            $indexResult['message']
+                        )
+                        ? json_encode(
+                            $indexResult['message']
+                        )
+                        : $indexResult['message']
                     )
-                    : 'Qdrant error';
+                    : 'Gabim gjate multi-object indexing.';
+
 
                 $this->db
-                    ->where('id', $row['index_id'])
+                    ->where(
+                        'id',
+                        $row['index_id']
+                    )
                     ->update(
                         'product_image_index',
                         [
                             'indexed' => 2,
-                            'error_message' => $errorMessage,
-                            'indexed_at' => null
+
+                            'error_message' =>
+                            $errorMessage,
+
+                            'indexed_at' =>
+                            null
                         ]
                     );
 
+
                 $failedCount++;
 
+
                 $results[] = [
-                    'product_id' => $row['product_id'],
-                    'code' => $row['code'],
-                    'status' => false,
-                    'message' => $errorMessage
+                    'product_id' =>
+                    $row['product_id'],
+
+                    'code' =>
+                    $row['code'],
+
+                    'status' =>
+                    false,
+
+                    'message' =>
+                    $errorMessage
                 ];
+
 
                 continue;
             }
+
 
             /*
         |--------------------------------------------------------------------------
         | SUCCESS
         |--------------------------------------------------------------------------
         */
+
             $this->db
-                ->where('id', $row['index_id'])
+                ->where(
+                    'id',
+                    $row['index_id']
+                )
                 ->update(
                     'product_image_index',
                     [
                         'indexed' => 1,
+
                         'embedding_model' =>
                         'gemini-embedding-2',
+
                         'indexed_at' =>
                         date('Y-m-d H:i:s'),
-                        'error_message' => null
+
+                        'error_message' =>
+                        null
                     ]
                 );
 
+
             $successCount++;
 
+
             $results[] = [
-                'product_id' => $row['product_id'],
-                'code' => $row['code'],
-                'name' => $row['name'],
-                'image' => $row['image'],
-                'status' => true,
-                'vector_size' => count($embedding)
+                'product_id' =>
+                $row['product_id'],
+
+                'code' =>
+                $row['code'],
+
+                'name' =>
+                $row['name'],
+
+                'image' =>
+                $row['image'],
+
+                'status' =>
+                true,
+
+                'vectors_saved' =>
+                isset(
+                    $indexResult['vectors_saved']
+                )
+                    ? (int)$indexResult['vectors_saved']
+                    : 0,
+
+                'objects_saved' =>
+                isset(
+                    $indexResult['objects_saved']
+                )
+                    ? (int)$indexResult['objects_saved']
+                    : 0,
+
+                'objects_detected' =>
+                isset(
+                    $indexResult['objects_detected']
+                )
+                    ? (int)$indexResult['objects_detected']
+                    : 0
             ];
         }
+
 
         /*
     |--------------------------------------------------------------------------
     | STATUS PAS BATCH-IT
     |--------------------------------------------------------------------------
     */
-        $remaining = $this->db
+
+        $remaining =
+            $this->db
             ->from('product_image_index')
             ->where('indexed', 0)
             ->count_all_results();
 
+
         return $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => true,
-                'finished' => ($remaining == 0),
-                'processed' => $processed,
-                'success_count' => $successCount,
-                'failed_count' => $failedCount,
-                'remaining' => $remaining,
-                'results' => $results
-            ]));
+            ->set_content_type(
+                'application/json'
+            )
+            ->set_output(
+                json_encode([
+                    'status' => true,
+
+                    'finished' => ($remaining == 0),
+
+                    'processed' =>
+                    $processed,
+
+                    'success_count' =>
+                    $successCount,
+
+                    'failed_count' =>
+                    $failedCount,
+
+                    'remaining' =>
+                    $remaining,
+
+                    'results' =>
+                    $results
+                ])
+            );
     }
 
     public function retry_failed_image_index()
@@ -1463,5 +1605,150 @@ class Products extends CI_Controller
             );
 
         return true;
+    }
+
+    public function test_multi_object_index($productId)
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $productId = (int)$productId;
+
+        if ($productId <= 0) {
+            return $this->output
+                ->set_status_header(422)
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Product ID nuk eshte valid.'
+                ]));
+        }
+
+        $product = $this->db
+            ->select('id, name, code, category_id, image')
+            ->from('products')
+            ->where('id', $productId)
+            ->where('is_deleted', 0)
+            ->limit(1)
+            ->get()
+            ->row_array();
+
+        if (!$product) {
+            return $this->output
+                ->set_status_header(404)
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Produkti nuk u gjet.'
+                ]));
+        }
+
+        if (empty($product['image'])) {
+            return $this->output
+                ->set_status_header(422)
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Produkti nuk ka foto.'
+                ]));
+        }
+
+        $imagePath =
+            FCPATH .
+            'optimum/products_images/' .
+            $product['image'];
+
+        if (
+            !file_exists($imagePath) ||
+            !is_file($imagePath)
+        ) {
+            return $this->output
+                ->set_status_header(404)
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Fotoja nuk ekziston ne server.',
+                    'image_path' => $imagePath
+                ]));
+        }
+
+        $this->load->library('Product_image_search');
+
+        $result =
+            $this->product_image_search
+            ->indexProductImageMultiObject(
+                $productId,
+                $imagePath,
+                [
+                    'name' => $product['name'],
+                    'code' => $product['code'],
+                    'category_id' => (int)$product['category_id'],
+                    'image' => $product['image']
+                ],
+                8
+            );
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(
+                json_encode(
+                    $result,
+                    JSON_PRETTY_PRINT |
+                        JSON_UNESCAPED_UNICODE
+                )
+            );
+    }
+
+
+    public function create_product_id_payload_index()
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $this->load->library('Product_image_search');
+
+        $result =
+            $this->product_image_search
+            ->createProductIdPayloadIndex();
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(
+                json_encode(
+                    $result,
+                    JSON_PRETTY_PRINT |
+                        JSON_UNESCAPED_UNICODE
+                )
+            );
+    }
+
+    public function test_gd()
+    {
+        echo '<pre>';
+
+        print_r([
+            'gd_loaded' => extension_loaded('gd'),
+            'imagecreatefromjpeg' => function_exists('imagecreatefromjpeg'),
+            'imagecreatefrompng' => function_exists('imagecreatefrompng'),
+            'imagecreatefromwebp' => function_exists('imagecreatefromwebp'),
+            'imagecrop' => function_exists('imagecrop'),
+            'imagejpeg' => function_exists('imagejpeg')
+        ]);
+    }
+
+    public function test_batch_once()
+    {
+        if ($this->session->userdata('role') != 'admin') {
+            show_404();
+            return;
+        }
+
+        $_POST['batch_size'] = 2;
+
+        return $this->index_product_batch();
     }
 }

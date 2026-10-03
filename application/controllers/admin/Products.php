@@ -1747,7 +1747,7 @@ class Products extends CI_Controller
             return;
         }
 
-        $_POST['batch_size'] = 1;
+        $_POST['batch_size'] = 2;
 
         return $this->index_product_batch();
     }

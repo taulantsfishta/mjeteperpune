@@ -126,6 +126,9 @@ class Dashboard extends CI_Controller
         $data = array();
         $view_category = $this->session->userdata('view_category');
         $limit = 20;
+
+        $products = [];
+        $productsAll = [];
         if ($_GET['query'] == '') {
             if ($view_category[0] == 0) {
                 $products = $this->db->select('products.id,products.name,products.image,products.category_id,products.code,products.price,products.is_deleted')->from('products')->where('is_deleted', 0)->order_by('id', 'DESC')->limit(10)->get()->result_array();
@@ -195,8 +198,27 @@ class Dashboard extends CI_Controller
     {
         $data = array();
         $limit = 20;
+
+        $products = [];
+        $productsAll = [];
         if ($_GET['query'] == '') {
-            $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->get()->result_array();
+
+            $products = $this->db
+                ->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')
+                ->from('products')
+                ->where('category_id', $id)
+                ->where('is_deleted', 0)
+                ->limit($limit, $_GET['offset'])
+                ->get()
+                ->result_array();
+
+            $productsAll = $this->db
+                ->select('products.id')
+                ->from('products')
+                ->where('category_id', $id)
+                ->where('is_deleted', 0)
+                ->get()
+                ->result_array();
         } else {
             if (preg_match('/^[0-9\-]+$/', $_GET['query'])) {
                 $products = $this->db->select('products.id,products.name,products.image,products.code,products.price,products.is_deleted')->from('products')->where('category_id', $id)->where('is_deleted', 0)->group_start()->where('code', $_GET['query'])->limit($limit, $_GET['offset'])->group_end()->get()->result_array();

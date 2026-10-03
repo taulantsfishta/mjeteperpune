@@ -144,6 +144,15 @@ class Products extends CI_Controller
             'products'
         );
 
+        $this->queueProductImageIndex(
+            $productId,
+            $uploadResult['image']
+        );
+
+        $this->indexProductImageNow(
+            $productId
+        );
+
 
         $this->session->set_flashdata(
             'msg',
@@ -182,6 +191,17 @@ class Products extends CI_Controller
                 }
                 $data = $this->security->xss_clean($data);
                 $this->common_model->edit_option($data, $_POST['id'], 'products');
+                if (!empty($data['image'])) {
+
+                    $this->queueProductImageIndex(
+                        $_POST['id'],
+                        $data['image']
+                    );
+
+                    $this->indexProductImageNow(
+                        $_POST['id']
+                    );
+                }
                 redirect(base_url() . 'admin/products/get_product/' . $_POST['id']);
             } else {
                 redirect(base_url() . 'admin/dashboard');
@@ -1233,5 +1253,215 @@ class Products extends CI_Controller
         header('Content-Type: application/json');
 
         echo json_encode($result);
+    }
+
+    private function queueProductImageIndex($productId, $image)
+    {
+        $productId = (int)$productId;
+
+        if ($productId <= 0 || empty($image)) {
+            return false;
+        }
+
+        $existing = $this->db
+            ->select('id')
+            ->from('product_image_index')
+            ->where('product_id', $productId)
+            ->limit(1)
+            ->get()
+            ->row_array();
+
+        $data = [
+            'image' => $image,
+            'indexed' => 0,
+            'embedding_model' => null,
+            'indexed_at' => null,
+            'error_message' => null
+        ];
+
+        if ($existing) {
+
+            $this->db
+                ->where('product_id', $productId)
+                ->update(
+                    'product_image_index',
+                    $data
+                );
+        } else {
+
+            $data['product_id'] = $productId;
+
+            $this->db->insert(
+                'product_image_index',
+                $data
+            );
+        }
+
+        return true;
+    }
+
+    private function indexProductImageNow($productId)
+    {
+        $productId = (int)$productId;
+
+        if ($productId <= 0) {
+            return false;
+        }
+
+        $this->load->library('Product_image_search');
+
+        $row = $this->db
+            ->select('
+            product_image_index.id AS index_id,
+            product_image_index.product_id,
+            product_image_index.image,
+            products.name,
+            products.code,
+            products.category_id
+        ')
+            ->from('product_image_index')
+            ->join(
+                'products',
+                'products.id = product_image_index.product_id'
+            )
+            ->where(
+                'product_image_index.product_id',
+                $productId
+            )
+            ->where(
+                'products.is_deleted',
+                0
+            )
+            ->limit(1)
+            ->get()
+            ->row_array();
+
+        if (!$row) {
+            return false;
+        }
+
+        $imagePath =
+            FCPATH .
+            'optimum/products_images/' .
+            $row['image'];
+
+        if (
+            !file_exists($imagePath) ||
+            !is_file($imagePath)
+        ) {
+
+            $this->db
+                ->where('id', $row['index_id'])
+                ->update(
+                    'product_image_index',
+                    [
+                        'indexed' => 2,
+                        'error_message' =>
+                        'Fotoja nuk ekziston ne server.',
+                        'indexed_at' => null
+                    ]
+                );
+
+            return false;
+        }
+
+        // GEMINI
+        $embeddingResult =
+            $this->product_image_search
+            ->createImageEmbedding($imagePath);
+
+        if (
+            !isset($embeddingResult['status']) ||
+            !$embeddingResult['status']
+        ) {
+
+            $errorMessage =
+                isset($embeddingResult['message'])
+                ? (
+                    is_array($embeddingResult['message'])
+                    ? json_encode($embeddingResult['message'])
+                    : $embeddingResult['message']
+                )
+                : 'Gemini error';
+
+            // E leme indexed = 0
+            // qe te provohet perseri nga batch-i
+            $this->db
+                ->where('id', $row['index_id'])
+                ->update(
+                    'product_image_index',
+                    [
+                        'indexed' => 0,
+                        'error_message' => $errorMessage,
+                        'indexed_at' => null
+                    ]
+                );
+
+            return false;
+        }
+
+        $embedding =
+            $embeddingResult['embedding'];
+
+        // QDRANT
+        $saveResult =
+            $this->product_image_search
+            ->saveProductVector(
+                $row['product_id'],
+                $embedding,
+                [
+                    'name' => $row['name'],
+                    'code' => $row['code'],
+                    'category_id' =>
+                    $row['category_id'],
+                    'image' => $row['image']
+                ]
+            );
+
+        if (
+            !isset($saveResult['status']) ||
+            !$saveResult['status']
+        ) {
+
+            $errorMessage =
+                isset($saveResult['message'])
+                ? (
+                    is_array($saveResult['message'])
+                    ? json_encode($saveResult['message'])
+                    : $saveResult['message']
+                )
+                : 'Qdrant error';
+
+            // E leme 0 qe batch-i ta provoje perseri
+            $this->db
+                ->where('id', $row['index_id'])
+                ->update(
+                    'product_image_index',
+                    [
+                        'indexed' => 0,
+                        'error_message' => $errorMessage,
+                        'indexed_at' => null
+                    ]
+                );
+
+            return false;
+        }
+
+        // SUCCESS
+        $this->db
+            ->where('id', $row['index_id'])
+            ->update(
+                'product_image_index',
+                [
+                    'indexed' => 1,
+                    'embedding_model' =>
+                    'gemini-embedding-2',
+                    'indexed_at' =>
+                    date('Y-m-d H:i:s'),
+                    'error_message' => null
+                ]
+            );
+
+        return true;
     }
 }

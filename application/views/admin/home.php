@@ -283,6 +283,7 @@
     class="background-blur"
     id="searchContainer">
 
+
     <label for="searchInput">
         Search for:
     </label>
@@ -968,6 +969,9 @@
         const searchIcon = document.getElementById("searchIcon");
         const productListing = document.getElementById("productListing");
         const loadingIndicator = document.getElementById("loadingIndicator");
+        const imageSearchPreview = document.getElementById('imageSearchPreview');
+        const imageSearchPreviewContainer = document.getElementById('imageSearchPreviewContainer');
+        const imageSearchStatus = document.getElementById('imageSearchStatus');
 
 
         const imageSearchButton =
@@ -985,6 +989,35 @@
         let imageCropper = null;
 
         let originalImageUrl = null;
+
+        function openImageForCrop(file) {
+
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Ju lutem vendosni nje fotografi.');
+                return;
+            }
+
+            if (originalImageUrl) {
+                URL.revokeObjectURL(originalImageUrl);
+                originalImageUrl = null;
+            }
+
+            originalImageUrl =
+                URL.createObjectURL(file);
+
+            if (imageCropper) {
+                imageCropper.destroy();
+                imageCropper = null;
+            }
+
+            cropImage.src =
+                originalImageUrl;
+
+            $('#imageCropModal')
+                .modal('show');
+        }
 
 
         // ===== Ctrl+B toggles admin actions =====
@@ -1602,28 +1635,49 @@
                 html;
         }
 
+        function clearImageSearchPreview() {
+
+            if (imageSearchPreview) {
+                imageSearchPreview.src = '';
+            }
+
+            if (imageSearchStatus) {
+                imageSearchStatus.innerHTML = '';
+            }
+
+            if (imageSearchPreviewContainer) {
+                imageSearchPreviewContainer.style.display = 'none';
+            }
+        }
+
         function performSearch() {
+
             const searchQuery = searchInput.value.trim();
 
-            if (searchQuery === "") {
-                window.location.href = url + `admin/dashboard/`;
-                return;
-            }
+            clearImageSearchPreview();
 
             resetSearchState();
 
-            isSearching = true; // enable infinite scroll only now
-            searchInProgress = true;
-
             window.scrollTo(0, 0);
-            $(window).off("scroll", throttledScroll);
 
-            searchProducts(searchQuery)
-                .catch(console.error)
-                .finally(() => {
-                    searchInProgress = false;
-                    $(window).on("scroll", throttledScroll);
-                });
+            if (searchQuery === "") {
+
+                searchInProgress = true;
+
+                searchProducts("")
+                    .finally(() => {
+                        searchInProgress = false;
+                    });
+
+            } else {
+
+                searchInProgress = true;
+
+                searchProducts(searchQuery)
+                    .finally(() => {
+                        searchInProgress = false;
+                    });
+            }
         }
 
 
@@ -1642,7 +1696,6 @@
 
             }
         );
-
         imageSearchInput.addEventListener(
             'change',
             function() {
@@ -1653,82 +1706,53 @@
                     this.files[0] :
                     null;
 
-                if (!file) {
-                    return;
-                }
+                if (!file) return;
 
+                openImageForCrop(file);
 
-                /*
-                |--------------------------------------------------------------------------
-                | Kontrollo qe eshte foto
-                |--------------------------------------------------------------------------
-                */
-
-                if (!file.type.startsWith('image/')) {
-
-                    alert('Ju lutem zgjidhni nje fotografi.');
-
-                    this.value = '';
-
-                    return;
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Largo URL e vjeter
-                |--------------------------------------------------------------------------
-                */
-
-                if (originalImageUrl) {
-
-                    URL.revokeObjectURL(
-                        originalImageUrl
-                    );
-
-                    originalImageUrl = null;
-                }
-
-
-                originalImageUrl =
-                    URL.createObjectURL(file);
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Largo cropper te vjeter
-                |--------------------------------------------------------------------------
-                */
-
-                if (imageCropper) {
-
-                    imageCropper.destroy();
-
-                    imageCropper = null;
-                }
-
-
-                cropImage.src =
-                    originalImageUrl;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Hap modal
-                |--------------------------------------------------------------------------
-                */
-
-                $('#imageCropModal')
-                    .modal('show');
-
-
-                /*
-                 * Lejon zgjedhjen e fotos se njejte perseri.
-                 */
                 this.value = '';
-
             }
         );
+
+        document.addEventListener('paste', function(event) {
+
+            const clipboardData =
+                event.clipboardData ||
+                window.clipboardData;
+
+            if (!clipboardData) {
+                return;
+            }
+
+            const items =
+                clipboardData.items;
+
+            if (!items) {
+                return;
+            }
+
+            for (let i = 0; i < items.length; i++) {
+
+                if (
+                    items[i].kind === 'file' &&
+                    items[i].type.startsWith('image/')
+                ) {
+
+                    const file =
+                        items[i].getAsFile();
+
+                    if (!file) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    openImageForCrop(file);
+
+                    break;
+                }
+            }
+        });
 
         $('#imageCropModal')
             .on(
@@ -1765,7 +1789,7 @@
 
                                 dragMode: 'move',
 
-                                autoCropArea: 0.65,
+                                autoCropArea: 0.99,
 
                                 responsive: true,
 

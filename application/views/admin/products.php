@@ -372,6 +372,38 @@
 
 </div>
 
+<div
+    id="imageSearchPreviewContainer"
+    class="background-blur"
+    style="
+        display:none;
+        text-align:center;
+        margin-bottom:20px;
+    ">
+
+    <img
+        id="imageSearchPreview"
+        src=""
+        alt=""
+        style="
+            max-width:180px;
+            max-height:140px;
+            object-fit:contain;
+            border:1px solid #ddd;
+            border-radius:8px;
+            padding:5px;
+            background:#fff;
+        ">
+
+    <div
+        id="imageSearchStatus"
+        style="
+            margin-top:8px;
+            font-weight:600;
+        ">
+    </div>
+
+</div>
 <div class="col-md-12">
     <hr style="border-top: 2px solid #bdb8b8ff;">
 </div>
@@ -885,7 +917,43 @@
             document.getElementById(
                 'cropAndSearchButton'
             );
+        const imageSearchPreview =
+            document.getElementById('imageSearchPreview');
 
+        const imageSearchPreviewContainer =
+            document.getElementById('imageSearchPreviewContainer');
+
+        const imageSearchStatus =
+            document.getElementById('imageSearchStatus');
+
+        function openImageForCrop(file) {
+
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Ju lutem vendosni nje fotografi.');
+                return;
+            }
+
+            if (originalImageUrl) {
+                URL.revokeObjectURL(originalImageUrl);
+                originalImageUrl = null;
+            }
+
+            originalImageUrl =
+                URL.createObjectURL(file);
+
+            if (imageCropper) {
+                imageCropper.destroy();
+                imageCropper = null;
+            }
+
+            cropImage.src =
+                originalImageUrl;
+
+            $('#imageCropModal')
+                .modal('show');
+        }
 
         let imageCropper = null;
         let originalImageUrl = null;
@@ -989,10 +1057,29 @@
             if (products.length === 0) return;
 
             const html = products.map(product => `
-      <div class="col-md-12 col-lg-3 product-col" style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
-        <div class="card product-card d-flex flex-column h-100"
-             data-product-id-main="${product.id}"
-             data-product-name="${product.name}">
+            <div class="col-md-12 col-lg-3 product-col"
+                style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
+
+                <div class="card product-card d-flex flex-column h-100"
+                    data-product-id-main="${product.id}"
+                    data-product-name="${product.name}">
+
+                    ${product.similarity_percent !== undefined && product.similarity_percent !== null ? `
+                        <div style="
+                            text-align:right;
+                            padding:8px 10px 0;
+                        ">
+                            <span style="
+                                background:#53d1b2;
+                                padding:4px 8px;
+                                border-radius:10px;
+                                font-size:12px;
+                                font-weight:bold;
+                            ">
+                                ${product.similarity_percent}%
+                            </span>
+                        </div>
+                    ` : ''}
           <img
             id="imageresource_${product.id}"
             imgId="${product.id}"
@@ -1061,6 +1148,18 @@
             if (!file) {
                 return;
             }
+
+            const previewUrl =
+                URL.createObjectURL(file);
+
+            imageSearchPreview.src =
+                previewUrl;
+
+            imageSearchPreviewContainer.style.display =
+                'block';
+
+            imageSearchStatus.innerHTML =
+                '<i class="fa fa-spinner fa-spin"></i> Duke analizuar fotografinë...';
 
 
             const formData =
@@ -1156,6 +1255,10 @@
                     return;
                 }
 
+                imageSearchStatus.innerHTML =
+                    products.length +
+                    ' produkte te ngjashme u gjeten.';
+
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1212,7 +1315,6 @@
             }
         );
 
-
         imageSearchInput.addEventListener(
             'change',
             function() {
@@ -1223,58 +1325,53 @@
                     this.files[0] :
                     null;
 
+                if (!file) return;
 
-                if (!file) {
-                    return;
-                }
-
-
-                if (!file.type.startsWith('image/')) {
-
-                    alert(
-                        'Ju lutem zgjidhni nje fotografi.'
-                    );
-
-                    this.value = '';
-
-                    return;
-                }
-
-
-                if (originalImageUrl) {
-
-                    URL.revokeObjectURL(
-                        originalImageUrl
-                    );
-
-                    originalImageUrl = null;
-                }
-
-
-                originalImageUrl =
-                    URL.createObjectURL(file);
-
-
-                if (imageCropper) {
-
-                    imageCropper.destroy();
-
-                    imageCropper = null;
-                }
-
-
-                cropImage.src =
-                    originalImageUrl;
-
-
-                $('#imageCropModal')
-                    .modal('show');
-
+                openImageForCrop(file);
 
                 this.value = '';
-
             }
         );
+
+        document.addEventListener('paste', function(event) {
+
+            const clipboardData =
+                event.clipboardData ||
+                window.clipboardData;
+
+            if (!clipboardData) {
+                return;
+            }
+
+            const items =
+                clipboardData.items;
+
+            if (!items) {
+                return;
+            }
+
+            for (let i = 0; i < items.length; i++) {
+
+                if (
+                    items[i].kind === 'file' &&
+                    items[i].type.startsWith('image/')
+                ) {
+
+                    const file =
+                        items[i].getAsFile();
+
+                    if (!file) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    openImageForCrop(file);
+
+                    break;
+                }
+            }
+        });
 
         $('#imageCropModal')
             .on(
@@ -1303,7 +1400,7 @@
 
                                 dragMode: 'move',
 
-                                autoCropArea: 0.65,
+                                autoCropArea: 0.90,
 
                                 responsive: true,
 
@@ -1425,20 +1522,32 @@
             );
 
         function performSearch() {
+
             const searchQuery = searchInput.value.trim();
 
+            clearImageSearchPreview();
+
             resetSearchState();
+
             window.scrollTo(0, 0);
 
             if (searchQuery === "") {
-                isSearching = false;
-                searchProducts("").catch(console.error);
-            } else {
-                isSearching = true;
+
                 searchInProgress = true;
+
+                searchProducts("")
+                    .finally(() => {
+                        searchInProgress = false;
+                    });
+
+            } else {
+
+                searchInProgress = true;
+
                 searchProducts(searchQuery)
-                    .catch(console.error)
-                    .finally(() => (searchInProgress = false));
+                    .finally(() => {
+                        searchInProgress = false;
+                    });
             }
         }
 
@@ -2124,6 +2233,21 @@
             const overlayRow = document.querySelector("#productListing");
             if (overlayRow && selectedBtnContainer) {
                 selectedBtnContainer.style.width = `${overlayRow.offsetWidth}px`;
+            }
+        }
+
+        function clearImageSearchPreview() {
+
+            if (imageSearchPreview) {
+                imageSearchPreview.src = '';
+            }
+
+            if (imageSearchStatus) {
+                imageSearchStatus.innerHTML = '';
+            }
+
+            if (imageSearchPreviewContainer) {
+                imageSearchPreviewContainer.style.display = 'none';
             }
         }
 

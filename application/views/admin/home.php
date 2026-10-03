@@ -1466,6 +1466,7 @@
                         width:90px;
                         height:70px;
                         object-fit:contain;
+                        cursor:pointer;
                     "
                     src="${url}optimum/products_images/${product.image}"
                     class="img-fluid"
@@ -1627,12 +1628,74 @@
 
             </div>
 
-        </div>`
+        </div>
+
+
+        <div
+            class="modal"
+            id="imagemodal_${product.id}"
+            tabindex="-1"
+            role="dialog"
+            aria-hidden="true">
+
+            <div class="modal-dialog">
+
+                <div class="modal-content">
+
+                    <div
+                        class="
+                            modal-header
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                        ">
+
+                        <h4 class="modal-title">
+                            ${escapeHtml(product.name)}
+                        </h4>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        </button>
+
+                    </div>
+
+
+                    <div class="modal-body">
+
+                        <img
+                            src="${url}optimum/products_images/${product.image}"
+                            id="imagepreview_${product.id}"
+                            class="img-fluid"
+                            style="
+                                margin-left:auto;
+                                margin-right:auto;
+                                display:block;
+                                width:270px;
+                                height:220px;
+                                object-fit:contain;
+                            ">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        `
                 ).join('');
 
 
             productListing.innerHTML =
                 html;
+
+
+            moveModalsOutside();
         }
 
         function clearImageSearchPreview() {
@@ -1776,49 +1839,46 @@
                         new Cropper(
                             cropImage, {
 
-                                /*
-                                 * 0 = crop box mund te levize
-                                 */
                                 viewMode: 1,
-
-                                /*
-                                 * Crop box i lire.
-                                 * Nuk e detyrojme katror.
-                                 */
                                 aspectRatio: NaN,
-
                                 dragMode: 'move',
 
-                                autoCropArea: 0.99,
+                                autoCropArea: 1,
 
                                 responsive: true,
-
                                 background: false,
-
                                 guides: true,
-
                                 center: true,
-
                                 highlight: true,
 
                                 movable: true,
-
                                 zoomable: true,
-
                                 zoomOnTouch: true,
-
                                 zoomOnWheel: true,
 
                                 scalable: false,
-
                                 rotatable: true,
 
                                 cropBoxMovable: true,
-
                                 cropBoxResizable: true,
 
-                                toggleDragModeOnDblclick: false
+                                toggleDragModeOnDblclick: false,
 
+                                ready() {
+
+                                    const containerData =
+                                        imageCropper.getContainerData();
+
+                                    const canvasData =
+                                        imageCropper.getCanvasData();
+
+                                    imageCropper.setCropBoxData({
+                                        left: canvasData.left,
+                                        top: canvasData.top,
+                                        width: canvasData.width,
+                                        height: canvasData.height
+                                    });
+                                }
                             }
                         );
 

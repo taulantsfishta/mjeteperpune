@@ -1394,35 +1394,47 @@
                     imageCropper =
                         new Cropper(
                             cropImage, {
+
                                 viewMode: 1,
-
                                 aspectRatio: NaN,
-
                                 dragMode: 'move',
 
-                                autoCropArea: 0.90,
+                                autoCropArea: 1,
 
                                 responsive: true,
-
                                 background: false,
-
                                 guides: true,
-
                                 center: true,
+                                highlight: true,
 
                                 movable: true,
-
                                 zoomable: true,
-
                                 zoomOnTouch: true,
-
                                 zoomOnWheel: true,
 
-                                cropBoxMovable: true,
+                                scalable: false,
+                                rotatable: true,
 
+                                cropBoxMovable: true,
                                 cropBoxResizable: true,
 
-                                toggleDragModeOnDblclick: false
+                                toggleDragModeOnDblclick: false,
+
+                                ready() {
+
+                                    const containerData =
+                                        imageCropper.getContainerData();
+
+                                    const canvasData =
+                                        imageCropper.getCanvasData();
+
+                                    imageCropper.setCropBoxData({
+                                        left: canvasData.left,
+                                        top: canvasData.top,
+                                        width: canvasData.width,
+                                        height: canvasData.height
+                                    });
+                                }
                             }
                         );
                 }

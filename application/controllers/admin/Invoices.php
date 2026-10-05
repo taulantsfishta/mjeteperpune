@@ -1162,10 +1162,30 @@ class Invoices extends CI_Controller
         $search = trim((string)$this->input->get('search', true));
         $selectedUserId = $this->debt_selected_user();
 
-        $this->db->select("debt_clients.*, COALESCE(SUM(CASE WHEN debt_transactions.type='debt' THEN debt_transactions.amount WHEN debt_transactions.type='payment' THEN -debt_transactions.amount ELSE 0 END),0) AS total_debt", false)
+        $this->db
+            ->select("
+        debt_clients.*,
+        COALESCE(
+            SUM(
+                CASE
+                    WHEN debt_transactions.type = 'debt'
+                        THEN debt_transactions.amount
+                    WHEN debt_transactions.type = 'payment'
+                        THEN -debt_transactions.amount
+                    ELSE 0
+                END
+            ),
+            0
+        ) AS total_debt
+    ", false)
             ->from('debt_clients')
-            ->where('debt_clients.is_deleted', 0)
-            ->join('debt_transactions', 'debt_transactions.client_id = debt_clients.id AND debt_transactions.user_id = ' . (int)$selectedUserId, 'inner');
+            ->join(
+                'debt_transactions',
+                'debt_transactions.client_id = debt_clients.id
+         AND debt_transactions.user_id = ' . (int)$selectedUserId,
+                'left'
+            )
+            ->where('debt_clients.is_deleted', 0);
 
         if ($search !== '') {
             $this->db->group_start()
@@ -1256,10 +1276,6 @@ class Invoices extends CI_Controller
         $totalTransactions = $this->db->where('client_id', $clientId)->where('user_id', $selectedUserId)
             ->count_all_results('debt_transactions');
 
-        if ($totalTransactions <= 0) {
-            show_404();
-            return;
-        }
 
         $total = $this->db->select("COALESCE(SUM(CASE WHEN type='debt' THEN amount WHEN type='payment' THEN -amount ELSE 0 END),0) AS total", false)
             ->where('client_id', $clientId)->where('user_id', $selectedUserId)
@@ -1456,30 +1472,29 @@ class Invoices extends CI_Controller
         // =====================================================
 
         $this->db
-            ->select(
-                "debt_clients.*,
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN debt_transactions.type='debt'
-                            THEN debt_transactions.amount
-                        WHEN debt_transactions.type='payment'
-                            THEN -debt_transactions.amount
-                        ELSE 0
-                    END
-                ),
-                0
-            ) AS total_debt",
-                false
-            )
+            ->select("
+        debt_clients.*,
+        COALESCE(
+            SUM(
+                CASE
+                    WHEN debt_transactions.type = 'debt'
+                        THEN debt_transactions.amount
+                    WHEN debt_transactions.type = 'payment'
+                        THEN -debt_transactions.amount
+                    ELSE 0
+                END
+            ),
+            0
+        ) AS total_debt
+    ", false)
             ->from('debt_clients')
-            ->where('debt_clients.is_deleted', 0)
             ->join(
                 'debt_transactions',
                 'debt_transactions.client_id = debt_clients.id
-            AND debt_transactions.user_id = ' . (int)$selectedUserId,
-                'inner'
-            );
+         AND debt_transactions.user_id = ' . (int)$selectedUserId,
+                'left'
+            )
+            ->where('debt_clients.is_deleted', 0);
 
         if ($search !== '') {
 

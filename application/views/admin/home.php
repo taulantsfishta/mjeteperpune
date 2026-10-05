@@ -1064,13 +1064,29 @@
         }
 
         function resetSearchState() {
+
             offset = 0;
+
             isLoading = false;
+
+            /*
+             * Çdo search i ri fillon pa mode.
+             * performSearch() vendos pastaj
+             * a eshte text search apo jo.
+             */
+            isSearching = false;
+
+            searchInProgress = false;
+
             hasMore = true;
+
             getSearchResult = 0;
+
             productsList.length = 0;
+
             productListing.innerHTML = "";
-            hideLoadingIndicator(); // ensure spinner hidden
+
+            hideLoadingIndicator();
         }
 
         function showNotFound() {
@@ -1715,32 +1731,77 @@
 
         function performSearch() {
 
-            const searchQuery = searchInput.value.trim();
+            const searchQuery =
+                searchInput.value.trim();
 
+            /*
+             * Largo preview/status nga image search.
+             */
             clearImageSearchPreview();
 
+            /*
+             * Reset pagination.
+             */
             resetSearchState();
 
             window.scrollTo(0, 0);
 
-            if (searchQuery === "") {
 
-                searchInProgress = true;
+            /*
+            |--------------------------------------------------------------------------
+            | SEARCH NORMAL ME INPUT
+            |--------------------------------------------------------------------------
+            |
+            | Ky search KA infinite scroll.
+            | 20 produkte per request,
+            | por JO vetem 20 produkte total.
+            |
+            */
 
-                searchProducts("")
-                    .finally(() => {
-                        searchInProgress = false;
-                    });
+            if (searchQuery !== "") {
 
-            } else {
+                isSearching = true;
+                hasMore = true;
 
                 searchInProgress = true;
 
                 searchProducts(searchQuery)
-                    .finally(() => {
+                    .catch(function(error) {
+
+                        console.error(error);
+
+                    })
+                    .finally(function() {
+
                         searchInProgress = false;
+
                     });
+
+                return;
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | INPUT BOSH
+            |--------------------------------------------------------------------------
+            */
+
+            isSearching = false;
+
+            searchInProgress = true;
+
+            searchProducts("")
+                .catch(function(error) {
+
+                    console.error(error);
+
+                })
+                .finally(function() {
+
+                    searchInProgress = false;
+
+                });
         }
 
 

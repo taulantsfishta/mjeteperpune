@@ -272,7 +272,7 @@
 
                 formData.append(
                     'batch_size',
-                    '2'
+                    '4'
                 );
 
 

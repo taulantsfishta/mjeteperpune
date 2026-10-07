@@ -1575,13 +1575,10 @@ PROMPT;
         $imagePath,
         $limit = 20,
         $categoryId = null,
-        $maxObjects = 8
+        $maxObjects = 4
     ) {
-        /*
-    |--------------------------------------------------------------------------
-    | BASIC VALIDATION
-    |--------------------------------------------------------------------------
-    */
+
+        $startTime = microtime(true);
 
         $limit = (int)$limit;
 
@@ -1589,229 +1586,60 @@ PROMPT;
             $limit = 20;
         }
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | SEARCH-TIME OBJECT LIMIT
+    |--------------------------------------------------------------------------
+    |
+    | Per indexing mund te kemi me shume objekte.
+    | Per LIVE search nuk duam 8 embeddings ekstra.
+    |
+    */
+
         $maxObjects = (int)$maxObjects;
 
         if ($maxObjects <= 0) {
-            $maxObjects = 8;
+            $maxObjects = 4;
         }
 
-        if ($maxObjects > 12) {
-            $maxObjects = 12;
+        if ($maxObjects > 4) {
+            $maxObjects = 4;
         }
-
-        /*
-     * Nga secili embedding marrim me shume kandidata.
-     * Ne fund kthejme vetem top $limit.
-     */
-        $perSearchLimit = max(50, $limit);
-
-        $allSearches = [];
-        $tempFiles = [];
 
 
         /*
     |--------------------------------------------------------------------------
-    | 1. FULL IMAGE EMBEDDING
+    | LIMITS
     |--------------------------------------------------------------------------
     */
 
-        $fullEmbedding =
-            $this->createImageEmbedding(
-                $imagePath
-            );
+        $fastSearchLimit = 30;
 
-        if (
-            isset($fullEmbedding['status']) &&
-            $fullEmbedding['status'] &&
-            !empty($fullEmbedding['embedding'])
-        ) {
-            $allSearches[] = [
-                'type' => 'full',
-                'label' => 'full_image',
-                'embedding' =>
-                $fullEmbedding['embedding']
-            ];
-        }
+        $deepSearchLimit = max(
+            40,
+            $limit
+        );
 
 
         /*
     |--------------------------------------------------------------------------
-    | 2. DETECT OBJECTS
+    | FAST SEARCH CONFIDENCE
     |--------------------------------------------------------------------------
     */
 
-        $detection =
-            $this->detectImageObjects(
-                $imagePath,
-                $maxObjects
-            );
+        $fastMinScore = 0.92;
 
-
-        if (
-            isset($detection['status']) &&
-            $detection['status'] &&
-            isset($detection['objects']) &&
-            is_array($detection['objects']) &&
-            !empty($detection['objects'])
-        ) {
-
-            foreach (
-                $detection['objects']
-                as $index => $object
-            ) {
-
-                /*
-             * Pa box nuk kemi cfare crop-i te bejme.
-             */
-                if (
-                    !isset($object['box_2d']) ||
-                    !is_array($object['box_2d']) ||
-                    count($object['box_2d']) !== 4
-                ) {
-                    continue;
-                }
-
-
-                /*
-            |--------------------------------------------------------------------------
-            | CROP OBJECT
-            |--------------------------------------------------------------------------
-            */
-
-                $cropFile =
-                    $this->cropDetectedObject(
-                        $imagePath,
-                        $object['box_2d'],
-                        0.06
-                    );
-
-
-                if (!$cropFile) {
-                    continue;
-                }
-
-
-                $tempFiles[] = $cropFile;
-
-
-                /*
-            |--------------------------------------------------------------------------
-            | OBJECT EMBEDDING
-            |--------------------------------------------------------------------------
-            */
-
-                $embeddingResult =
-                    $this->createImageEmbedding(
-                        $cropFile
-                    );
-
-
-                if (
-                    !isset($embeddingResult['status']) ||
-                    !$embeddingResult['status'] ||
-                    empty($embeddingResult['embedding'])
-                ) {
-                    continue;
-                }
-
-
-                $allSearches[] = [
-                    'type' => 'object',
-
-                    'label' =>
-                    isset($object['label']) &&
-                        trim($object['label']) !== ''
-                        ? $object['label']
-                        : 'object_' . ($index + 1),
-
-                    'box_2d' =>
-                    $object['box_2d'],
-
-                    'embedding' =>
-                    $embeddingResult['embedding']
-                ];
-            }
-        }
+        $fastMinGap = 0.04;
 
 
         /*
     |--------------------------------------------------------------------------
-    | ASNJE EMBEDDING NUK U KRIJUA
+    | HELPERS
     |--------------------------------------------------------------------------
     */
 
-        if (empty($allSearches)) {
-
-            foreach ($tempFiles as $file) {
-
-                if (
-                    $file &&
-                    file_exists($file)
-                ) {
-                    @unlink($file);
-                }
-            }
-
-
-            return [
-                'status' => false,
-                'message' =>
-                'Nuk u krijua asnje embedding.'
-            ];
-        }
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | 3. SEARCH QDRANT PER CDO EMBEDDING
-    |--------------------------------------------------------------------------
-    */
-
-        $merged = [];
-
-
-        foreach ($allSearches as $search) {
-
-            /*
-        |--------------------------------------------------------------------------
-        | CATEGORY SEARCH / GLOBAL SEARCH
-        |--------------------------------------------------------------------------
-        */
-
-            if ($categoryId !== null) {
-
-                $result =
-                    $this->searchSimilarByCategory(
-                        $search['embedding'],
-                        (int)$categoryId,
-                        $perSearchLimit
-                    );
-            } else {
-
-                $result =
-                    $this->searchSimilar(
-                        $search['embedding'],
-                        $perSearchLimit
-                    );
-            }
-
-
-            if (
-                !isset($result['status']) ||
-                !$result['status']
-            ) {
-                continue;
-            }
-
-
-            /*
-        |--------------------------------------------------------------------------
-        | QDRANT POINTS
-        |--------------------------------------------------------------------------
-        */
-
-            $points = [];
-
+        $extractPoints = function ($result) {
 
             if (
                 isset(
@@ -1822,26 +1650,43 @@ PROMPT;
                 )
             ) {
 
-                $points =
+                return
                     $result['data']['result']['points'];
             }
 
+            return [];
+        };
 
-            /*
-        |--------------------------------------------------------------------------
-        | MERGE BY PRODUCT ID
-        |--------------------------------------------------------------------------
-        */
+
+        /*
+    |--------------------------------------------------------------------------
+    | MERGE / DEDUPLICATE BY PRODUCT_ID
+    |--------------------------------------------------------------------------
+    |
+    | Nje produkt mund te kete:
+    |
+    | full vector
+    | object_1
+    | object_2
+    |
+    | Prandaj confidence duhet llogaritur
+    | me PRODUKTE TE NDRYSHME, jo me points.
+    |
+    */
+
+        $mergePoints = function (
+            &$merged,
+            array $points,
+            $matchedFrom,
+            $matchedObject,
+            $matchedBox = null
+        ) {
 
             foreach ($points as $point) {
 
                 $productId = null;
 
 
-                /*
-             * Per vectorat e rinj UUID:
-             * product_id merret nga payload.
-             */
                 if (
                     isset(
                         $point['payload']['product_id']
@@ -1850,15 +1695,14 @@ PROMPT;
 
                     $productId =
                         (int)$point['payload']['product_id'];
-
-                    /*
-             * Vetem per legacy points numerike.
-             * Mos tentojme UUID ta kthejme ne integer.
-             */
                 } elseif (
                     isset($point['id']) &&
                     is_numeric($point['id'])
                 ) {
+
+                    /*
+                 * Legacy numeric Qdrant points.
+                 */
 
                     $productId =
                         (int)$point['id'];
@@ -1876,41 +1720,26 @@ PROMPT;
                     : 0;
 
 
-                /*
-             * I njejti produkt mund te gjendet:
-             *
-             * - nga full image
-             * - nga object 1
-             * - nga object 2
-             * - etj.
-             *
-             * Mbajme vetem score-in me te mire.
-             */
                 if (
                     !isset($merged[$productId]) ||
                     $score >
                     (float)$merged[$productId]['score']
                 ) {
 
-                    $point['score'] = $score;
+                    $point['score'] =
+                        $score;
 
-
-                    /*
-                 * Debug info.
-                 */
                     $point['matched_from'] =
-                        $search['type'];
+                        $matchedFrom;
 
                     $point['matched_object'] =
-                        $search['label'];
+                        $matchedObject;
 
 
-                    if (
-                        isset($search['box_2d'])
-                    ) {
+                    if ($matchedBox !== null) {
 
                         $point['matched_box'] =
-                            $search['box_2d'];
+                            $matchedBox;
                     }
 
 
@@ -1918,12 +1747,522 @@ PROMPT;
                         $point;
                 }
             }
+        };
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | SORT HELPER
+    |--------------------------------------------------------------------------
+    */
+
+        $sortPoints = function (array $merged) {
+
+            $points =
+                array_values($merged);
+
+
+            usort(
+                $points,
+                function ($a, $b) {
+
+                    $scoreA =
+                        isset($a['score'])
+                        ? (float)$a['score']
+                        : 0;
+
+                    $scoreB =
+                        isset($b['score'])
+                        ? (float)$b['score']
+                        : 0;
+
+
+                    if ($scoreA == $scoreB) {
+                        return 0;
+                    }
+
+
+                    return ($scoreA > $scoreB)
+                        ? -1
+                        : 1;
+                }
+            );
+
+
+            return $points;
+        };
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 1. FULL IMAGE EMBEDDING
+    |--------------------------------------------------------------------------
+    */
+
+        $embeddingStart =
+            microtime(true);
+
+
+        $fullEmbedding =
+            $this->createImageEmbedding(
+                $imagePath
+            );
+
+
+        $embeddingTime =
+            microtime(true) -
+            $embeddingStart;
+
+
+        if (
+            !isset($fullEmbedding['status']) ||
+            !$fullEmbedding['status'] ||
+            empty($fullEmbedding['embedding'])
+        ) {
+
+            return [
+                'status' => false,
+
+                'message' =>
+                isset($fullEmbedding['message'])
+                    ? $fullEmbedding['message']
+                    : 'Nuk u krijua embedding per fotografinë.'
+            ];
         }
 
 
         /*
     |--------------------------------------------------------------------------
-    | 4. CLEANUP TEMP CROPS
+    | 2. FAST QDRANT SEARCH
+    |--------------------------------------------------------------------------
+    */
+
+        $qdrantFastStart =
+            microtime(true);
+
+
+        if ($categoryId !== null) {
+
+            $fastResult =
+                $this->searchSimilarByCategory(
+                    $fullEmbedding['embedding'],
+                    (int)$categoryId,
+                    $fastSearchLimit
+                );
+        } else {
+
+            $fastResult =
+                $this->searchSimilar(
+                    $fullEmbedding['embedding'],
+                    $fastSearchLimit
+                );
+        }
+
+
+        $qdrantFastTime =
+            microtime(true) -
+            $qdrantFastStart;
+
+
+        if (
+            !isset($fastResult['status']) ||
+            !$fastResult['status']
+        ) {
+
+            return [
+                'status' => false,
+                'message' =>
+                'Gabim gjate kerkimit ne Qdrant.',
+                'debug' => $fastResult
+            ];
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | DEDUP FAST RESULTS BY PRODUCT
+    |--------------------------------------------------------------------------
+    */
+
+        $merged = [];
+
+
+        $fastPoints =
+            $extractPoints(
+                $fastResult
+            );
+
+
+        $mergePoints(
+            $merged,
+            $fastPoints,
+            'full',
+            'full_image'
+        );
+
+
+        $fastProducts =
+            $sortPoints(
+                $merged
+            );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 3. CONFIDENCE CHECK
+    |--------------------------------------------------------------------------
+    */
+
+        $topScore = 0;
+        $secondScore = 0;
+        $scoreGap = 0;
+
+
+        if (
+            isset($fastProducts[0]['score'])
+        ) {
+
+            $topScore =
+                (float)$fastProducts[0]['score'];
+        }
+
+
+        if (
+            isset($fastProducts[1]['score'])
+        ) {
+
+            $secondScore =
+                (float)$fastProducts[1]['score'];
+        }
+
+
+        if ($topScore > 0) {
+
+            /*
+         * Nese kemi vetem nje produkt,
+         * gap konsiderohet i madh.
+         */
+
+            if (!isset($fastProducts[1])) {
+
+                $scoreGap = 1;
+            } else {
+
+                $scoreGap =
+                    $topScore -
+                    $secondScore;
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | FAST RETURN
+    |--------------------------------------------------------------------------
+    |
+    | Produkti i pare duhet:
+    |
+    | 1. te kete score te forte
+    | 2. te jete qarte para produktit te dyte
+    |
+    */
+
+        if (
+            $topScore >= $fastMinScore &&
+            $scoreGap >= $fastMinGap
+        ) {
+
+            $points =
+                array_slice(
+                    $fastProducts,
+                    0,
+                    $limit
+                );
+
+
+            return [
+                'status' => true,
+
+                'data' => [
+                    'result' => [
+                        'points' => $points
+                    ]
+                ],
+
+                'multi_object_debug' => [
+
+                    'mode' =>
+                    'fast',
+
+                    'objects_detected' =>
+                    0,
+
+                    'searches_count' =>
+                    1,
+
+                    'top_score' =>
+                    $topScore,
+
+                    'second_score' =>
+                    $secondScore,
+
+                    'score_gap' =>
+                    $scoreGap,
+
+                    'embedding_ms' =>
+                    round(
+                        $embeddingTime * 1000,
+                        1
+                    ),
+
+                    'qdrant_fast_ms' =>
+                    round(
+                        $qdrantFastTime * 1000,
+                        1
+                    ),
+
+                    'total_ms' =>
+                    round(
+                        (
+                            microtime(true) -
+                            $startTime
+                        ) * 1000,
+                        1
+                    ),
+
+                    'final_results_count' =>
+                    count($points)
+                ]
+            ];
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 4. DEEP SEARCH
+    |--------------------------------------------------------------------------
+    |
+    | FAST search nuk ishte bindes.
+    |
+    | Tash vetem bejme object detection.
+    |
+    */
+
+        $detectionStart =
+            microtime(true);
+
+
+        $detection =
+            $this->detectImageObjects(
+                $imagePath,
+                $maxObjects
+            );
+
+
+        $detectionTime =
+            microtime(true) -
+            $detectionStart;
+
+
+        $tempFiles = [];
+
+        $objectSearches = [];
+
+
+        if (
+            isset($detection['status']) &&
+            $detection['status'] &&
+            isset($detection['objects']) &&
+            is_array($detection['objects'])
+        ) {
+
+            foreach (
+                $detection['objects']
+                as $index => $object
+            ) {
+
+                if (
+                    !isset($object['box_2d']) ||
+                    !is_array($object['box_2d']) ||
+                    count($object['box_2d']) !== 4
+                ) {
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | Optional optimization:
+            | objekti pothuajse mbulon krejt foton
+            |--------------------------------------------------------------------------
+            |
+            | Nese crop-i eshte mbi 95% te fotos,
+            | FULL embedding zakonisht mjafton.
+            |
+            */
+
+                $box = $object['box_2d'];
+
+                $boxWidth =
+                    max(
+                        0,
+                        $box[3] - $box[1]
+                    );
+
+                $boxHeight =
+                    max(
+                        0,
+                        $box[2] - $box[0]
+                    );
+
+                $boxArea =
+                    (
+                        $boxWidth *
+                        $boxHeight
+                    ) / 1000000;
+
+
+                if ($boxArea >= 0.95) {
+
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | CROP
+            |--------------------------------------------------------------------------
+            */
+
+                $cropFile =
+                    $this->cropDetectedObject(
+                        $imagePath,
+                        $object['box_2d'],
+                        0.06
+                    );
+
+
+                if (!$cropFile) {
+                    continue;
+                }
+
+
+                $tempFiles[] =
+                    $cropFile;
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | OBJECT EMBEDDING
+            |--------------------------------------------------------------------------
+            */
+
+                $objectEmbedding =
+                    $this->createImageEmbedding(
+                        $cropFile
+                    );
+
+
+                if (
+                    !isset(
+                        $objectEmbedding['status']
+                    ) ||
+                    !$objectEmbedding['status'] ||
+                    empty($objectEmbedding['embedding'])
+                ) {
+
+                    continue;
+                }
+
+
+                $objectSearches[] = [
+
+                    'label' =>
+                    isset($object['label']) &&
+                        trim($object['label']) !== ''
+                        ? $object['label']
+                        : 'object_' . ($index + 1),
+
+                    'box_2d' =>
+                    $object['box_2d'],
+
+                    'embedding' =>
+                    $objectEmbedding['embedding']
+                ];
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 5. QDRANT SEARCH VETEM PER OBJECTS
+    |--------------------------------------------------------------------------
+    |
+    | FULL Qdrant search nuk perseritet.
+    | Rezultatet e tij tashme jane ne $merged.
+    |
+    */
+
+        $deepQdrantStart =
+            microtime(true);
+
+
+        foreach (
+            $objectSearches
+            as $search
+        ) {
+
+            if ($categoryId !== null) {
+
+                $result =
+                    $this->searchSimilarByCategory(
+                        $search['embedding'],
+                        (int)$categoryId,
+                        $deepSearchLimit
+                    );
+            } else {
+
+                $result =
+                    $this->searchSimilar(
+                        $search['embedding'],
+                        $deepSearchLimit
+                    );
+            }
+
+
+            if (
+                !isset($result['status']) ||
+                !$result['status']
+            ) {
+
+                continue;
+            }
+
+
+            $objectPoints =
+                $extractPoints(
+                    $result
+                );
+
+
+            $mergePoints(
+                $merged,
+                $objectPoints,
+                'object',
+                $search['label'],
+                $search['box_2d']
+            );
+        }
+
+
+        $deepQdrantTime =
+            microtime(true) -
+            $deepQdrantStart;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | CLEAN TEMP FILES
     |--------------------------------------------------------------------------
     */
 
@@ -1941,46 +2280,15 @@ PROMPT;
 
         /*
     |--------------------------------------------------------------------------
-    | 5. SORT BY BEST SCORE
+    | FINAL SORT
     |--------------------------------------------------------------------------
     */
 
         $points =
-            array_values($merged);
+            $sortPoints(
+                $merged
+            );
 
-
-        usort(
-            $points,
-            function ($a, $b) {
-
-                $scoreA =
-                    isset($a['score'])
-                    ? (float)$a['score']
-                    : 0;
-
-                $scoreB =
-                    isset($b['score'])
-                    ? (float)$b['score']
-                    : 0;
-
-
-                if ($scoreA == $scoreB) {
-                    return 0;
-                }
-
-
-                return (
-                    $scoreA > $scoreB
-                ) ? -1 : 1;
-            }
-        );
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | 6. FINAL TOP RESULTS
-    |--------------------------------------------------------------------------
-    */
 
         $points =
             array_slice(
@@ -1992,27 +2300,23 @@ PROMPT;
 
         /*
     |--------------------------------------------------------------------------
-    | RESPONSE
+    | FINAL RESPONSE
     |--------------------------------------------------------------------------
     */
 
         return [
             'status' => true,
 
-            /*
-         * E ruajme strukturen qe Dashboard.php
-         * vazhdon te punoje pa ndryshime.
-         */
             'data' => [
                 'result' => [
                     'points' => $points
                 ]
             ],
 
-            /*
-         * Debug info.
-         */
             'multi_object_debug' => [
+
+                'mode' =>
+                'deep',
 
                 'detected_objects' =>
                 isset($detection['objects']) &&
@@ -2026,11 +2330,57 @@ PROMPT;
                     ? count($detection['objects'])
                     : 0,
 
-                'searches_count' =>
-                count($allSearches),
+                'objects_searched' =>
+                count($objectSearches),
 
-                'per_search_limit' =>
-                $perSearchLimit,
+                /*
+             * Full + object searches
+             */
+                'searches_count' =>
+                1 +
+                    count($objectSearches),
+
+                'top_score_before_deep' =>
+                $topScore,
+
+                'second_score_before_deep' =>
+                $secondScore,
+
+                'score_gap_before_deep' =>
+                $scoreGap,
+
+                'embedding_ms' =>
+                round(
+                    $embeddingTime * 1000,
+                    1
+                ),
+
+                'qdrant_fast_ms' =>
+                round(
+                    $qdrantFastTime * 1000,
+                    1
+                ),
+
+                'detection_ms' =>
+                round(
+                    $detectionTime * 1000,
+                    1
+                ),
+
+                'qdrant_deep_ms' =>
+                round(
+                    $deepQdrantTime * 1000,
+                    1
+                ),
+
+                'total_ms' =>
+                round(
+                    (
+                        microtime(true) -
+                        $startTime
+                    ) * 1000,
+                    1
+                ),
 
                 'final_results_count' =>
                 count($points)
@@ -2111,8 +2461,8 @@ PROMPT;
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 120,
-            CURLOPT_CONNECTTIMEOUT => 20,
+            CURLOPT_TIMEOUT => 35,
+            CURLOPT_CONNECTTIMEOUT => 8,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_POSTFIELDS => json_encode($payload)

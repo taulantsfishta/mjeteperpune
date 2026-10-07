@@ -1912,6 +1912,10 @@
 
             if (searchQuery === "") {
 
+                // Search bosh = shfaq produktet normale te kategorise
+                isSearching = false;
+                hasMore = true;
+
                 searchInProgress = true;
 
                 searchProducts("")
@@ -1920,6 +1924,10 @@
                     });
 
             } else {
+
+                // Search aktiv
+                isSearching = true;
+                hasMore = true;
 
                 searchInProgress = true;
 

@@ -921,7 +921,7 @@ class Invoices extends CI_Controller
                         font-weight: bold;
                     }
                     .invoice-products .total_sum td {
-                        font-size: 9px;
+                        font-size: 15px;
                         font-weight: bold;
                     }
                 </style>
@@ -1217,42 +1217,144 @@ class Invoices extends CI_Controller
         }
 
         if ($this->input->post()) {
+
             $name = trim((string)$this->input->post('name', true));
             $address = trim((string)$this->input->post('address', true));
             $phone = trim((string)$this->input->post('phone', true));
             $initialDebt = (float)$this->input->post('initial_debt');
 
+
             if ($name === '') {
-                $this->session->set_flashdata('error', 'Emri i klientit është i obligueshëm.');
+
+                $this->session->set_flashdata(
+                    'error',
+                    'Emri i klientit është i obligueshëm.'
+                );
+
+                $this->session->set_flashdata('old_name', $name);
+                $this->session->set_flashdata('old_address', $address);
+                $this->session->set_flashdata('old_phone', $phone);
+                $this->session->set_flashdata('old_initial_debt', $initialDebt);
+
                 redirect('admin/invoices/add_debt_client');
                 return;
             }
 
-            $this->db->insert('debt_clients', [
-                'name' => strtoupper($name),
-                'address' => $address !== '' ? $address : null,
-                'phone' => $phone !== '' ? $phone : null,
-                'is_deleted' => 0
-            ]);
+
+            $normalizedName = preg_replace(
+                '/\s+/u',
+                ' ',
+                trim($name)
+            );
+
+            $normalizedName = mb_strtoupper(
+                $normalizedName,
+                'UTF-8'
+            );
+
+
+            $existingClients = $this->db
+                ->select('id, name, is_deleted')
+                ->from('debt_clients')
+                ->get()
+                ->result_array();
+
+
+            foreach ($existingClients as $client) {
+
+                $existingName = preg_replace(
+                    '/\s+/u',
+                    ' ',
+                    trim((string)$client['name'])
+                );
+
+                $existingName = mb_strtoupper(
+                    $existingName,
+                    'UTF-8'
+                );
+
+
+                if ($existingName === $normalizedName) {
+
+                    $message =
+                        'Ekziston tashmë një klient me emrin "' .
+                        $client['name'] .
+                        '".';
+
+                    if ((int)$client['is_deleted'] === 1) {
+                        $message .= ' Ky klient është në listën e klientëve të fshirë.';
+                    }
+
+
+                    $this->session->set_flashdata(
+                        'error',
+                        $message
+                    );
+
+                    /*
+                | Ruaj të dhënat që janë shkruar,
+                | që të mos humbin pas redirect-it.
+                */
+                    $this->session->set_flashdata('old_name', $name);
+                    $this->session->set_flashdata('old_address', $address);
+                    $this->session->set_flashdata('old_phone', $phone);
+                    $this->session->set_flashdata('old_initial_debt', $initialDebt);
+
+                    /*
+                | Qëndro te faqja SHTO KLIENT
+                */
+                    redirect('admin/invoices/add_debt_client');
+                    return;
+                }
+            }
+
+
+            $this->db->insert(
+                'debt_clients',
+                [
+                    'name' => $normalizedName,
+                    'address' => $address !== '' ? $address : null,
+                    'phone' => $phone !== '' ? $phone : null,
+                    'is_deleted' => 0
+                ]
+            );
+
+
             $clientId = (int)$this->db->insert_id();
 
+
             if ($initialDebt > 0) {
-                $this->db->insert('debt_transactions', [
-                    'client_id' => $clientId,
-                    'user_id' => (int)$this->session->userdata('id'),
-                    'type' => 'debt',
-                    'amount' => $initialDebt,
-                    'description' => 'Detyrim fillestar'
-                ]);
+
+                $this->db->insert(
+                    'debt_transactions',
+                    [
+                        'client_id' => $clientId,
+                        'user_id' => (int)$this->session->userdata('id'),
+                        'type' => 'debt',
+                        'amount' => $initialDebt,
+                        'description' => 'Detyrim fillestar'
+                    ]
+                );
             }
+
 
             redirect('admin/invoices/debt_client/' . $clientId);
             return;
         }
 
+
         $data['page_title'] = 'SHTO KLIENT';
-        $data['main_content'] = $this->load->view('admin/add-debt-client', $data, TRUE);
-        $this->load->view('admin/index', $data);
+
+        $data['main_content'] = $this->load->view(
+            'admin/add-debt-client',
+            $data,
+            TRUE
+        );
+
+        $this->load->view(
+            'admin/index',
+            $data
+        );
     }
 
     public function debt_client($clientId)
@@ -1758,20 +1860,46 @@ class Invoices extends CI_Controller
 
     public function search_debt_clients_invoice()
     {
-        if (!$this->debt_access_allowed()) {
-            $this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode([]));
-            return;
+        if ($this->session->userdata('role') !== 'admin') {
+
+            return $this->output
+                ->set_status_header(403)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode([]));
         }
-        $search = trim((string)$this->input->get('search', true));
+
+
+        $search = trim(
+            (string)$this->input->get('search', true)
+        );
+
+
         if ($search === '') {
-            $this->output->set_content_type('application/json')->set_output(json_encode([]));
-            return;
+
+            return $this->output
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode([]));
         }
-        $clients = $this->db->select('id, name, address, phone')->from('debt_clients')
+
+
+        $clients = $this->db
+            ->select('id, name, address, phone')
+            ->from('debt_clients')
             ->where('is_deleted', 0)
-            ->group_start()->like('name', $search)->or_like('address', $search)->or_like('phone', $search)->group_end()
-            ->order_by('name', 'ASC')->limit(10)->get()->result_array();
-        $this->output->set_content_type('application/json')->set_output(json_encode($clients));
+            ->group_start()
+            ->like('name', $search)
+            ->or_like('address', $search)
+            ->or_like('phone', $search)
+            ->group_end()
+            ->order_by('name', 'ASC')
+            ->limit(10)
+            ->get()
+            ->result_array();
+
+
+        return $this->output
+            ->set_content_type('application/json', 'utf-8')
+            ->set_output(json_encode($clients));
     }
 
     public function invoice_to_debt()
@@ -1780,7 +1908,14 @@ class Invoices extends CI_Controller
             return $this->output->set_status_header($httpCode)->set_content_type('application/json', 'utf-8')
                 ->set_output(json_encode(array_merge(['status' => $status, 'message' => $message], $extra), JSON_UNESCAPED_UNICODE));
         };
-        if (!$this->debt_access_allowed()) return $reply(false, 'Nuk keni qasje.', 403);
+        if ($this->session->userdata('role') !== 'admin') {
+
+            return $reply(
+                false,
+                'Nuk keni qasje.',
+                403
+            );
+        }
 
         $invoiceId = (int)$this->input->post('invoice_id');
         if ($invoiceId <= 0) return $reply(false, 'ID e faturës nuk është valide.', 400);

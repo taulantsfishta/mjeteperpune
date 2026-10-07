@@ -5,6 +5,29 @@
 
             <h3>Shto klient</h3>
 
+            <?php
+            $error = $this->session->flashdata('error');
+            ?>
+
+            <?php if (!empty($error)) : ?>
+
+                <div
+                    class="alert alert-danger"
+                    style="margin-top:15px;">
+
+                    <i class="fa fa-times-circle"></i>
+
+                    <?php echo htmlspecialchars(
+                        $error,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ); ?>
+
+                </div>
+
+            <?php endif; ?>
+
+
             <form method="post">
 
                 <div class="form-group">
@@ -15,7 +38,11 @@
                         type="text"
                         name="name"
                         class="form-control"
-                        required>
+                        value="<?php echo htmlspecialchars(
+                                    $this->session->flashdata('old_name') ?? '',
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ); ?>">
 
                 </div>
 
@@ -27,7 +54,12 @@
                     <input
                         type="text"
                         name="address"
-                        class="form-control">
+                        class="form-control"
+                        value="<?php echo htmlspecialchars(
+                                    $this->session->flashdata('old_address') ?? '',
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ); ?>">
 
                 </div>
 
@@ -39,7 +71,12 @@
                     <input
                         type="text"
                         name="phone"
-                        class="form-control">
+                        class="form-control"
+                        value="<?php echo htmlspecialchars(
+                                    $this->session->flashdata('old_phone') ?? '',
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ); ?>">
 
                 </div>
 
@@ -50,11 +87,14 @@
 
                     <input
                         type="number"
+                        step="0.01"
                         name="initial_debt"
                         class="form-control"
-                        step="0.01"
-                        min="0"
-                        value="0">
+                        value="<?php echo htmlspecialchars(
+                                    $this->session->flashdata('old_initial_debt') ?? '',
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ); ?>">
 
                 </div>
 

@@ -92,14 +92,6 @@
 </head>
 
 <body>
-
-    <?php if ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger">
-            <i class="fa fa-times"></i>
-            <?php echo htmlspecialchars($this->session->flashdata('error'), ENT_QUOTES, 'UTF-8'); ?>
-        </div>
-    <?php endif; ?>
-
     <?php if (!empty($debtIsAdmin) && !empty($debtUserOptions)): ?>
         <div class="row" style="margin-bottom:15px;">
             <div class="col-xs-12 col-sm-5 col-md-4">

@@ -569,9 +569,31 @@
                 <div class="form-grid">
                     <div>
                         <label for="client_name">Emri I Klientit:</label>
-                        <input type="text" id="client_name" name="client_name" value="QYTETAR" required>
-                        <input type="hidden" id="debt_client_id" name="debt_client_id" value="">
-                        <div id="debtClientSuggestions" class="debt-client-suggestions" style="display:none;"></div>
+
+                        <input
+                            type="text"
+                            id="client_name"
+                            name="client_name"
+                            value="QYTETAR"
+                            autocomplete="off"
+                            required>
+
+                        <?php if ($this->session->userdata('role') === 'admin') : ?>
+
+                            <input
+                                type="hidden"
+                                id="debt_client_id"
+                                name="debt_client_id"
+                                value="">
+
+                            <div
+                                id="debtClientSuggestions"
+                                class="debt-client-suggestions"
+                                style="display:none;">
+                            </div>
+
+                        <?php endif; ?>
+
                     </div>
                     <div>
                         <label for="address">Adresa:</label>
@@ -823,7 +845,19 @@
                             <button type="submit" id="saveBtn" class="btn" name="submit_type" value="ruaj_faturen"><i class="fa fa-save"></i> RUAJ</button>
                             <button type="submit" id="printBtn" class="btn" name="submit_type" value="printo_faturen"><i class="fa fa-edit"></i> PRINTO FATUREN</button>
                             <button type="submit" id="downloadBtn" class="btn" name="submit_type" value="printo_faturen_excel"><i class="fa fa-edit"></i> PRINTO EXCEL</button>
-                            <button type="button" id="debtBtn" class="btn"><i class="fa fa-money"></i> DETYRIM NGA KLIENTI</button>
+                            <?php if ($this->session->userdata('role') === 'admin') : ?>
+
+                                <button
+                                    type="button"
+                                    id="debtBtn"
+                                    class="btn">
+
+                                    <i class="fa fa-money"></i>
+                                    DETYRIM NGA KLIENTI
+
+                                </button>
+
+                            <?php endif; ?>
                             <button type="button" id="delete_row" class="btn" style="display:none;"><i class="fa fa-trash"></i> FSHIJ RRESHTAT</button>
                         </div>
                     </div>
@@ -848,33 +882,164 @@
 
 
 <!-- Konfirmimi i detyrimit -->
-<div class="modal" id="confirmDebtModal" tabindex="-1" role="dialog" aria-labelledby="confirmDebtModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDebtModalLabel">Konfirmo detyrimin</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+<?php if ($this->session->userdata('role') === 'admin') : ?>
+
+    <!-- Konfirmimi i detyrimit -->
+    <div class="modal"
+        id="confirmDebtModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="confirmDebtModalLabel"
+        aria-hidden="true">
+
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5
+                        class="modal-title"
+                        id="confirmDebtModalLabel">
+
+                        Konfirmo detyrimin
+
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                        <span aria-hidden="true">&times;</span>
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="modal-body"
+                    id="confirmDebtModalMessage">
+
+                    A dëshironi ta regjistroni ose përditësoni shumën e mbetur si detyrim?
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                        Jo
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        id="confirmDebtAction">
+
+                        Po, konfirmo
+
+                    </button>
+
+                </div>
+
             </div>
-            <div class="modal-body" id="confirmDebtModalMessage">A dëshironi ta regjistroni ose përditësoni shumën e mbetur si detyrim?</div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Jo</button>
-                <button type="button" class="btn btn-danger" id="confirmDebtAction">Po, konfirmo</button>
-            </div>
+
         </div>
+
     </div>
-</div>
-<!-- Njoftimet e detyrimit -->
-<div class="modal" id="debtNotificationModal" tabindex="-1" role="dialog" aria-labelledby="debtNotificationModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="debtNotificationModalLabel">Njoftim</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+
+    <!-- Njoftimet e detyrimit -->
+
+    <div
+        class="modal"
+        id="debtNotificationModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="debtNotificationModalLabel"
+        aria-hidden="true">
+
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5
+                        class="modal-title"
+                        id="debtNotificationModalLabel">
+
+                        Njoftim
+
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                        <span aria-hidden="true">&times;</span>
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="modal-body"
+                    id="debtNotificationMessage">
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal">
+
+                        Në rregull
+
+                    </button>
+
+                </div>
+
             </div>
-            <div class="modal-body" id="debtNotificationMessage"></div>
-            <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Në rregull</button></div>
+
         </div>
+
     </div>
-</div>
+
+
+    <script>
+        function showDebtNotification(
+            message,
+            title
+        ) {
+
+            $('#debtNotificationModalLabel')
+                .text(
+                    title || 'Njoftim'
+                );
+
+            $('#debtNotificationMessage')
+                .text(message);
+
+            $('#debtNotificationModal')
+                .modal('show');
+        }
+    </script>
+
+<?php endif; ?>
 <script>
     function showDebtNotification(message, title) {
         $('#debtNotificationModalLabel').text(title || 'Njoftim');
@@ -1670,173 +1835,175 @@
 
 <script>
     $(document).ready(function() {
-        var debtSearchTimer = null;
-        var debtSearchRequest = null;
-        var activeDebtClientIndex = -1;
+        <?php if ($this->session->userdata('role') === 'admin') : ?>
+            var debtSearchTimer = null;
+            var debtSearchRequest = null;
+            var activeDebtClientIndex = -1;
 
-        function selectDebtClient($item) {
-            if (!$item.length) return;
-            $('#debt_client_id').val($item.attr('data-id'));
-            $('#client_name').val($item.attr('data-name'));
-            if ($item.attr('data-address')) $('#address').val($item.attr('data-address'));
-            if ($item.attr('data-phone')) $('#phone_number').val($item.attr('data-phone'));
-            activeDebtClientIndex = -1;
-            $('#debtClientSuggestions').hide().empty();
-            $('#client_name').focus();
-        }
-
-        $('#client_name').on('input', function() {
-            $('#debt_client_id').val('');
-            activeDebtClientIndex = -1;
-            clearTimeout(debtSearchTimer);
-            if (debtSearchRequest) debtSearchRequest.abort();
-            var q = $.trim($(this).val());
-            if (q.length < 2) {
+            function selectDebtClient($item) {
+                if (!$item.length) return;
+                $('#debt_client_id').val($item.attr('data-id'));
+                $('#client_name').val($item.attr('data-name'));
+                if ($item.attr('data-address')) $('#address').val($item.attr('data-address'));
+                if ($item.attr('data-phone')) $('#phone_number').val($item.attr('data-phone'));
+                activeDebtClientIndex = -1;
                 $('#debtClientSuggestions').hide().empty();
-                return;
+                $('#client_name').focus();
             }
-            debtSearchTimer = setTimeout(function() {
-                debtSearchRequest = $.ajax({
-                    url: '<?php echo base_url("admin/invoices/search_debt_clients_invoice"); ?>',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        search: q
-                    },
-                    success: function(res) {
-                        // Mos shfaq rezultate të vjetra nëse emri ndërkohë ka ndryshuar.
-                        if ($.trim($('#client_name').val()) !== q) return;
-                        var box = $('#debtClientSuggestions').empty();
-                        activeDebtClientIndex = -1;
-                        if (!res || !res.length) {
-                            box.hide();
-                            return;
-                        }
-                        $.each(res, function(_, c) {
-                            $('<div class="debt-client-suggestion" role="option"></div>')
-                                .attr('data-id', c.id)
-                                .attr('data-name', c.name || '')
-                                .attr('data-address', c.address || '')
-                                .attr('data-phone', c.phone || '')
-                                .html('<strong>' + $('<div>').text(c.name || '').html() + '</strong>' +
-                                    '<small>' + $('<div>').text((c.address || '') + ((c.phone || '') ? ' | ' + c.phone : '')).html() + '</small>')
-                                .appendTo(box);
-                        });
-                        box.show();
-                    }
-                });
-            }, 250);
-        });
 
-        $('#client_name').on('keydown', function(e) {
-            var $box = $('#debtClientSuggestions');
-            var $items = $box.find('.debt-client-suggestion');
-            if (!$box.is(':visible') || !$items.length) return;
-
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (e.key === 'ArrowDown') {
-                    activeDebtClientIndex = Math.min(activeDebtClientIndex + 1, $items.length - 1);
-                } else {
-                    activeDebtClientIndex = activeDebtClientIndex <= 0 ? $items.length - 1 : activeDebtClientIndex - 1;
-                }
-                $items.removeClass('active').attr('aria-selected', 'false');
-                var $active = $items.eq(activeDebtClientIndex).addClass('active').attr('aria-selected', 'true');
-                $active[0].scrollIntoView({
-                    block: 'nearest'
-                });
-            } else if (e.key === 'Enter') {
-                e.preventDefault(); // Mos e dërgo formularin kur zgjedhim klientin.
-                selectDebtClient($items.eq(activeDebtClientIndex < 0 ? 0 : activeDebtClientIndex));
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                $box.hide();
+            $('#client_name').on('input', function() {
+                $('#debt_client_id').val('');
                 activeDebtClientIndex = -1;
-            }
-        });
-
-        $(document).on('click', '.debt-client-suggestion', function() {
-            selectDebtClient($(this));
-        });
-
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('#client_name,#debtClientSuggestions').length) {
-                $('#debtClientSuggestions').hide();
-                activeDebtClientIndex = -1;
-            }
-        });
-
-        // Hap konfirmimin para ruajtjes dhe regjistrimit të detyrimit.
-        $('#debtBtn').on('click', function(e) {
-            e.preventDefault();
-            $('#confirmDebtModalMessage').text(
-                'A dëshironi ta ruani faturën dhe ta regjistroni ose përditësoni shumën e mbetur si detyrim?'
-            );
-            $('#confirmDebtModal').modal('show');
-        });
-
-        $('#confirmDebtAction').on('click', function() {
-            var $confirmButton = $(this);
-            var $debtButton = $('#debtBtn');
-            var clientId = $('#debt_client_id').val();
-            var invoiceId = $('#sales_form > #id').val();
-
-            // Klienti kërkohet vetëm kur detyrimi regjistrohet për herë të parë.
-            // Për faturën ekzistuese, controller-i e gjen klientin nga transaksioni i lidhur.
-            if (!invoiceId && !clientId) {
-                $('#confirmDebtModal').modal('hide');
-                $('#confirmDebtModal').one('hidden.bs.modal', function() {
-                    showDebtNotification('Zgjidhni klientin ekzistues nga lista e borxheve.', 'Vërejtje');
-                });
-                return;
-            }
-
-            $confirmButton.prop('disabled', true).text('Duke ruajtur...');
-            $debtButton.prop('disabled', true);
-            $('#confirmDebtModal').modal('hide');
-
-            function unlock() {
-                $confirmButton.prop('disabled', false).text('Po, konfirmo');
-                $debtButton.prop('disabled', false);
-            }
-
-            // Ruaje gjithmonë faturën e ndryshuar përpara sinkronizimit të borxhit.
-            window.validateAndSubmitForm('ruaj_faturen', true, function() {
-                var savedInvoiceId = $('#sales_form > #id').val();
-                if (!savedInvoiceId) {
-                    unlock();
-                    showDebtNotification('Fatura nuk u ruajt. Detyrimi nuk u ndryshua.', 'Gabim');
+                clearTimeout(debtSearchTimer);
+                if (debtSearchRequest) debtSearchRequest.abort();
+                var q = $.trim($(this).val());
+                if (q.length < 2) {
+                    $('#debtClientSuggestions').hide().empty();
                     return;
                 }
-                $confirmButton.text('Duke regjistruar...');
-                $.ajax({
-                    url: window.base_url + 'admin/invoices/invoice_to_debt',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        invoice_id: savedInvoiceId,
-                        debt_client_id: clientId
-                    },
-                    success: function(res) {
-                        if (res && res.status) {
-                            if (res.client_id) $('#debt_client_id').val(res.client_id);
-                            showDebtNotification(res.message || 'Detyrimi u regjistrua me sukses.', 'Sukses');
-                        } else {
-                            showDebtNotification((res && res.message) || 'Detyrimi nuk u regjistrua.', 'Vërejtje');
+                debtSearchTimer = setTimeout(function() {
+                    debtSearchRequest = $.ajax({
+                        url: '<?php echo base_url("admin/invoices/search_debt_clients_invoice"); ?>',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            search: q
+                        },
+                        success: function(res) {
+                            // Mos shfaq rezultate të vjetra nëse emri ndërkohë ka ndryshuar.
+                            if ($.trim($('#client_name').val()) !== q) return;
+                            var box = $('#debtClientSuggestions').empty();
+                            activeDebtClientIndex = -1;
+                            if (!res || !res.length) {
+                                box.hide();
+                                return;
+                            }
+                            $.each(res, function(_, c) {
+                                $('<div class="debt-client-suggestion" role="option"></div>')
+                                    .attr('data-id', c.id)
+                                    .attr('data-name', c.name || '')
+                                    .attr('data-address', c.address || '')
+                                    .attr('data-phone', c.phone || '')
+                                    .html('<strong>' + $('<div>').text(c.name || '').html() + '</strong>' +
+                                        '<small>' + $('<div>').text((c.address || '') + ((c.phone || '') ? ' | ' + c.phone : '')).html() + '</small>')
+                                    .appendTo(box);
+                            });
+                            box.show();
                         }
-                    },
-                    error: function(xhr) {
-                        var message = (xhr.responseJSON && xhr.responseJSON.message) ||
-                            'Ndodhi një gabim gjatë regjistrimit të detyrimit.';
-                        showDebtNotification(message, 'Gabim');
-                    },
-                    complete: unlock
-                });
+                    });
+                }, 250);
             });
-            // Nëse validimi/ruajtja dështon, nuk ekzekutohet callback-u.
-            // Riaktivizo butonat kur modali i validimit ose gabimit mbyllet.
-            $(document).one('invoiceSaveFailed', unlock);
-        });
+
+            $('#client_name').on('keydown', function(e) {
+                var $box = $('#debtClientSuggestions');
+                var $items = $box.find('.debt-client-suggestion');
+                if (!$box.is(':visible') || !$items.length) return;
+
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (e.key === 'ArrowDown') {
+                        activeDebtClientIndex = Math.min(activeDebtClientIndex + 1, $items.length - 1);
+                    } else {
+                        activeDebtClientIndex = activeDebtClientIndex <= 0 ? $items.length - 1 : activeDebtClientIndex - 1;
+                    }
+                    $items.removeClass('active').attr('aria-selected', 'false');
+                    var $active = $items.eq(activeDebtClientIndex).addClass('active').attr('aria-selected', 'true');
+                    $active[0].scrollIntoView({
+                        block: 'nearest'
+                    });
+                } else if (e.key === 'Enter') {
+                    e.preventDefault(); // Mos e dërgo formularin kur zgjedhim klientin.
+                    selectDebtClient($items.eq(activeDebtClientIndex < 0 ? 0 : activeDebtClientIndex));
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    $box.hide();
+                    activeDebtClientIndex = -1;
+                }
+            });
+
+            $(document).on('click', '.debt-client-suggestion', function() {
+                selectDebtClient($(this));
+            });
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#client_name,#debtClientSuggestions').length) {
+                    $('#debtClientSuggestions').hide();
+                    activeDebtClientIndex = -1;
+                }
+            });
+
+            // Hap konfirmimin para ruajtjes dhe regjistrimit të detyrimit.
+            $('#debtBtn').on('click', function(e) {
+                e.preventDefault();
+                $('#confirmDebtModalMessage').text(
+                    'A dëshironi ta ruani faturën dhe ta regjistroni ose përditësoni shumën e mbetur si detyrim?'
+                );
+                $('#confirmDebtModal').modal('show');
+            });
+
+            $('#confirmDebtAction').on('click', function() {
+                var $confirmButton = $(this);
+                var $debtButton = $('#debtBtn');
+                var clientId = $('#debt_client_id').val();
+                var invoiceId = $('#sales_form > #id').val();
+
+                // Klienti kërkohet vetëm kur detyrimi regjistrohet për herë të parë.
+                // Për faturën ekzistuese, controller-i e gjen klientin nga transaksioni i lidhur.
+                if (!invoiceId && !clientId) {
+                    $('#confirmDebtModal').modal('hide');
+                    $('#confirmDebtModal').one('hidden.bs.modal', function() {
+                        showDebtNotification('Zgjidhni klientin ekzistues nga lista e borxheve.', 'Vërejtje');
+                    });
+                    return;
+                }
+
+                $confirmButton.prop('disabled', true).text('Duke ruajtur...');
+                $debtButton.prop('disabled', true);
+                $('#confirmDebtModal').modal('hide');
+
+                function unlock() {
+                    $confirmButton.prop('disabled', false).text('Po, konfirmo');
+                    $debtButton.prop('disabled', false);
+                }
+
+                // Ruaje gjithmonë faturën e ndryshuar përpara sinkronizimit të borxhit.
+                window.validateAndSubmitForm('ruaj_faturen', true, function() {
+                    var savedInvoiceId = $('#sales_form > #id').val();
+                    if (!savedInvoiceId) {
+                        unlock();
+                        showDebtNotification('Fatura nuk u ruajt. Detyrimi nuk u ndryshua.', 'Gabim');
+                        return;
+                    }
+                    $confirmButton.text('Duke regjistruar...');
+                    $.ajax({
+                        url: window.base_url + 'admin/invoices/invoice_to_debt',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            invoice_id: savedInvoiceId,
+                            debt_client_id: clientId
+                        },
+                        success: function(res) {
+                            if (res && res.status) {
+                                if (res.client_id) $('#debt_client_id').val(res.client_id);
+                                showDebtNotification(res.message || 'Detyrimi u regjistrua me sukses.', 'Sukses');
+                            } else {
+                                showDebtNotification((res && res.message) || 'Detyrimi nuk u regjistrua.', 'Vërejtje');
+                            }
+                        },
+                        error: function(xhr) {
+                            var message = (xhr.responseJSON && xhr.responseJSON.message) ||
+                                'Ndodhi një gabim gjatë regjistrimit të detyrimit.';
+                            showDebtNotification(message, 'Gabim');
+                        },
+                        complete: unlock
+                    });
+                });
+                // Nëse validimi/ruajtja dështon, nuk ekzekutohet callback-u.
+                // Riaktivizo butonat kur modali i validimit ose gabimit mbyllet.
+                $(document).one('invoiceSaveFailed', unlock);
+            });
 
     });
 </script>
+<?php endif; ?>

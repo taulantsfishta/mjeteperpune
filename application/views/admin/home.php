@@ -1437,19 +1437,15 @@
                 return;
             }
 
+            const html = products.map(product => `
 
-            const html =
-                products.map(
-                    product => `
-
-        <div
-            class="col-md-12 col-lg-3 product-col">
+        <div class="col-md-12 col-lg-3 product-col">
 
             <div
                 class="card"
                 style="margin-bottom:10px;">
 
-
+                <!-- SIMILARITY -->
                 <div
                     style="
                         text-align:right;
@@ -1472,6 +1468,7 @@
                 </div>
 
 
+                <!-- IMAGE -->
                 <img
                     id="imageresource_${product.id}"
                     imgId="${product.id}"
@@ -1489,8 +1486,8 @@
                 />
 
 
+                <!-- PRODUCT DATA -->
                 <div class="card-body">
-
 
                     <div
                         class="
@@ -1503,16 +1500,10 @@
                             Kodi:
                         </h5>
 
-                        <h5
-                            class="
-                                text-dark
-                                mb-0
-                            ">
-
+                        <h5 class="text-dark mb-0">
                             <b>
                                 ${escapeHtml(product.code)}
                             </b>
-
                         </h5>
 
                     </div>
@@ -1530,13 +1521,8 @@
                         </h5>
 
                         <h5
-                            class="
-                                text-dark
-                                mb-0
-                            "
-                            style="
-                                margin-left:10px;
-                            ">
+                            class="text-dark mb-0"
+                            style="margin-left:10px;">
 
                             <b>
                                 ${escapeHtml(product.name)}
@@ -1549,59 +1535,48 @@
 
                     ${priceStatus == 1 ? `
 
-                    <div
-                        class="
-                            d-flex
-                            justify-content-between
-                            mb-3
-                        ">
-
-                        <h5 class="mb-0">
-                            Çmimi:
-                        </h5>
-
-                        <h5
+                        <div
                             class="
-                                text-dark
-                                mb-0
+                                d-flex
+                                justify-content-between
+                                mb-3
                             ">
 
-                            <b>
-                                ${product.price}
-                                <i class="fa fa-euro"></i>
-                            </b>
+                            <h5 class="mb-0">
+                                Çmimi:
+                            </h5>
 
-                        </h5>
+                            <h5 class="text-dark mb-0">
+                                <b>
+                                    ${product.price}
+                                    <i class="fa fa-euro"></i>
+                                </b>
+                            </h5>
 
-                    </div>
+                        </div>
 
                     ` : ''}
-
 
                 </div>
 
 
+                <!-- ================================================= -->
+                <!-- ADMIN / SALES ACTIONS - SHFAQEN ME CTRL+B -->
+                <!-- ================================================= -->
+
                 ${['admin', 'sales'].includes(role) ? `
 
-                    <div
-                        class="
-                            mt-2
-                            admin-actions
-                        ">
+                    <div class="mt-2 admin-actions">
 
                         ${role === 'admin' ? `
 
+                            <!-- ADMIN: NDRYSHO -->
                             <a
                                 href="${url}admin/products/get_product/${product.id}"
                                 target="_blank">
 
                                 <button
-                                    class="
-                                        btn
-                                        btn-primary
-                                        btn-block
-                                        mb-2
-                                    "
+                                    class="btn btn-primary btn-block mb-2"
                                     style="
                                         background:#53d1b2;
                                         font-size:14px;
@@ -1615,27 +1590,82 @@
 
                             </a>
 
-                        ` : ''}
+
+                            <!-- ADMIN: FSHIJE -->
+                            <a
+                                href="${url}admin/products/delete_product/${product.category_id}/${product.id}"
+                                data-toggle="modal"
+                                data-target="#confirmDeleteModal"
+                                data-productid="${product.id}"
+                                data-categoryid="${product.category_id}">
+
+                                <button
+                                    class="btn btn-danger btn-block mb-2"
+                                    style="
+                                        background:#ff5e2dcc;
+                                        font-size:14px;
+                                    ">
+
+                                    <i class="fa fa-trash"></i>
+
+                                    Fshije Produktin
+
+                                </button>
+
+                            </a>
 
 
-                        <button
-                            type="button"
-                            class="
-                                btn
-                                btn-warning
-                                btn-block
-                                add-to-cart-btn
-                            "
-                            data-productid="${product.id}"
-                            data-code="${escapeHtml(product.code)}"
-                            data-name="${escapeHtml(product.name)}"
-                            data-price="${product.price}">
+                            <!-- ADMIN: INFO + SHPORTA -->
+                            <div class="product-bottom-actions">
 
-                            <i class="fa fa-shopping-cart"></i>
+                                <button
+                                    type="button"
+                                    class="btn product-info-btn"
+                                    style="background:#85b3f7;"
+                                    id="infoButton_${product.id}"
+                                    data-productid="${product.id}">
 
-                            Shportë
+                                    <i class="fa fa-info-circle"></i>
 
-                        </button>
+                                    Informata Produkti
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="btn btn-warning add-to-cart-btn"
+                                    data-productid="${product.id}"
+                                    data-code="${escapeHtml(product.code)}"
+                                    data-name="${escapeHtml(product.name)}"
+                                    data-price="${product.price}">
+
+                                    <i class="fa fa-shopping-cart"></i>
+
+                                    Shportë
+
+                                </button>
+
+                            </div>
+
+                        ` : `
+
+                            <!-- SALES: VETËM SHPORTA -->
+                            <button
+                                type="button"
+                                class="btn btn-warning btn-block add-to-cart-btn"
+                                data-productid="${product.id}"
+                                data-code="${escapeHtml(product.code)}"
+                                data-name="${escapeHtml(product.name)}"
+                                data-price="${product.price}">
+
+                                <i class="fa fa-shopping-cart"></i>
+
+                                Shportë
+
+                            </button>
+
+                        `}
 
                     </div>
 
@@ -1647,6 +1677,7 @@
         </div>
 
 
+        <!-- IMAGE MODAL -->
         <div
             class="modal"
             id="imagemodal_${product.id}"
@@ -1703,13 +1734,10 @@
 
         </div>
 
-        `
-                ).join('');
+    `).join('');
 
 
-            productListing.innerHTML =
-                html;
-
+            productListing.innerHTML = html;
 
             moveModalsOutside();
         }

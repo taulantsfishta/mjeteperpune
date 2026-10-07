@@ -242,6 +242,16 @@
         z-index: 2;
     }
 
+    /* ===== CTRL+B ADMIN / SALES ACTIONS ===== */
+
+    .admin-actions {
+        display: none;
+    }
+
+    .show-admin-actions .admin-actions {
+        display: block;
+    }
+
     /* ===== SHOPPING CART ===== */
     .product-bottom-actions {
         display: flex;
@@ -445,44 +455,103 @@
                             </div>
                         <?php endif ?>
                     </div>
-
                     <?php if (in_array($this->session->userdata('role'), ['admin', 'sales'])) : ?>
-                        <div class="mt-2">
+
+                        <div class="mt-2 admin-actions">
+
                             <?php if ($this->session->userdata('role') == 'admin') : ?>
-                                <a href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>" target="_blank">
-                                    <button class="btn btn-block" style="background:#53d1b2; font-size:14px;" id="editButton_<?php echo $value['id']; ?>">
-                                        <i class="fa fa-edit"></i> Ndrysho Produktin
+
+                                <!-- ADMIN: NDRYSHO -->
+                                <a
+                                    href="<?php echo base_url('admin/products/get_product/' . $value['id']); ?>"
+                                    target="_blank">
+
+                                    <button
+                                        class="btn btn-block"
+                                        style="background:#53d1b2; font-size:14px;"
+                                        id="editButton_<?php echo $value['id']; ?>">
+
+                                        <i class="fa fa-edit"></i>
+                                        Ndrysho Produktin
+
                                     </button>
+
                                 </a>
-                                <a href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>"
-                                    data-toggle="modal" data-target="#confirmDeleteModal"
-                                    data-productid="<?php echo $value['id']; ?>" data-categoryid="<?php echo $category['id']; ?>">
-                                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc; font-size:14px;" id="deleteButton_<?php echo $value['id']; ?>">
-                                        <i class="fa fa-trash"></i> Fshije Produktin
+
+
+                                <!-- ADMIN: FSHIJE -->
+                                <a
+                                    href="<?php echo base_url('admin/products/delete_product/' . $category['id'] . '/' . $value['id']); ?>"
+                                    data-toggle="modal"
+                                    data-target="#confirmDeleteModal"
+                                    data-productid="<?php echo $value['id']; ?>"
+                                    data-categoryid="<?php echo $category['id']; ?>">
+
+                                    <button
+                                        class="btn btn-block mt-2"
+                                        style="background:#ff5e2dcc; font-size:14px;"
+                                        id="deleteButton_<?php echo $value['id']; ?>">
+
+                                        <i class="fa fa-trash"></i>
+                                        Fshije Produktin
+
                                     </button>
+
                                 </a>
+
+
+                                <!-- ADMIN: INFO + SHPORTA -->
                                 <div class="product-bottom-actions">
-                                    <button type="button" class="btn product-info-btn" style="background:#85b3f7;" id="infoButton_<?php echo $value['id']; ?>" data-productid="<?php echo $value['id']; ?>">
-                                        <i class="fa fa-info-circle"></i> Informata Produkti
+
+                                    <button
+                                        type="button"
+                                        class="btn product-info-btn"
+                                        style="background:#85b3f7;"
+                                        id="infoButton_<?php echo $value['id']; ?>"
+                                        data-productid="<?php echo $value['id']; ?>">
+
+                                        <i class="fa fa-info-circle"></i>
+                                        Informata Produkti
+
                                     </button>
-                                    <button type="button" class="btn btn-warning add-to-cart-btn"
+
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-warning add-to-cart-btn"
                                         data-productid="<?php echo $value['id']; ?>"
                                         data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
                                         data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
                                         data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
-                                        <i class="fa fa-shopping-cart"></i> Shportë
+
+                                        <i class="fa fa-shopping-cart"></i>
+                                        Shportë
+
                                     </button>
+
                                 </div>
-                            <?php else : ?>
-                                <button type="button" class="btn btn-warning btn-block add-to-cart-btn"
+
+
+                            <?php elseif ($this->session->userdata('role') == 'sales') : ?>
+
+                                <!-- SALES: VETËM SHPORTA -->
+                                <button
+                                    type="button"
+                                    class="btn btn-warning btn-block add-to-cart-btn"
                                     data-productid="<?php echo $value['id']; ?>"
                                     data-code="<?php echo htmlspecialchars($value['code'], ENT_QUOTES); ?>"
                                     data-name="<?php echo htmlspecialchars($value['name'], ENT_QUOTES); ?>"
                                     data-price="<?php echo htmlspecialchars($value['price'], ENT_QUOTES); ?>">
-                                    <i class="fa fa-shopping-cart"></i> Shportë
+
+                                    <i class="fa fa-shopping-cart"></i>
+                                    Shportë
+
                                 </button>
+
                             <?php endif; ?>
+
                         </div>
+
                     <?php endif; ?>
                 </div>
             </div>
@@ -878,6 +947,33 @@
         const selectedBtnContainer = document.getElementById("selectedProductsButtonContainer");
         const gatherBtn = document.getElementById("gatherSelectedProductsBtn");
 
+        // =====================================================
+        // CTRL+B - ADMIN / SALES ACTIONS
+        // =====================================================
+
+        function onCtrlB(e) {
+
+            if (
+                e.ctrlKey &&
+                (e.key === 'b' || e.key === 'B')
+            ) {
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                document.body.classList.toggle(
+                    'show-admin-actions'
+                );
+            }
+        }
+
+
+        document.addEventListener(
+            'keydown',
+            onCtrlB,
+            true
+        );
+
         window.base_url = <?php echo json_encode(base_url()); ?>;
         const url = window.base_url;
 
@@ -1052,94 +1148,365 @@
         }
 
         function updateProductListing(products, category_id, query) {
+
             searchInput.value = query;
 
-            if (products.length === 0) return;
+            if (!products || products.length === 0) {
+                return;
+            }
+
 
             const html = products.map(product => `
-            <div class="col-md-12 col-lg-3 product-col"
-                style="padding-left:5px;padding-right:5px;padding-bottom:15px;">
 
-                <div class="card product-card d-flex flex-column h-100"
-                    data-product-id-main="${product.id}"
-                    data-product-name="${product.name}">
+        <div
+            class="col-md-12 col-lg-3 product-col"
+            style="
+                padding-left:5px;
+                padding-right:5px;
+                padding-bottom:15px;
+            ">
 
-                    ${product.similarity_percent !== undefined && product.similarity_percent !== null ? `
-                        <div style="
-                            text-align:right;
-                            padding:8px 10px 0;
-                        ">
-                            <span style="
-                                background:#53d1b2;
-                                padding:4px 8px;
-                                border-radius:10px;
-                                font-size:12px;
-                                font-weight:bold;
+            <div
+                class="card product-card d-flex flex-column h-100"
+                data-product-id-main="${product.id}"
+                data-product-name="${escapeHtml(product.name)}">
+
+
+                <!-- SIMILARITY VETËM PËR IMAGE SEARCH -->
+                ${
+                    product.similarity_percent !== undefined &&
+                    product.similarity_percent !== null
+                    ? `
+
+                        <div
+                            style="
+                                text-align:right;
+                                padding:8px 10px 0;
                             ">
+
+                            <span
+                                style="
+                                    background:#53d1b2;
+                                    padding:4px 8px;
+                                    border-radius:10px;
+                                    font-size:12px;
+                                    font-weight:bold;
+                                ">
+
                                 ${product.similarity_percent}%
+
                             </span>
+
                         </div>
+
+                    `
+                    : ''
+                }
+
+
+                <!-- IMAGE -->
+                <img
+                    id="imageresource_${product.id}"
+                    imgId="${product.id}"
+                    class="lazyload img-fluid mx-auto mt-3"
+                    style="
+                        width:90px;
+                        height:70px;
+                        object-fit:contain;
+                    "
+                    data-src="${url}optimum/products_images/${product.image}"
+                />
+
+
+                <div
+                    class="
+                        card-body
+                        d-flex
+                        flex-column
+                        justify-content-between
+                        flex-grow-1
+                    ">
+
+                    <div>
+
+                        <!-- CODE -->
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                mb-2
+                            ">
+
+                            <h5 class="mb-0">
+                                Kodi:
+                            </h5>
+
+                            <h5 class="text-dark mb-0">
+
+                                <b>
+                                    ${escapeHtml(product.code)}
+                                </b>
+
+                            </h5>
+
+                        </div>
+
+
+                        <!-- DESCRIPTION -->
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                mb-2
+                            ">
+
+                            <h5 class="mb-0">
+                                Përshkrimi:
+                            </h5>
+
+                            <h5
+                                class="
+                                    text-dark
+                                    mb-0
+                                    text-end
+                                    product-description
+                                ">
+
+                                <b>
+                                    ${escapeHtml(product.name)}
+                                </b>
+
+                            </h5>
+
+                        </div>
+
+
+                        <!-- PRICE -->
+                        ${priceStatus == 1 ? `
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    mb-2
+                                ">
+
+                                <h5 class="mb-0">
+                                    Çmimi:
+                                </h5>
+
+                                <h5 class="text-dark mb-0">
+
+                                    <b>
+                                        ${product.price}
+                                        <i class="fa fa-euro"></i>
+                                    </b>
+
+                                </h5>
+
+                            </div>
+
+                        ` : ''}
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- CTRL+B ACTIONS -->
+                    <!-- ================================================= -->
+
+                    ${['admin', 'sales'].includes(role) ? `
+
+                        <div class="mt-2 admin-actions">
+
+                            ${role === 'admin' ? `
+
+                                ${
+                                    product.is_deleted == 0
+                                    ? `
+
+                                        <!-- ADMIN: NDRYSHO -->
+                                        <a
+                                            href="${url}admin/products/get_product/${product.id}"
+                                            target="_blank">
+
+                                            <button
+                                                class="btn btn-block"
+                                                style="
+                                                    background:#53d1b2;
+                                                    font-size:14px;
+                                                "
+                                                id="editButton_${product.id}">
+
+                                                <i class="fa fa-edit"></i>
+
+                                                Ndrysho Produktin
+
+                                            </button>
+
+                                        </a>
+
+
+                                        <!-- ADMIN: FSHIJE -->
+                                        <a
+                                            href="${url}admin/products/delete_product/${category_id}/${product.id}"
+                                            data-toggle="modal"
+                                            data-target="#confirmDeleteModal"
+                                            data-productid="${product.id}"
+                                            data-categoryid="${category_id}">
+
+                                            <button
+                                                class="btn btn-block mt-2"
+                                                style="
+                                                    background:#ff5e2dcc;
+                                                    font-size:14px;
+                                                "
+                                                id="deleteButton_${product.id}">
+
+                                                <i class="fa fa-trash"></i>
+
+                                                Fshije Produktin
+
+                                            </button>
+
+                                        </a>
+
+
+                                        <!-- ADMIN: INFO + SHPORTA -->
+                                        <div class="product-bottom-actions">
+
+                                            <button
+                                                type="button"
+                                                class="btn product-info-btn"
+                                                style="background:#85b3f7;"
+                                                id="infoButton_${product.id}"
+                                                data-productid="${product.id}">
+
+                                                <i class="fa fa-info-circle"></i>
+
+                                                Informata Produkti
+
+                                            </button>
+
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-warning add-to-cart-btn"
+                                                data-productid="${product.id}"
+                                                data-code="${escapeHtml(product.code)}"
+                                                data-name="${escapeHtml(product.name)}"
+                                                data-price="${product.price}">
+
+                                                <i class="fa fa-shopping-cart"></i>
+
+                                                Shportë
+
+                                            </button>
+
+                                        </div>
+
+                                    `
+                                    : `
+
+                                        <!-- ADMIN: PRODUKT I FSHIRË -->
+                                        <a
+                                            href="${url}admin/products/delete_product/${category_id}/${product.id}"
+                                            data-toggle="modal"
+                                            data-target="#confirmUNDeleteModal"
+                                            data-productid="${product.id}"
+                                            data-categoryid="${category_id}">
+
+                                            <button
+                                                class="btn btn-block mt-2"
+                                                style="
+                                                    background:#ff5e2dcc;
+                                                    font-size:14px;
+                                                "
+                                                id="deleteButton_${product.id}">
+
+                                                <i class="fa fa-angle-left"></i>
+
+                                                Rikthe Produktin
+
+                                            </button>
+
+                                        </a>
+
+                                    `
+                                }
+
+                            ` : `
+
+                                <!-- SALES: VETËM SHPORTA -->
+                                ${
+                                    product.is_deleted == 0
+                                    ? `
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-warning btn-block add-to-cart-btn"
+                                            data-productid="${product.id}"
+                                            data-code="${escapeHtml(product.code)}"
+                                            data-name="${escapeHtml(product.name)}"
+                                            data-price="${product.price}">
+
+                                            <i class="fa fa-shopping-cart"></i>
+
+                                            Shportë
+
+                                        </button>
+
+                                    `
+                                    : ''
+                                }
+
+                            `}
+
+                        </div>
+
                     ` : ''}
-          <img
-            id="imageresource_${product.id}"
-            imgId="${product.id}"
-            class="lazyload img-fluid mx-auto mt-3"
-            style="width:90px; height:70px; object-fit: contain;"
-            data-src="${url}optimum/products_images/${product.image}"
-          />
-          <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
-            <div>
-              <div class="d-flex justify-content-between mb-2">
-                <h5 class="mb-0">Kodi:</h5>
-                <h5 class="text-dark mb-0"><b>${product.code}</b></h5>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <h5 class="mb-0">Përshkrimi:</h5>
-                <h5 class="text-dark mb-0 text-end product-description"><b>${product.name}</b></h5>
-              </div>
-              ${priceStatus == 1 ? `
-              <div class="d-flex justify-content-between mb-2">
-                <h5 class="mb-0">Çmimi:</h5>
-                <h5 class="text-dark mb-0"><b>${product.price}<i class="fa fa-euro"></i></b></h5>
-              </div>` : ''}
+
+                </div>
+
             </div>
 
-            ${['admin', 'sales'].includes(role) ? `
-            <div class="mt-2">
-              ${role === 'admin' ? `
-                ${product.is_deleted == 0 ? `
-                  <a href="${url}admin/products/get_product/${product.id}" target="_blank">
-                    <button class="btn btn-block" style="background:#53d1b2;font-size:14px;" id="editButton_${product.id}"><i class="fa fa-edit"></i> Ndrysho Produktin</button>
-                  </a>
-                  <a href="${url}admin/products/delete_product/${category_id}/${product.id}" data-toggle="modal" data-target="#confirmDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
-                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc;font-size:14px;" id="deleteButton_${product.id}"><i class="fa fa-trash"></i> Fshije Produktin</button>
-                  </a>
-                  <div class="product-bottom-actions">
-                    <button type="button" class="btn product-info-btn" style="background:#85b3f7;" id="infoButton_${product.id}" data-productid="${product.id}"><i class="fa fa-info-circle"></i> Informata Produkti</button>
-                    <button type="button" class="btn btn-warning add-to-cart-btn" data-productid="${product.id}" data-code="${escapeHtml(product.code)}" data-name="${escapeHtml(product.name)}" data-price="${product.price}"><i class="fa fa-shopping-cart"></i> Shportë</button>
-                  </div>
-                ` : `
-                  <a href="${url}admin/products/delete_product/${category_id}/${product.id}" data-toggle="modal" data-target="#confirmUNDeleteModal" data-productid="${product.id}" data-categoryid="${category_id}">
-                    <button class="btn btn-block mt-2" style="background:#ff5e2dcc;font-size:14px;" id="deleteButton_${product.id}"><i class="fa fa-angle-left"></i> Rikthe Produktin</button>
-                  </a>`}
-              ` : `
-                ${product.is_deleted == 0 ? `<button type="button" class="btn btn-warning btn-block add-to-cart-btn" data-productid="${product.id}" data-code="${escapeHtml(product.code)}" data-name="${escapeHtml(product.name)}" data-price="${product.price}"><i class="fa fa-shopping-cart"></i> Shportë</button>` : ''}
-              `}
-            </div>` : ""}
-          </div>
         </div>
-      </div>
+
     `).join("");
 
-            productListing.insertAdjacentHTML("beforeend", html);
+
+            productListing.insertAdjacentHTML(
+                "beforeend",
+                html
+            );
+
+
             moveModalsOutside();
 
-            // attach select handler to newly added cards only if in select mode
+
+            /*
+             * Nëse jemi në select mode,
+             * lidhi edhe kartelat e reja.
+             */
             if (stateDropdown === "select") {
-                productListing.querySelectorAll(".product-card:not([data-select-bound])").forEach(card => {
-                    card.setAttribute("data-select-bound", "1");
-                    card.addEventListener("click", handleProductCardClick);
-                });
+
+                productListing
+                    .querySelectorAll(
+                        ".product-card:not([data-select-bound])"
+                    )
+                    .forEach(card => {
+
+                        card.setAttribute(
+                            "data-select-bound",
+                            "1"
+                        );
+
+                        card.addEventListener(
+                            "click",
+                            handleProductCardClick
+                        );
+
+                    });
             }
         }
 

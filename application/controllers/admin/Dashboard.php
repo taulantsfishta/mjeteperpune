@@ -894,7 +894,7 @@ class Dashboard extends CI_Controller
             ->searchImageMultiObject(
                 $file['tmp_name'],
                 20,
-                (int)$categoryId,
+                (int)$category_id,
                 8
             );
 

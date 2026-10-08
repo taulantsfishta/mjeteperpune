@@ -558,6 +558,23 @@
         font-size: 12px !important;
         padding: 5px !important;
     }
+
+    .invoice-actions .btn.clicked-once {
+        opacity: 0.45 !important;
+        filter: grayscale(35%);
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+
+    #debtBtn.clicked-debt {
+        opacity: 0.55 !important;
+        filter: grayscale(25%);
+    }
+
+    #saveBtn.clicked-debt {
+        opacity: 0.55 !important;
+        filter: grayscale(25%);
+    }
 </style>
 
 <div class="row" id="mainDiv">
@@ -1091,6 +1108,21 @@
         updateRowNumbers();
 
         updateTotalSum(true);
+
+        function markButtonAsClicked(button) {
+
+            const $button = $(button);
+
+            // Nese eshte klikuar me pare, mos bej asgje
+            if ($button.hasClass('clicked-once')) {
+                return false;
+            }
+
+            // Hijezoje dhe blloko klikimet tjera
+            $button.addClass('clicked-once');
+
+            return true;
+        }
 
         $(document).on('blur', '.product_name, .quantity, .price', function() {
             const row = $(this).closest('tr');
@@ -1750,6 +1782,9 @@
         window.validateAndSubmitForm = validateAndSubmitForm;
 
         $('#saveBtn').on('click', function(e) {
+            e.preventDefault();
+
+            $(this).addClass('clicked-debt');
             const rows = $('#sales_table tbody tr');
             if (rows.length > 1) {
                 rows.each(function() {
@@ -1934,10 +1969,17 @@
 
             // Hap konfirmimin para ruajtjes dhe regjistrimit të detyrimit.
             $('#debtBtn').on('click', function(e) {
+
                 e.preventDefault();
+
+                // Vetem hijezoje.
+                // Mos e blloko klikimin.
+                $(this).addClass('clicked-debt');
+
                 $('#confirmDebtModalMessage').text(
                     'A dëshironi ta ruani faturën dhe ta regjistroni ose përditësoni shumën e mbetur si detyrim?'
                 );
+
                 $('#confirmDebtModal').modal('show');
             });
 

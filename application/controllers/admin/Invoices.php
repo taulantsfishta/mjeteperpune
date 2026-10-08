@@ -954,6 +954,7 @@ class Invoices extends CI_Controller
 
         $html .= '
                 </tbody>
+                <br>
                 <tfoot>
                     <tr class="total_sum">
                         <td colspan="5">TOTALI</td>
@@ -1168,7 +1169,8 @@ class Invoices extends CI_Controller
         COALESCE(
             SUM(
                 CASE
-                    WHEN debt_transactions.type = 'debt'
+                    WHEN debt_transactions.is_cancelled = 1 THEN 0
+                     WHEN debt_transactions.type = 'debt'
                         THEN debt_transactions.amount
                     WHEN debt_transactions.type = 'payment'
                         THEN -debt_transactions.amount
@@ -1185,7 +1187,16 @@ class Invoices extends CI_Controller
          AND debt_transactions.user_id = ' . (int)$selectedUserId,
                 'left'
             )
-            ->where('debt_clients.is_deleted', 0);
+            ->where('debt_clients.is_deleted', 0)
+            ->where(
+                'debt_clients.id IN (
+        SELECT DISTINCT client_id
+        FROM debt_transactions
+        WHERE user_id = ' . (int)$selectedUserId . '
+    )',
+                NULL,
+                FALSE
+            );
 
         if ($search !== '') {
             $this->db->group_start()
@@ -1381,6 +1392,7 @@ class Invoices extends CI_Controller
 
         $total = $this->db->select("COALESCE(SUM(CASE WHEN type='debt' THEN amount WHEN type='payment' THEN -amount ELSE 0 END),0) AS total", false)
             ->where('client_id', $clientId)->where('user_id', $selectedUserId)
+            ->where('is_cancelled', 0)
             ->get('debt_transactions')->row_array();
 
         $data['client'] = $client;
@@ -1435,6 +1447,15 @@ class Invoices extends CI_Controller
         }
 
         $clientId = (int)$clientId;
+
+        if (!$this->debt_client_belongs_to_current_user($clientId)) {
+            show_error(
+                'Nuk keni leje të ndryshoni klientin e administratorit tjetër.',
+                403
+            );
+            return;
+        }
+
         $selectedUserId = $this->debt_selected_user();
 
         // Admini mund ta largojë klientin vetëm kur është te pamja e vet.
@@ -1579,7 +1600,8 @@ class Invoices extends CI_Controller
         COALESCE(
             SUM(
                 CASE
-                    WHEN debt_transactions.type = 'debt'
+                    WHEN debt_transactions.is_cancelled = 1 THEN 0
+                     WHEN debt_transactions.type = 'debt'
                         THEN debt_transactions.amount
                     WHEN debt_transactions.type = 'payment'
                         THEN -debt_transactions.amount
@@ -1596,7 +1618,15 @@ class Invoices extends CI_Controller
          AND debt_transactions.user_id = ' . (int)$selectedUserId,
                 'left'
             )
-            ->where('debt_clients.is_deleted', 0);
+            ->where('debt_clients.is_deleted', 0)->where(
+                'debt_clients.id IN (
+        SELECT DISTINCT client_id
+        FROM debt_transactions
+        WHERE user_id = ' . (int)$selectedUserId . '
+    )',
+                NULL,
+                FALSE
+            );
 
         if ($search !== '') {
 
@@ -1765,6 +1795,7 @@ class Invoices extends CI_Controller
 
         $totalData = $this->db->select("COALESCE(SUM(CASE WHEN type='debt' THEN amount WHEN type='payment' THEN -amount ELSE 0 END),0) AS total", false)
             ->where('client_id', $clientId)->where('user_id', $selectedUserId)
+            ->where('is_cancelled', 0)
             ->get('debt_transactions')->row_array();
         $totalDebt = (float)$totalData['total'];
 
@@ -1798,9 +1829,18 @@ class Invoices extends CI_Controller
         foreach ($transactions as $transaction) {
             $isDebt = $transaction['type'] === 'debt';
             $type = $isDebt ? 'DETYRIM' : 'PAGESË';
+            if ((int)$transaction['is_cancelled'] === 1) {
+                $type .= ' (ANULUAR)';
+            }
             $amount = ($isDebt ? '+ ' : '- ') . number_format((float)$transaction['amount'], 2, '.', ',') . ' €';
             $date = !empty($transaction['created_at']) ? date('d.m.Y', strtotime($transaction['created_at'])) : '-';
-            $html .= '<tr><td width="7%" align="center">' . $nr . '</td><td width="18%">' . $e($date) . '</td><td width="15%">' . $type . '</td><td width="40%">' . $e($transaction['description'] ?? '') . '</td><td width="20%" align="right"><strong>' . $amount . '</strong></td></tr>';
+            $description = (string)($transaction['description'] ?? '');
+            if ((int)$transaction['is_cancelled'] === 1) {
+                $description .= ' | ANULUAR: ' . (string)($transaction['cancellation_reason'] ?? '');
+                $description .= ' | ' . (string)($transaction['cancelled_at'] ?? '');
+                $description .= ' | Nga përdoruesi #' . (int)$transaction['cancelled_by'];
+            }
+            $html .= '<tr><td width="7%" align="center">' . $nr . '</td><td width="18%">' . $e($date) . '</td><td width="15%">' . $type . '</td><td width="40%">' . $e($description) . '</td><td width="20%" align="right"><strong>' . $amount . '</strong></td></tr>';
             $nr++;
         }
         $html .= '<tr style="background-color:#eeeeee;font-weight:bold;"><td colspan="4" align="right">DETYRIM AKTUAL:</td><td align="right">' . number_format($totalDebt, 2, '.', ',') . ' €</td></tr></tbody></table>';
@@ -1831,6 +1871,57 @@ class Invoices extends CI_Controller
         $printUrl = base_url('admin/invoices/print_debt_pdf/' . $clientId . '?debt_user_id=' . $selectedUserId);
         echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Printo Historinë e Detyrimit</title><style>html,body{margin:0;padding:0;height:100%}iframe{width:100%;height:100%;border:none}</style></head><body><iframe id="pdfFrame" src="' . htmlspecialchars($printUrl, ENT_QUOTES, 'UTF-8') . '"></iframe><script>const iframe=document.getElementById("pdfFrame");iframe.addEventListener("load",function(){try{iframe.contentWindow.focus();iframe.contentWindow.print();}catch(e){console.error(e);}});</script></body></html>';
         exit;
+    }
+
+    public function cancel_debt_transaction($transactionId)
+    {
+        if (!$this->debt_access_allowed() || $this->input->method(TRUE) !== 'POST') {
+            show_error('Veprim i palejuar.', 403);
+            return;
+        }
+
+        $transactionId = (int)$transactionId;
+        $ownId = (int)$this->session->userdata('id');
+        $reason = trim((string)$this->input->post('cancellation_reason', true));
+
+        if ($transactionId <= 0 || $reason === '' || mb_strlen($reason, 'UTF-8') > 1000) {
+            show_error('Shkruani arsyen e anulimit (maksimumi 1000 karaktere).', 400);
+            return;
+        }
+
+        // Mos lejo anulimin e transaksioneve të përdoruesve të tjerë.
+        $transaction = $this->db->select('debt_transactions.id, debt_transactions.client_id')
+            ->from('debt_transactions')
+            ->join('debt_clients', 'debt_clients.id = debt_transactions.client_id')
+            ->where('debt_transactions.id', $transactionId)
+            ->where('debt_transactions.user_id', $ownId)
+            ->where('debt_transactions.is_cancelled', 0)
+            ->where('debt_clients.is_deleted', 0)
+            ->get()->row_array();
+
+        if (!$transaction) {
+            show_error('Transaksioni nuk u gjet ose nuk keni leje ta anuloni.', 403);
+            return;
+        }
+
+        // Kushti is_cancelled=0 shmang anulimin e dyfishtë.
+        $this->db->where('id', $transactionId)
+            ->where('user_id', $ownId)
+            ->where('is_cancelled', 0)
+            ->update('debt_transactions', [
+                'is_cancelled' => 1,
+                'cancelled_at' => date('Y-m-d H:i:s'),
+                'cancelled_by' => $ownId,
+                'cancellation_reason' => $reason
+            ]);
+
+        if ($this->db->affected_rows() !== 1) {
+            show_error('Transaksioni është anuluar më parë ose nuk u përditësua.', 409);
+            return;
+        }
+
+        $this->session->set_flashdata('success', 'Transaksioni u anulua me sukses.');
+        redirect('admin/invoices/debt_client/' . (int)$transaction['client_id']);
     }
 
     public function debt_transactions_ajax($clientId)
@@ -1957,6 +2048,11 @@ class Invoices extends CI_Controller
             return $reply(true, 'Detyrimi prej ' . number_format($newAmount, 2) . ' € u regjistrua me sukses.', 200, ['client_id' => $clientId, 'action' => 'created']);
         }
 
+        // Transaksioni i anuluar nuk mund të riaktivizohet ose ndryshohet nga fatura.
+        if ((int)($existing['is_cancelled'] ?? 0) === 1) {
+            return $reply(false, 'Detyrimi i kësaj fature është anuluar. Nuk mund të përditësohet automatikisht.', 409);
+        }
+
         if ((int)($existing['user_id'] ?? 0) !== $ownerId) {
             $this->db->where('id', (int)$existing['id'])->update('debt_transactions', ['user_id' => $ownerId]);
         }
@@ -1978,6 +2074,15 @@ class Invoices extends CI_Controller
             return;
         }
         $clientId = (int)$clientId;
+
+        if (!$this->debt_client_belongs_to_current_user($clientId)) {
+            show_error(
+                'Nuk keni leje të ndryshoni klientin e administratorit tjetër.',
+                403
+            );
+            return;
+        }
+
         $client = $this->db->where('id', $clientId)->where('is_deleted', 0)->get('debt_clients')->row_array();
         if (!$client) {
             show_404();
@@ -2002,7 +2107,7 @@ class Invoices extends CI_Controller
         }
         $data['client'] = $client;
         $data['page_title'] = 'EDITO KLIENTIN';
-        $data['main_content'] = $this->load->view('admin/edit_debt_client_data', $data, TRUE);
+        $data['main_content'] = $this->load->view('admin/edit-debt-client-data', $data, TRUE);
         $this->load->view('admin/index', $data);
     }
 
@@ -2070,5 +2175,15 @@ class Invoices extends CI_Controller
         );
 
         redirect('admin/invoices/debt_invoices');
+    }
+
+    private function debt_client_belongs_to_current_user($clientId)
+    {
+        $userId = (int)$this->session->userdata('id');
+
+        return $this->db
+            ->where('client_id', (int)$clientId)
+            ->where('user_id', $userId)
+            ->count_all_results('debt_transactions') > 0;
     }
 }

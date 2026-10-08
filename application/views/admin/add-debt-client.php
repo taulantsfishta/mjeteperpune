@@ -5,6 +5,31 @@
 
             <h3>Shto klient</h3>
 
+
+            <?php
+            $error = $this->session->flashdata('error');
+
+            // Pastro mesazhin pasi është lexuar.
+            $this->session->unset_userdata('error');
+            ?>
+
+            <?php if (!empty($error)): ?>
+
+                <div class="alert alert-danger" style="margin-top:15px;">
+
+                    <i class="fa fa-times-circle"></i>
+
+                    <?php echo htmlspecialchars(
+                        $error,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ); ?>
+
+                </div>
+
+            <?php endif; ?>
+
+
             <?php
             $error = $this->session->flashdata('error');
             ?>

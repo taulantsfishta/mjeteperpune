@@ -1106,6 +1106,23 @@
         font-size: 12px !important;
         padding: 5px !important;
     }
+
+    .invoice-actions .btn.clicked-once {
+        opacity: 0.45 !important;
+        filter: grayscale(35%);
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+
+    #debtBtn.clicked-debt {
+        opacity: 0.55 !important;
+        filter: grayscale(25%);
+    }
+
+    #saveBtn.clicked-debt {
+        opacity: 0.55 !important;
+        filter: grayscale(25%);
+    }
 </style>
 <div class="row" id="invoicesStructure">
     <div class="col-lg-12">
@@ -2348,6 +2365,8 @@
         }
 
         $('#saveBtn').on('click', function(e) {
+            e.preventDefault();
+            $(this).addClass('clicked-debt');
             const rows = $('#sales_table tbody tr');
             if (rows.length > 1) {
                 rows.each(function() {
@@ -2532,6 +2551,7 @@
             // Konfirmimi i detyrimit në faturën e hapur.
             $('#debtBtn').on('click', function(e) {
                 e.preventDefault();
+                $(this).addClass('clicked-debt');
                 $('#confirmDebtModalMessage').text('A dëshironi ta ruani faturën dhe ta regjistroni ose përditësoni shumën e mbetur si detyrim?');
                 $('#confirmDebtModal').modal('show');
             });

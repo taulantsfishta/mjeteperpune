@@ -2113,6 +2113,24 @@
             }
         );
 
+        document.addEventListener('keydown', function(e) {
+
+            if (
+                e.key === 'Enter' &&
+                $('#imageCropModal').is(':visible')
+            ) {
+
+                e.preventDefault();
+
+                if (
+                    cropAndSearchButton &&
+                    !cropAndSearchButton.disabled
+                ) {
+                    cropAndSearchButton.click();
+                }
+            }
+        });
+
         $('#imageCropModal')
             .on(
                 'hidden.bs.modal',

@@ -1038,21 +1038,10 @@
 
 
     <script>
-        function showDebtNotification(
-            message,
-            title
-        ) {
-
-            $('#debtNotificationModalLabel')
-                .text(
-                    title || 'Njoftim'
-                );
-
-            $('#debtNotificationMessage')
-                .text(message);
-
-            $('#debtNotificationModal')
-                .modal('show');
+        function showDebtNotification(message, title) {
+            $('#debtNotificationModalLabel').text(title || 'Njoftim');
+            $('#debtNotificationMessage').text(message);
+            $('#debtNotificationModal').modal('show');
         }
     </script>
 
@@ -1991,13 +1980,28 @@
 
                 // Klienti kërkohet vetëm kur detyrimi regjistrohet për herë të parë.
                 // Për faturën ekzistuese, controller-i e gjen klientin nga transaksioni i lidhur.
+
                 if (!invoiceId && !clientId) {
+                    const clientName = $('#client_name').val().trim();
+
+                    const message = clientName &&
+                        clientName.toUpperCase() !== 'QYTETAR' ?
+                        'Klienti "' + clientName +
+                        '" nuk ekziston ose nuk është zgjedhur nga lista e klientëve me borxh. Regjistrojeni fillimisht ose zgjidheni nga lista.' :
+                        'Ju lutem, zgjidhni një klient ekzistues nga lista e klientëve me borxh.';
+
+                    // Regjistro eventin para mbylljes se modalit.
+                    $('#confirmDebtModal')
+                        .off('hidden.bs.modal.debtWarning')
+                        .one('hidden.bs.modal.debtWarning', function() {
+                            showDebtNotification(message, 'Klienti nuk u gjet');
+                        });
+
                     $('#confirmDebtModal').modal('hide');
-                    $('#confirmDebtModal').one('hidden.bs.modal', function() {
-                        showDebtNotification('Zgjidhni klientin ekzistues nga lista e borxheve.', 'Vërejtje');
-                    });
+
                     return;
                 }
+
 
                 $confirmButton.prop('disabled', true).text('Duke ruajtur...');
                 $debtButton.prop('disabled', true);

@@ -44,6 +44,10 @@ class Invoices extends CI_Controller
         check_login_user();
         $this->load->model('common_model');
         $db = $this->load->database();
+        // Ora lokale e Kosoves, me ndryshim automatik vere/dimer.
+        date_default_timezone_set('Europe/Belgrade');
+        // CURRENT_TIMESTAMP ne MySQL perdor offset-in lokal te kerkeses.
+        $this->db->query('SET time_zone = ' . $this->db->escape(date('P')));
     }
 
     public function index()
@@ -1343,7 +1347,8 @@ class Invoices extends CI_Controller
                         'user_id' => (int)$this->session->userdata('id'),
                         'type' => 'debt',
                         'amount' => $initialDebt,
-                        'description' => 'Detyrim fillestar'
+                        'description' => 'Detyrim fillestar',
+                        'created_at' => date('Y-m-d H:i:s')
                     ]
                 );
             }
@@ -1434,7 +1439,8 @@ class Invoices extends CI_Controller
             'user_id' => (int)$this->session->userdata('id'),
             'type' => $type,
             'amount' => $amount,
-            'description' => $description !== '' ? $description : null
+            'description' => $description !== '' ? $description : null,
+            'created_at' => date('Y-m-d H:i:s')
         ]);
         redirect('admin/invoices/debt_client/' . $clientId);
     }
@@ -1924,6 +1930,45 @@ class Invoices extends CI_Controller
         redirect('admin/invoices/debt_client/' . (int)$transaction['client_id']);
     }
 
+    // Fshirje perfundimtare: vetem admin, vetem transaksionet e veta, vetem POST.
+    public function delete_debt_transaction($transactionId)
+    {
+        if ($this->session->userdata('role') !== 'admin' || $this->input->method(TRUE) !== 'POST') {
+            show_error('Veprim i palejuar.', 403);
+            return;
+        }
+
+        $transactionId = (int)$transactionId;
+        $ownId = (int)$this->session->userdata('id');
+        if ($transactionId <= 0) {
+            show_error('ID e transaksionit nuk eshte valide.', 400);
+            return;
+        }
+
+        $transaction = $this->db->select('debt_transactions.id, debt_transactions.client_id')
+            ->from('debt_transactions')
+            ->join('debt_clients', 'debt_clients.id = debt_transactions.client_id')
+            ->where('debt_transactions.id', $transactionId)
+            ->where('debt_transactions.user_id', $ownId)
+            ->where('debt_clients.is_deleted', 0)
+            ->get()->row_array();
+
+        if (!$transaction) {
+            show_error('Transaksioni nuk u gjet ose nuk keni leje ta fshini.', 403);
+            return;
+        }
+
+        $this->db->where('id', $transactionId)->where('user_id', $ownId)
+            ->delete('debt_transactions');
+        if ($this->db->affected_rows() !== 1) {
+            show_error('Fshirja nuk u krye. Provoni perseri.', 409);
+            return;
+        }
+
+        $this->session->set_flashdata('success', 'Transaksioni u fshi perfundimisht. Borxhi u rillogarit.');
+        redirect('admin/invoices/debt_client/' . (int)$transaction['client_id']);
+    }
+
     public function debt_transactions_ajax($clientId)
     {
         if (!$this->debt_access_allowed()) {
@@ -1993,78 +2038,269 @@ class Invoices extends CI_Controller
             ->set_output(json_encode($clients));
     }
 
+
     public function invoice_to_debt()
     {
         $reply = function ($status, $message, $httpCode = 200, $extra = []) {
-            return $this->output->set_status_header($httpCode)->set_content_type('application/json', 'utf-8')
-                ->set_output(json_encode(array_merge(['status' => $status, 'message' => $message], $extra), JSON_UNESCAPED_UNICODE));
+            return $this->output
+                ->set_status_header($httpCode)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(
+                    array_merge([
+                        'status' => $status,
+                        'message' => $message
+                    ], $extra),
+                    JSON_UNESCAPED_UNICODE
+                ));
         };
-        if ($this->session->userdata('role') !== 'admin') {
 
+        // Vetem administratori ka qasje
+        if ($this->session->userdata('role') !== 'admin') {
+            return $reply(false, 'Nuk keni qasje.', 403);
+        }
+
+        $invoiceId = (int)$this->input->post('invoice_id');
+
+        if ($invoiceId <= 0) {
+            return $reply(false, 'ID e faturës nuk është valide.', 400);
+        }
+
+        $invoice = $this->db
+            ->where('id', $invoiceId)
+            ->get('invoices')
+            ->row_array();
+
+        if (!$invoice) {
+            return $reply(false, 'Fatura nuk u gjet.', 404);
+        }
+
+        // Fatura duhet t'i perkase perdoruesit aktual
+        if ((int)$invoice['user_id'] !== (int)$this->session->userdata('id')) {
             return $reply(
                 false,
-                'Nuk keni qasje.',
+                'Nuk mund ta ndryshoni faturën e një përdoruesi tjetër.',
                 403
             );
         }
 
-        $invoiceId = (int)$this->input->post('invoice_id');
-        if ($invoiceId <= 0) return $reply(false, 'ID e faturës nuk është valide.', 400);
-        $invoice = $this->db->where('id', $invoiceId)->get('invoices')->row_array();
-        if (!$invoice) return $reply(false, 'Fatura nuk u gjet.', 404);
-
-        // Edhe admini mund ta transferoje vetem faturen qe eshte duke e pare;
-        // pronari i detyrimit mbetet pronari i fatures.
-        if ((int)$invoice['user_id'] !== (int)$this->session->userdata('id'))
-            return $reply(false, 'Nuk mund ta ndryshoni faturën e një përdoruesi tjetër.', 403);
-
         $ownerId = (int)$invoice['user_id'];
-        $hasInvoiceId = $this->db->field_exists('invoice_id', 'debt_transactions');
+
+        $hasInvoiceId = $this->db->field_exists(
+            'invoice_id',
+            'debt_transactions'
+        );
+
         $marker = 'FATURA_ID:' . $invoiceId . ' -';
+
+        // Kerko transaksionin ekzistues te fatures
         $existing = null;
+
         if ($hasInvoiceId) {
-            $existing = $this->db->where('invoice_id', $invoiceId)->where('type', 'debt')->order_by('id', 'ASC')->get('debt_transactions')->row_array();
-        }
-        if (!$existing) {
-            $existing = $this->db->where('type', 'debt')->like('description', $marker, 'after')->order_by('id', 'ASC')->get('debt_transactions')->row_array();
+            $existing = $this->db
+                ->where('invoice_id', $invoiceId)
+                ->where('type', 'debt')
+                ->order_by('id', 'ASC')
+                ->get('debt_transactions')
+                ->row_array();
         }
 
-        $newAmount = round(max(0, (float)$invoice['total_price_invoice'] - (float)$invoice['prepayment_price_invoice']), 2);
         if (!$existing) {
-            if ($newAmount <= 0) return $reply(false, 'Fatura është paguar plotësisht; nuk ka shumë për detyrim.', 400);
+            $existing = $this->db
+                ->where('type', 'debt')
+                ->like('description', $marker, 'after')
+                ->order_by('id', 'ASC')
+                ->get('debt_transactions')
+                ->row_array();
+        }
+
+        // Llogarit shumen e mbetur nga fatura
+        $newAmount = round(
+            max(
+                0,
+                (float)$invoice['total_price_invoice']
+                    - (float)$invoice['prepayment_price_invoice']
+            ),
+            2
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | REGJISTRIMI I DETYRIMIT TE RI
+    |--------------------------------------------------------------------------
+    */
+        if (!$existing) {
+
+            if ($newAmount <= 0) {
+                return $reply(
+                    false,
+                    'Fatura është paguar plotësisht; nuk ka shumë për detyrim.',
+                    400
+                );
+            }
+
             $clientId = (int)$this->input->post('debt_client_id');
-            if ($clientId <= 0) return $reply(false, 'Zgjidhni klientin për regjistrimin e detyrimit.', 400);
-            if (!$this->db->where('id', $clientId)->where('is_deleted', 0)->get('debt_clients')->row_array()) return $reply(false, 'Klienti i zgjedhur nuk u gjet.', 404);
+
+            if ($clientId <= 0) {
+                return $reply(
+                    false,
+                    'Zgjidhni klientin për regjistrimin e detyrimit.',
+                    400
+                );
+            }
+
+            // Merr klientin dhe emrin e tij nga databaza
+            $client = $this->db
+                ->select('id, name')
+                ->where('id', $clientId)
+                ->where('is_deleted', 0)
+                ->get('debt_clients')
+                ->row_array();
+
+            if (!$client) {
+                return $reply(
+                    false,
+                    'Klienti i zgjedhur nuk u gjet.',
+                    404
+                );
+            }
+
+            $clientName = $client['name'];
 
             $insert = [
                 'client_id' => $clientId,
                 'user_id' => $ownerId,
                 'type' => 'debt',
                 'amount' => number_format($newAmount, 2, '.', ''),
-                'description' => $marker . 'Detyrimi nga fatura #' . $invoiceId
+                'description' => $marker . 'Detyrimi nga fatura #' . $invoiceId,
+                'created_at' => date('Y-m-d H:i:s')
             ];
-            if ($hasInvoiceId) $insert['invoice_id'] = $invoiceId;
-            if (!$this->db->insert('debt_transactions', $insert)) return $reply(false, 'Detyrimi nuk u regjistrua.', 500);
-            return $reply(true, 'Detyrimi prej ' . number_format($newAmount, 2) . ' € u regjistrua me sukses.', 200, ['client_id' => $clientId, 'action' => 'created']);
+
+            if ($hasInvoiceId) {
+                $insert['invoice_id'] = $invoiceId;
+            }
+
+            if (!$this->db->insert('debt_transactions', $insert)) {
+                return $reply(
+                    false,
+                    'Detyrimi nuk u regjistrua.',
+                    500
+                );
+            }
+
+            return $reply(
+                true,
+                'Detyrimi prej ' . number_format($newAmount, 2) .
+                    ' € u regjistrua me sukses për klientin: ' .
+                    $clientName . '.',
+                200,
+                [
+                    'client_id' => $clientId,
+                    'client_name' => $clientName,
+                    'action' => 'created'
+                ]
+            );
         }
 
-        // Transaksioni i anuluar nuk mund të riaktivizohet ose ndryshohet nga fatura.
+        /*
+    |--------------------------------------------------------------------------
+    | PERDITESIMI I DETYRIMIT EKZISTUES
+    |--------------------------------------------------------------------------
+    */
+
+        // Mos riaktivizo transaksionin e anuluar
         if ((int)($existing['is_cancelled'] ?? 0) === 1) {
-            return $reply(false, 'Detyrimi i kësaj fature është anuluar. Nuk mund të përditësohet automatikisht.', 409);
+            return $reply(
+                false,
+                'Detyrimi i kësaj fature është anuluar. Nuk mund të përditësohet automatikisht.',
+                409
+            );
         }
 
-        if ((int)($existing['user_id'] ?? 0) !== $ownerId) {
-            $this->db->where('id', (int)$existing['id'])->update('debt_transactions', ['user_id' => $ownerId]);
-        }
         $clientId = (int)$existing['client_id'];
+
+        // Merr emrin e klientit qe e ka detyrimin ekzistues
+        $client = $this->db
+            ->select('id, name')
+            ->where('id', $clientId)
+            ->get('debt_clients')
+            ->row_array();
+
+        if (!$client) {
+            return $reply(
+                false,
+                'Klienti i detyrimit nuk u gjet.',
+                404
+            );
+        }
+
+        $clientName = $client['name'];
+
         $oldAmount = round((float)$existing['amount'], 2);
-        $update = ['amount' => number_format($newAmount, 2, '.', ''), 'user_id' => $ownerId];
-        if ($hasInvoiceId && empty($existing['invoice_id'])) $update['invoice_id'] = $invoiceId;
-        if (!$this->db->where('id', (int)$existing['id'])->where('type', 'debt')->update('debt_transactions', $update))
-            return $reply(false, 'Detyrimi nuk u përditësua.', 500);
-        if ($newAmount === $oldAmount) return $reply(true, 'Shuma e detyrimit është e njëjtë. Nuk u ndryshua asgjë.', 200, ['client_id' => $clientId, 'action' => 'unchanged']);
-        return $reply(true, 'Detyrimi i faturës u përditësua nga ' . number_format($oldAmount, 2) . ' € në ' . number_format($newAmount, 2) . ' €.', 200, ['client_id' => $clientId, 'action' => 'updated']);
+
+        $update = [
+            'amount' => number_format($newAmount, 2, '.', ''),
+            'user_id' => $ownerId
+        ];
+
+        if ($hasInvoiceId && empty($existing['invoice_id'])) {
+            $update['invoice_id'] = $invoiceId;
+        }
+
+        if (
+            !$this->db
+                ->where('id', (int)$existing['id'])
+                ->where('type', 'debt')
+                ->update('debt_transactions', $update)
+        ) {
+            return $reply(
+                false,
+                'Detyrimi nuk u përditësua.',
+                500
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | SHUMA NUK KA NDRYSHUAR
+    |--------------------------------------------------------------------------
+    */
+        if ($newAmount === $oldAmount) {
+            return $reply(
+                true,
+                'Detyrimi për klientin ' . $clientName .
+                    ' është i njëjtë (' .
+                    number_format($newAmount, 2) .
+                    ' €). Nuk u ndryshua asgjë.',
+                200,
+                [
+                    'client_id' => $clientId,
+                    'client_name' => $clientName,
+                    'action' => 'unchanged'
+                ]
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | SHUMA ESHTE PERDITESUAR
+    |--------------------------------------------------------------------------
+    */
+        return $reply(
+            true,
+            'Detyrimi për klientin ' . $clientName .
+                ' u përditësua nga ' .
+                number_format($oldAmount, 2) .
+                ' € në ' .
+                number_format($newAmount, 2) . ' €.',
+            200,
+            [
+                'client_id' => $clientId,
+                'client_name' => $clientName,
+                'action' => 'updated'
+            ]
+        );
     }
+
 
     public function edit_debt_client($clientId)
     {

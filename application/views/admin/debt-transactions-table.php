@@ -77,9 +77,19 @@
                                     <button type="submit" class="btn btn-warning btn-sm"><i class="fa fa-ban"></i> Anulo</button>
                                 </form>
                             <?php else: ?>
-                                <span class="text-muted">—</span>
+                                <!-- <span class="text-muted">—</span> -->
+                            <?php endif; ?>
+                            <?php if ($this->session->userdata('role') === 'admin' && !empty($debtCanModify)): ?>
+                                <form method="post" action="<?= base_url('admin/invoices/delete_debt_transaction/' . (int)$transaction['id']) ?>" style="display:inline-block" onsubmit="return confirm('KUJDES: Ky transaksion do te FSHIHET PERGJITHMONE nga databaza dhe do te ndryshoje bilancin. Deshironi te vazhdoni?');">
+                                    <?php if ($this->config->item('csrf_protection')): ?>
+                                        <input type="hidden" name="<?= html_escape($this->security->get_csrf_token_name()) ?>" value="<?= html_escape($this->security->get_csrf_hash()) ?>">
+                                    <?php endif; ?>
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Fshi</button>
+                                </form>
                             <?php endif; ?>
                         </td>
+
+
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>

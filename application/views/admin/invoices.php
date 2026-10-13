@@ -1433,9 +1433,35 @@
         </div>
     </div>
     <script>
-        function showDebtNotification(message, title) {
+        function showDebtNotification(message, title, clientName = '') {
             $('#debtNotificationModalLabel').text(title || 'Njoftim');
-            $('#debtNotificationMessage').text(message);
+
+            const $message = $('#debtNotificationMessage');
+            $message.empty();
+
+            if (clientName && title === 'Sukses') {
+                const index = message.lastIndexOf(clientName);
+
+                if (index !== -1) {
+                    $message.append(document.createTextNode(message.substring(0, index)));
+
+                    $('<strong>')
+                        .text(clientName)
+                        .css({
+                            'font-size': '15px',
+                            'font-weight': 'bold',
+                            'color': '#1938e4'
+                        })
+                        .appendTo($message);
+
+                    $message.append(document.createTextNode(message.substring(index + clientName.length)));
+                } else {
+                    $message.text(message);
+                }
+            } else {
+                $message.text(message);
+            }
+
             $('#debtNotificationModal').modal('show');
         }
     </script>
@@ -2561,13 +2587,26 @@
                     $debt = $('#debtBtn');
                 var clientId = $('#debt_client_id').val();
                 var existingId = $('#sales_form > #id').val();
+
                 if (!existingId && !clientId) {
+                    const clientName = $('#client_name').val().trim();
+
+                    const message = clientName &&
+                        clientName.toUpperCase() !== 'QYTETAR' ?
+                        'Klienti "' + clientName +
+                        '" nuk është zgjedhur nga lista e klientëve me borxh. Zgjidheni nga lista ose regjistrojeni fillimisht.' :
+                        'Ju lutem, zgjidhni një klient ekzistues nga lista e klientëve me borxh.';
+
+                    $('#confirmDebtModal')
+                        .off('hidden.bs.modal.debtWarning')
+                        .one('hidden.bs.modal.debtWarning', function() {
+                            showDebtNotification(message, 'Klienti nuk u gjet');
+                        });
+
                     $('#confirmDebtModal').modal('hide');
-                    $('#confirmDebtModal').one('hidden.bs.modal', function() {
-                        showDebtNotification('Zgjidhni klientin ekzistues nga lista e borxheve.', 'Vërejtje');
-                    });
                     return;
                 }
+
                 $confirm.prop('disabled', true).text('Duke ruajtur...');
                 $debt.prop('disabled', true);
                 $('#confirmDebtModal').modal('hide');
@@ -2597,7 +2636,11 @@
                         success: function(res) {
                             if (res && res.status) {
                                 if (res.client_id) $('#debt_client_id').val(res.client_id);
-                                showDebtNotification(res.message || 'Detyrimi u regjistrua me sukses.', 'Sukses');
+                                showDebtNotification(
+                                    res.message || 'Detyrimi u regjistrua me sukses.',
+                                    'Sukses',
+                                    res.client_name || ''
+                                );
                             } else {
                                 showDebtNotification((res && res.message) || 'Detyrimi nuk u regjistrua.', 'Vërejtje');
                             }
@@ -2714,6 +2757,37 @@
                             box.text('Nuk u gjet klient. Regjistroje fillimisht te Borxhet e Klientëve.');
                             return;
                         }
+
+
+                        var normalizeName = function(name) {
+                            return String(name || '')
+                                .trim()
+                                .replace(/\s+/g, ' ')
+                                .toLocaleLowerCase();
+                        };
+
+                        var matches = clients.filter(function(client) {
+                            return normalizeName(client.name) === normalizeName(pendingInvoiceName);
+                        });
+
+                        if (matches.length === 1) {
+                            var matchedClient = matches[0];
+
+                            $('#invoiceDebtSelectedClient').val(matchedClient.id);
+                            $('#invoiceDebtSelectedLabel').text(
+                                'Klienti u gjet automatikisht: ' + matchedClient.name
+                            );
+                            $('#confirmInvoiceDebt').prop('disabled', false);
+
+                            box.empty().text(
+                                'Klienti "' + matchedClient.name +
+                                '" u gjet në listën e borxheve.'
+                            );
+
+                            return;
+                        }
+
+
                         $.each(clients, function(i, client) {
                             $('<button type="button" class="btn btn-default btn-block invoice-debt-client-option"></button>')
                                 .attr('data-clientid', client.id).attr('data-clientname', client.name || '')
@@ -2737,38 +2811,75 @@
                 $('#invoiceDebtClientResults .invoice-debt-client-option').removeClass('keyboard-active');
                 modalActiveIndex = -1;
             });
+
             $('#confirmInvoiceDebt').on('click', function() {
                 var clientId = parseInt($('#invoiceDebtSelectedClient').val(), 10) || 0;
-                if (!pendingInvoiceId || !clientId) return;
+
+                if (!pendingInvoiceId) {
+                    $('#invoiceDebtClientModal')
+                        .off('hidden.bs.modal.debtWarning')
+                        .one('hidden.bs.modal.debtWarning', function() {
+                            showDebtNotification(
+                                'Zgjidhni një klient ekzistues nga lista e borxheve.',
+                                'Klienti nuk u gjet'
+                            );
+                        });
+
+                    $('#invoiceDebtClientModal').modal('hide');
+                    return;
+                }
+
+                $('#confirmListDebtMessage').text(
+                    'Konfirmon regjistrimin ose përditësimin e shumës së mbetur për faturën #' +
+                    pendingInvoiceId + '?'
+                );
+
+                $('#invoiceDebtClientModal')
+                    .off('hidden.bs.modal.debtConfirm')
+                    .one('hidden.bs.modal.debtConfirm', function() {
+                        $('#confirmListDebtModal').modal('show');
+                    });
+
                 $('#invoiceDebtClientModal').modal('hide');
-                $('#confirmListDebtMessage').text('Konfirmon regjistrimin ose përditësimin e shumës së mbetur për faturën #' + pendingInvoiceId + '?');
-                $('#confirmListDebtModal').modal('show');
             });
+
             $('#confirmListDebtAction').on('click', function() {
                 var clientId = parseInt($('#invoiceDebtSelectedClient').val(), 10) || 0;
                 if (!pendingInvoiceId || !clientId) return;
                 var button = $(this).prop('disabled', true);
+
+                $('#confirmListDebtModal')
+                    .off('hidden.bs.modal.debtSave')
+                    .one('hidden.bs.modal.debtSave', function() {
+                        $.ajax({
+                            url: window.base_url + 'admin/invoices/invoice_to_debt',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                invoice_id: pendingInvoiceId,
+                                debt_client_id: clientId
+                            },
+                            success: function(res) {
+                                showDebtNotification(
+                                    (res && res.message) || 'Detyrimi nuk u regjistrua.',
+                                    res && res.status ? 'Sukses' : 'Vërejtje'
+                                );
+                            },
+                            error: function(xhr) {
+                                showDebtNotification(
+                                    (xhr.responseJSON && xhr.responseJSON.message) ||
+                                    'Gabim gjatë regjistrimit të detyrimit.',
+                                    'Gabim'
+                                );
+                            },
+                            complete: function() {
+                                button.prop('disabled', false);
+                            }
+                        });
+                    });
+
                 $('#confirmListDebtModal').modal('hide');
-                $.ajax({
-                    url: window.base_url + 'admin/invoices/invoice_to_debt',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        invoice_id: pendingInvoiceId,
-                        debt_client_id: clientId
-                    },
-                    success: function(res) {
-                        if (res && res.status) {
-                            showDebtNotification(res.message || 'Detyrimi u regjistrua.', 'Sukses');
-                        } else showDebtNotification(res && res.message ? res.message : 'Detyrimi nuk u regjistrua.', 'Vërejtje');
-                    },
-                    error: function(xhr) {
-                        showDebtNotification((xhr.responseJSON && xhr.responseJSON.message) || 'Gabim gjatë regjistrimit të detyrimit.', 'Gabim');
-                    },
-                    complete: function() {
-                        button.prop('disabled', false);
-                    }
-                });
+
             });
     });
     <?php endif; ?>

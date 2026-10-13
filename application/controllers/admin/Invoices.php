@@ -2138,15 +2138,58 @@ class Invoices extends CI_Controller
                 );
             }
 
+
             $clientId = (int)$this->input->post('debt_client_id');
 
             if ($clientId <= 0) {
-                return $reply(
-                    false,
-                    'Zgjidhni klientin për regjistrimin e detyrimit.',
-                    400
-                );
+                // Merr emrin e klientit nga fatura ekzistuese.
+                $invoiceName = trim((string)$invoice['client_name']);
+
+                $normalizeName = function ($name) {
+                    $name = preg_replace('/\s+/u', ' ', trim((string)$name));
+                    return mb_strtoupper($name, 'UTF-8');
+                };
+
+                $normalizedInvoiceName = $normalizeName($invoiceName);
+
+                if ($normalizedInvoiceName === '' || $normalizedInvoiceName === 'QYTETAR') {
+                    return $reply(false, 'Zgjidhni një klient nga lista e borxheve.', 400);
+                }
+
+                $clients = $this->db
+                    ->select('id, name')
+                    ->from('debt_clients')
+                    ->where('is_deleted', 0)
+                    ->get()
+                    ->result_array();
+
+                $matches = [];
+
+                foreach ($clients as $candidate) {
+                    if ($normalizeName($candidate['name']) === $normalizedInvoiceName) {
+                        $matches[] = $candidate;
+                    }
+                }
+
+                if (count($matches) === 0) {
+                    return $reply(
+                        false,
+                        'Klienti "' . $invoiceName . '" nuk ekziston në listën e borxheve.',
+                        404
+                    );
+                }
+
+                if (count($matches) > 1) {
+                    return $reply(
+                        false,
+                        'Ekzistojnë disa klientë me këtë emër. Zgjidheni manualisht.',
+                        409
+                    );
+                }
+
+                $clientId = (int)$matches[0]['id'];
             }
+
 
             // Merr klientin dhe emrin e tij nga databaza
             $client = $this->db
@@ -2190,8 +2233,7 @@ class Invoices extends CI_Controller
             return $reply(
                 true,
                 'Detyrimi prej ' . number_format($newAmount, 2) .
-                    ' € u regjistrua me sukses për klientin: ' .
-                    $clientName . '.',
+                    ' € u regjistrua me sukses për klientin: ' . $clientName . '.',
                 200,
                 [
                     'client_id' => $clientId,

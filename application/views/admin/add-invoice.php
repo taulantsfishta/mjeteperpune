@@ -1038,18 +1038,70 @@
 
 
     <script>
-        function showDebtNotification(message, title) {
+        function showDebtNotification(message, title, clientName = '') {
             $('#debtNotificationModalLabel').text(title || 'Njoftim');
-            $('#debtNotificationMessage').text(message);
+
+            const $message = $('#debtNotificationMessage');
+            $message.empty();
+
+            if (clientName && title === 'Sukses') {
+                const index = message.lastIndexOf(clientName);
+
+                if (index !== -1) {
+                    $message.append(document.createTextNode(message.substring(0, index)));
+
+                    $('<strong>')
+                        .text(clientName)
+                        .css({
+                            'font-size': '17px',
+                            'font-weight': 'bold',
+                            'color': '#1a5dec'
+                        })
+                        .appendTo($message);
+
+                    $message.append(document.createTextNode(message.substring(index + clientName.length)));
+                } else {
+                    $message.text(message);
+                }
+            } else {
+                $message.text(message);
+            }
+
             $('#debtNotificationModal').modal('show');
         }
     </script>
 
 <?php endif; ?>
 <script>
-    function showDebtNotification(message, title) {
+    function showDebtNotification(message, title, clientName = '') {
         $('#debtNotificationModalLabel').text(title || 'Njoftim');
-        $('#debtNotificationMessage').text(message);
+
+        const $message = $('#debtNotificationMessage');
+        $message.empty();
+
+        if (clientName && title === 'Sukses') {
+            const index = message.lastIndexOf(clientName);
+
+            if (index !== -1) {
+                $message.append(document.createTextNode(message.substring(0, index)));
+
+                $('<strong>')
+                    .text(clientName)
+                    .css({
+                        'font-size': '15px',
+                        'font-weight': 'bold',
+                        'color': '#1938e4'
+                    })
+                    .appendTo($message);
+
+                $message.append(document.createTextNode(message.substring(index + clientName.length)));
+            } else {
+                $message.text(message);
+            }
+        } else {
+            $message.text(message);
+        }
+
         $('#debtNotificationModal').modal('show');
     }
 </script>
@@ -2032,7 +2084,11 @@
                         success: function(res) {
                             if (res && res.status) {
                                 if (res.client_id) $('#debt_client_id').val(res.client_id);
-                                showDebtNotification(res.message || 'Detyrimi u regjistrua me sukses.', 'Sukses');
+                                showDebtNotification(
+                                    res.message || 'Detyrimi u regjistrua me sukses.',
+                                    'Sukses',
+                                    res.client_name || ''
+                                );
                             } else {
                                 showDebtNotification((res && res.message) || 'Detyrimi nuk u regjistrua.', 'Vërejtje');
                             }

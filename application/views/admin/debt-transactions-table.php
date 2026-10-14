@@ -33,7 +33,9 @@
                             </span>
                         </td>
                         <td>
-                            <?php echo htmlspecialchars((string)($transaction['description'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                            <span style="font-size:15px; text-transform:uppercase;">
+                                <?php echo htmlspecialchars((string)($transaction['description'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                            </span>
                             <?php if ($isCancelled): ?>
                                 <div class="text-muted" style="margin-top:6px;font-size:12px;">
                                     <strong>Arsyeja:</strong> <?php echo htmlspecialchars((string)($transaction['cancellation_reason'] ?? ''), ENT_QUOTES, 'UTF-8'); ?><br>

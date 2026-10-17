@@ -60,6 +60,22 @@ class Dashboard extends CI_Controller
         $data['products'] = $products;
         $data['page_title'] = 'TË GJITHA PRODUKTET';
         $data['count'] = $this->common_model->get_user_total();
+        $data['vehicle_registration_alerts'] = [];
+
+        if ($this->session->userdata('role') == 'admin') {
+
+            $today = date('Y-m-d');
+            $alertDate = date('Y-m-d', strtotime('+10 days'));
+
+            $data['vehicle_registration_alerts'] = $this->db
+                ->select('id, plate_number, brand, model, registration_expiry')
+                ->from('company_vehicles')
+                ->where('status', 1)
+                ->where('registration_expiry <=', $alertDate)
+                ->order_by('registration_expiry', 'ASC')
+                ->get()
+                ->result_array();
+        }
         $data['main_content'] = $this->load->view('admin/home', $data, TRUE);
         $this->load->view('admin/index', $data);
     }

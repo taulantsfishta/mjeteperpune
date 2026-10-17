@@ -276,7 +276,245 @@
             width: 100%;
         }
     }
+
+    .vehicle-registration-alert-desktop {
+        display: block;
+    }
+
+    /* Fshehe në telefon dhe tablet/iPad */
+    @media (max-width: 1024px) {
+        .vehicle-registration-alert-desktop {
+            display: none !important;
+        }
+    }
 </style>
+
+
+<?php if (
+    $this->session->userdata('role') == 'admin' &&
+    !empty($vehicle_registration_alerts)
+): ?>
+
+    <div class="vehicle-registration-alert-desktop">
+
+        <div class="row mb-3 background-blur">
+
+            <div class="col-md-12">
+
+                <div
+                    style="
+                    background:#fff;
+                    border:1px solid #e3e7eb;
+                    border-left:5px solid #dc3545;
+                    border-radius:8px;
+                    padding:15px 18px;
+                    box-shadow:0 2px 8px rgba(0,0,0,.05);
+                ">
+
+                    <div
+                        style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        margin-bottom:12px;
+                    ">
+
+                        <h4 style="margin:0; font-weight:600;">
+
+                            <i
+                                class="fa fa-exclamation-triangle"
+                                style="color:#dc3545;">
+                            </i>
+
+                            REGJISTRIMET E VETURAVE
+
+                        </h4>
+
+
+                        <a
+                            href="<?php echo base_url('admin/vehicles'); ?>"
+                            class="btn btn-sm btn-outline-primary">
+
+                            <i class="fa fa-car"></i>
+                            Shiko veturat
+
+                        </a>
+
+                    </div>
+
+
+                    <?php foreach ($vehicle_registration_alerts as $vehicle): ?>
+
+                        <?php
+
+                        $today = new DateTime();
+                        $expiry = new DateTime(
+                            $vehicle['registration_expiry']
+                        );
+
+                        $daysRemaining = (int)
+                        $today->diff($expiry)->format('%r%a');
+
+
+                        if ($daysRemaining < 0) {
+
+                            $message =
+                                'REGJISTRIMI KA SKADUAR';
+
+                            $color = '#dc3545';
+
+                            $daysText =
+                                abs($daysRemaining) .
+                                ' ditë me vonesë';
+                        } elseif ($daysRemaining == 0) {
+
+                            $message =
+                                'REGJISTRIMI SKADON SOT';
+
+                            $color = '#dc3545';
+
+                            $daysText = 'Sot';
+                        } elseif ($daysRemaining <= 15) {
+
+                            $message =
+                                'REGJISTRIM URGJENT';
+
+                            $color = '#dc3545';
+
+                            $daysText =
+                                $daysRemaining .
+                                ' ditë të mbetura';
+                        } else {
+
+                            $message =
+                                'AFATI I REGJISTRIMIT PO AFROHET';
+
+                            $color = '#f0ad4e';
+
+                            $daysText =
+                                $daysRemaining .
+                                ' ditë të mbetura';
+                        }
+
+                        ?>
+
+
+                        <div
+                            style="
+                            border-top:1px solid #eee;
+                            padding:12px 0;
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                            gap:15px;
+                            flex-wrap:wrap;
+                        ">
+
+                            <div>
+
+                                <strong
+                                    style="
+                                    font-size:16px;
+                                    color:#222;
+                                ">
+
+                                    <?php
+                                    echo htmlspecialchars(
+                                        $vehicle['plate_number']
+                                    );
+                                    ?>
+
+                                </strong>
+
+
+                                <?php if (
+                                    !empty($vehicle['brand']) ||
+                                    !empty($vehicle['model'])
+                                ): ?>
+
+                                    <span
+                                        style="
+                                        color:#777;
+                                        margin-left:8px;
+                                    ">
+
+                                        <?php
+                                        echo htmlspecialchars(
+                                            trim(
+                                                $vehicle['brand'] .
+                                                    ' ' .
+                                                    $vehicle['model']
+                                            )
+                                        );
+                                        ?>
+
+                                    </span>
+
+                                <?php endif; ?>
+
+
+                                <div
+                                    style="
+                                    margin-top:4px;
+                                    color:#666;
+                                ">
+
+                                    Regjistrimi deri:
+
+                                    <strong>
+
+                                        <?php
+                                        echo date(
+                                            'd.m.Y',
+                                            strtotime(
+                                                $vehicle['registration_expiry']
+                                            )
+                                        );
+                                        ?>
+
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <div style="text-align:right;">
+
+                                <div
+                                    style="
+                                    font-weight:700;
+                                    color:<?php echo $color; ?>;
+                                ">
+
+                                    <?php echo $message; ?>
+
+                                </div>
+
+                                <div
+                                    style="
+                                    margin-top:3px;
+                                    color:#555;
+                                ">
+
+                                    <?php echo $daysText; ?>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+<?php endif; ?>
 
 <div
     role="search"

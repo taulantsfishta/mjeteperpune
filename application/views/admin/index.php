@@ -534,7 +534,7 @@
               <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navCreate" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="icon-user p-r-10 me-1"></i>
                 KRIJO
-                <span class="ms-2 nav-badge nav-badge-danger">4</span>
+                <span class="ms-2 nav-badge nav-badge-danger">5</span>
               </a>
               <ul class="dropdown-menu" aria-labelledby="navCreate">
                 <!-- <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/workers'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PUNTORËVE</a></li> -->
@@ -542,6 +542,7 @@
                 <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/all_user_list'); ?>"><i class="fa fa-list me-2"></i> LISTA E TË GJITHË PËRDORUESVE</a></li>
                 <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/categories'); ?>"><i class="fa fa-list me-2"></i> KATEGORIT</a></li>
                 <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/user/login_history'); ?>"><i class="fa fa-list me-2"></i> HISTORIKU I PËRDORUESVE</a></li>
+                <li><a class="dropdown-item d-flex align-items-center" href="<?php echo base_url('admin/vehicles'); ?>"> <i class="fa fa-car me-2"></i> LISTA E VETURAVE</a></li>
               </ul>
             </li>
           <?php endif; ?>

@@ -116,3 +116,56 @@
         }
     });
 </script>
+
+<script>
+    $(function() {
+        document.addEventListener('paste', function(event) {
+            const clipboard = event.clipboardData;
+
+            if (!clipboard || !clipboard.items) {
+                return;
+            }
+
+            // Gjej imazhin e kopjuar.
+            const imageItem = Array.from(clipboard.items).find(function(item) {
+                return item.kind === 'file' && item.type.startsWith('image/');
+            });
+
+            if (!imageItem) {
+                return;
+            }
+
+            const imageFile = imageItem.getAsFile();
+
+            if (!imageFile) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const input = document.getElementById('input-file-now');
+            const $input = $(input);
+
+            // Pastro pamjen e fotos së mëparshme në Dropify.
+            const dropify = $input.data('dropify');
+
+            if (dropify) {
+                dropify.resetPreview();
+                dropify.clearElement();
+            }
+
+            // Vendos foton në input që të dërgohet bashkë me formën.
+            try {
+                const transfer = new DataTransfer();
+                transfer.items.add(imageFile);
+                input.files = transfer.files;
+            } catch (error) {
+                alert('Shfletuesi nuk e mbështet ngjitjen e fotos. Përdor ngarkimin manual.');
+                return;
+            }
+
+            // Përditëso parapamjen e Dropify.
+            $input.trigger('change');
+        });
+    });
+</script>

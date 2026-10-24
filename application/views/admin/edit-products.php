@@ -48,3 +48,59 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(function() {
+        document.addEventListener('paste', function(event) {
+            const clipboard = event.clipboardData;
+
+            if (!clipboard || !clipboard.items) {
+                return;
+            }
+
+            const imageItem = Array.from(clipboard.items).find(function(item) {
+                return item.kind === 'file' && item.type.startsWith('image/');
+            });
+
+            if (!imageItem) {
+                return;
+            }
+
+            const imageFile = imageItem.getAsFile();
+            const input = document.getElementById('input-file-now');
+
+            if (!imageFile || !input) {
+                return;
+            }
+
+            event.preventDefault();
+
+            let transfer;
+
+            try {
+                transfer = new DataTransfer();
+                transfer.items.add(imageFile);
+            } catch (error) {
+                alert('Shfletuesi nuk e mbështet ngjitjen e fotos. Përdor ngarkimin manual.');
+                return;
+            }
+
+            const $input = $(input);
+            const dropify = $input.data('dropify');
+
+            if (dropify) {
+                dropify.resetPreview();
+                dropify.clearElement();
+            }
+
+            try {
+                input.files = transfer.files;
+            } catch (error) {
+                alert('Shfletuesi nuk e mbështet ngjitjen e fotos. Përdor ngarkimin manual.');
+                return;
+            }
+
+            $input.trigger('change');
+        });
+    });
+</script>

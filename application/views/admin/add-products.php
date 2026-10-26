@@ -3,6 +3,15 @@
         font-family: Arial, Helvetica, sans-serif;
         font-size: 100%;
     }
+
+    #product-submit.product-saved {
+        background-color: #eeeeee !important;
+        border-color: #dddddd !important;
+        color: #777777 !important;
+        opacity: 1 !important;
+        cursor: default;
+        box-shadow: none;
+    }
 </style>
 <!-- .row -->
 <div class="row">
@@ -83,7 +92,20 @@
                         </div>
                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
                         <div class="form-group">
-                            <button type="submit" class="btn btn-block btn-info">Ruaj</button>
+                            <?php
+                            $addedCategoryId = $this->session->flashdata('added_product_category_id');
+
+                            $productSaved = $addedCategoryId !== null
+                                && (int) $addedCategoryId === (int) $category_id;
+                            ?>
+
+                            <button type="submit"
+                                id="product-submit"
+                                class="btn btn-block btn-info<?= $productSaved ? ' product-saved' : ''; ?>"
+                                data-default-text="Ruaj"
+                                <?= $productSaved ? 'disabled' : ''; ?>>
+                                <?= $productSaved ? 'U ruajt ✓' : 'Ruaj'; ?>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -167,5 +189,32 @@
             // Përditëso parapamjen e Dropify.
             $input.trigger('change');
         });
+    });
+</script>
+
+<script>
+    $(function() {
+        const button = document.getElementById('product-submit');
+
+        if (!button) {
+            return;
+        }
+
+        const form = button.form;
+
+        // Aktivizo butonin kur përdoruesi ndryshon një fushë ose foton.
+        $(form).on(
+            'input change',
+            'input:not([type="hidden"]), textarea, select',
+            function() {
+                if (!button.classList.contains('product-saved')) {
+                    return;
+                }
+
+                button.disabled = false;
+                button.classList.remove('product-saved');
+                button.textContent = button.dataset.defaultText;
+            }
+        );
     });
 </script>

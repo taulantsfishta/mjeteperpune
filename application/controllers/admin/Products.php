@@ -159,9 +159,15 @@ class Products extends CI_Controller
             'Produkti eshte ruajtur me sukses.'
         );
 
-        redirect(
-            base_url() . 'admin/dashboard/get_category/' . $category_id
+        $this->session->set_flashdata(
+            'added_product_category_id',
+            (int) $category_id
         );
+
+        redirect(
+            base_url() . 'admin/products/add/' . $category_id
+        );
+        return;
     }
 
     public function edit()
@@ -202,6 +208,11 @@ class Products extends CI_Controller
                         $_POST['id']
                     );
                 }
+                $this->session->set_flashdata(
+                    'edited_product_id',
+                    (int) $product['id']
+                );
+
                 redirect(base_url() . 'admin/products/get_product/' . $_POST['id']);
             } else {
                 redirect(base_url() . 'admin/dashboard');

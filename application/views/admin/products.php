@@ -245,12 +245,9 @@
     /* ===== CTRL+B ADMIN / SALES ACTIONS ===== */
 
     .admin-actions {
-        display: none;
-    }
-
-    .show-admin-actions .admin-actions {
         display: block;
     }
+
 
     /* ===== SHOPPING CART ===== */
     .product-bottom-actions {
@@ -950,29 +947,6 @@
         // =====================================================
         // CTRL+B - ADMIN / SALES ACTIONS
         // =====================================================
-
-        function onCtrlB(e) {
-
-            if (
-                e.ctrlKey &&
-                (e.key === 'b' || e.key === 'B')
-            ) {
-
-                e.preventDefault();
-                e.stopPropagation();
-
-                document.body.classList.toggle(
-                    'show-admin-actions'
-                );
-            }
-        }
-
-
-        document.addEventListener(
-            'keydown',
-            onCtrlB,
-            true
-        );
 
         window.base_url = <?php echo json_encode(base_url()); ?>;
         const url = window.base_url;

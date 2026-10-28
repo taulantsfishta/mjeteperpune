@@ -211,8 +211,16 @@
         background: var(--warn) !important;
     }
 
-    .selected-row {
-        background: #d1e7dd !important;
+    /* Hijezimi i rreshtit të zgjedhur për fshirje */
+    #sales_table tbody tr.selected-row,
+    #sales_table tbody tr.selected-row td,
+    #sales_table tbody tr.selected-row input {
+        background-color: #e9e6ce !important;
+    }
+
+    #sales_table tbody tr.selected-row {
+        outline: 2px solid #e9e6ce;
+        outline-offset: -2px;
     }
 
     .modal-backdrop {

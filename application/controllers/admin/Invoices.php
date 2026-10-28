@@ -1173,11 +1173,9 @@ class Invoices extends CI_Controller
         COALESCE(
             SUM(
                 CASE
-                    WHEN debt_transactions.is_cancelled = 1 THEN 0
-                     WHEN debt_transactions.type = 'debt'
-                        THEN debt_transactions.amount
-                    WHEN debt_transactions.type = 'payment'
-                        THEN -debt_transactions.amount
+                    WHEN dt.is_cancelled = 1 THEN 0
+                    WHEN dt.type = 'debt' THEN dt.amount
+                    WHEN dt.type = 'payment' THEN -dt.amount
                     ELSE 0
                 END
             ),
@@ -1186,21 +1184,12 @@ class Invoices extends CI_Controller
     ", false)
             ->from('debt_clients')
             ->join(
-                'debt_transactions',
-                'debt_transactions.client_id = debt_clients.id
-         AND debt_transactions.user_id = ' . (int)$selectedUserId,
+                'debt_transactions AS dt',
+                'dt.client_id = debt_clients.id
+         AND dt.user_id = ' . (int)$selectedUserId,
                 'left'
             )
-            ->where('debt_clients.is_deleted', 0)
-            ->where(
-                'debt_clients.id IN (
-        SELECT DISTINCT client_id
-        FROM debt_transactions
-        WHERE user_id = ' . (int)$selectedUserId . '
-    )',
-                NULL,
-                FALSE
-            );
+            ->where('debt_clients.is_deleted', 0);
 
         if ($search !== '') {
             $this->db->group_start()

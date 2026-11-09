@@ -410,7 +410,12 @@
 
 
 
-                                        <?php if (!empty($debtCanModify) && !empty($debtIsAdmin)): ?>
+                                        <?php if (
+                                            !empty($debtCanModify) &&
+                                            !empty($debtIsAdmin) &&
+                                            isset($client['user_id']) &&
+                                            (int)$client['user_id'] === (int)$this->session->userdata('id')
+                                        ): ?>
 
 
 
@@ -428,17 +433,24 @@
 
 
 
-                                            <a
 
-                                                href="<?php echo htmlspecialchars($deleteUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                            <form action="<?php echo htmlspecialchars($deleteUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                                method="post"
+                                                style="display:inline;"
+                                                onclick="event.stopPropagation();"
+                                                onsubmit="return confirm('A jeni i sigurt që dëshironi ta largoni këtë klient nga lista? Klienti dhe historia e detyrimeve nuk do të fshihen nga databaza.');">
 
-                                                class="btn btn-danger btn-sm"
+                                                <?php if ($this->config->item('csrf_protection')): ?>
+                                                    <input type="hidden"
+                                                        name="<?php echo $this->security->get_csrf_token_name(); ?>"
+                                                        value="<?php echo $this->security->get_csrf_hash(); ?>">
+                                                <?php endif; ?>
 
-                                                onclick="event.stopPropagation(); return confirm('A jeni i sigurt që dëshironi ta largoni këtë klient nga lista? Klienti dhe historia e detyrimeve nuk do të fshihen nga databaza.');">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fa fa-trash"></i> Fshi
+                                                </button>
+                                            </form>
 
-                                                <i class="fa fa-trash"></i> Fshi
-
-                                            </a>
 
 
 

@@ -803,17 +803,30 @@ class Invoices extends CI_Controller
     }
 
 
+
     public function delete_invoice($invoiceId)
     {
+        if ($this->input->method(TRUE) !== 'POST') {
+            show_error('Veprim i palejuar.', 405);
+            return;
+        }
+
         if (in_array($this->session->userdata('role'), ['admin', 'sales'])) {
             $invoiceToDelete = $this->db->where('id', (int)$invoiceId)->get('invoices')->row_array();
-            if (!$invoiceToDelete || ($this->session->userdata('role') !== 'admin' && (int)$invoiceToDelete['user_id'] !== (int)$this->session->userdata('id'))) {
+
+            if (
+                !$invoiceToDelete ||
+                (int)$invoiceToDelete['user_id'] !== (int)$this->session->userdata('id')
+            ) {
                 show_404();
                 return;
             }
+
             $this->common_model->delete($invoiceId, 'invoices');
+
             $categories = $this->db->select()->from('invoices')->get()->result_array();
             $_SESSION['invoices'] = $categories;
+
             redirect(base_url() . 'admin/invoices/created');
         } else {
             $data = array();
@@ -822,6 +835,7 @@ class Invoices extends CI_Controller
             $this->load->view('errors/html/error_404', $data);
         }
     }
+
 
     public function appendImageProduct()
     {
@@ -1191,6 +1205,20 @@ class Invoices extends CI_Controller
             )
             ->where('debt_clients.is_deleted', 0);
 
+        $this->db->group_start()
+            ->where('debt_clients.user_id', $selectedUserId)
+            ->or_where(
+                'EXISTS (
+            SELECT 1
+            FROM debt_transactions AS tx_owner
+            WHERE tx_owner.client_id = debt_clients.id
+              AND tx_owner.user_id = ' . (int)$selectedUserId . '
+        )',
+                null,
+                false
+            )
+            ->group_end();
+
         if ($search !== '') {
             $this->db->group_start()
                 ->like('debt_clients.name', $search)
@@ -1316,6 +1344,7 @@ class Invoices extends CI_Controller
             $this->db->insert(
                 'debt_clients',
                 [
+                    'user_id' => (int)$this->session->userdata('id'),
                     'name' => $normalizedName,
                     'address' => $address !== '' ? $address : null,
                     'phone' => $phone !== '' ? $phone : null,
@@ -1371,6 +1400,11 @@ class Invoices extends CI_Controller
         $clientId = (int)$clientId;
         $selectedUserId = $this->debt_selected_user();
 
+        if (!$this->debt_client_visible_to_user($clientId, $selectedUserId)) {
+            show_404();
+            return;
+        }
+
         $client = $this->db->where('id', $clientId)->where('is_deleted', 0)->get('debt_clients')->row_array();
         if (!$client) {
             show_404();
@@ -1408,6 +1442,20 @@ class Invoices extends CI_Controller
             return;
         }
         $clientId = (int)$clientId;
+        if ($this->input->method(TRUE) !== 'POST') {
+            show_error('Veprim i palejuar.', 405);
+            return;
+        }
+
+        $selectedUserId = $this->debt_selected_user();
+
+        if (!$this->debt_can_modify_selected_user($selectedUserId)) {
+            show_error(
+                'Nuk mund të shtoni transaksione në pamjen e administratorit tjetër.',
+                403
+            );
+            return;
+        }
         if (!$this->db->where('id', $clientId)->where('is_deleted', 0)->get('debt_clients')->row_array()) {
             show_404();
             return;
@@ -1436,11 +1484,15 @@ class Invoices extends CI_Controller
 
     public function delete_debt_client($clientId)
     {
+        if ($this->input->method(TRUE) !== 'POST') {
+            show_error('Veprim i palejuar.', 405);
+            return;
+        }
+
         if ($this->session->userdata('role') !== 'admin') {
             show_404();
             return;
         }
-
         $clientId = (int)$clientId;
 
         if (!$this->debt_client_belongs_to_current_user($clientId)) {
@@ -1472,6 +1524,18 @@ class Invoices extends CI_Controller
         }
 
         // SOFT DELETE: klienti dhe historia e tij mbeten në databazë.
+        $otherTransactions = $this->db
+            ->where('client_id', $clientId)
+            ->where('user_id !=', (int)$this->session->userdata('id'))
+            ->count_all_results('debt_transactions');
+
+        if ($otherTransactions > 0) {
+            show_error(
+                'Ky klient ka histori transaksionesh edhe te një administrator tjetër. Nuk mund të fshihet.',
+                403
+            );
+            return;
+        }
         $this->db
             ->where('id', $clientId)
             ->update('debt_clients', ['is_deleted' => 1]);
@@ -1507,6 +1571,10 @@ class Invoices extends CI_Controller
                 ->select('debt_clients.*')
                 ->from('debt_clients')
                 ->where('debt_clients.is_deleted', 1)
+                ->where(
+                    'debt_clients.user_id',
+                    (int)$this->session->userdata('id')
+                )
                 ->order_by('debt_clients.name', 'ASC')
                 ->get()
                 ->result_array();
@@ -1555,27 +1623,35 @@ class Invoices extends CI_Controller
                     </span>
                   </td>';
 
-                echo '<td data-label="Veprimi" class="text-center">
+                // BUTONI RIKTHE
+                echo '
+                    <td data-label="Veprimi" class="text-center">
 
-                    <a href="' .
-                    htmlspecialchars(
-                        $restoreUrl,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) .
-                    '"
-                       class="btn btn-success btn-sm"
-                       onclick="
-                           event.stopPropagation();
-                           return confirm(\'A dëshironi ta riktheni këtë klient?\');
-                       ">
+                        <form method="post"
+                            action="' . htmlspecialchars($restoreUrl, ENT_QUOTES, 'UTF-8') . '"
+                            style="display:inline;"
+                            onclick="event.stopPropagation();"
+                            onsubmit="event.stopPropagation(); return confirm(\'A dëshironi ta riktheni këtë klient?\');">
+                ';
 
-                        <i class="fa fa-undo"></i>
-                        RIKTHE
+                // CSRF - mbrojtja e formularit
+                if ($this->config->item('csrf_protection')) {
+                    echo '
+                        <input type="hidden"
+                            name="' . $this->security->get_csrf_token_name() . '"
+                            value="' . $this->security->get_csrf_hash() . '">
+                    ';
+                }
 
-                    </a>
+                // BUTONI
+                echo '
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fa fa-undo"></i> RIKTHE
+                            </button>
 
-                  </td>';
+                        </form>
+                    </td>
+                ';
 
                 echo '</tr>';
             }
@@ -1613,15 +1689,21 @@ class Invoices extends CI_Controller
          AND debt_transactions.user_id = ' . (int)$selectedUserId,
                 'left'
             )
-            ->where('debt_clients.is_deleted', 0)->where(
-                'debt_clients.id IN (
-        SELECT DISTINCT client_id
-        FROM debt_transactions
-        WHERE user_id = ' . (int)$selectedUserId . '
-    )',
-                NULL,
-                FALSE
-            );
+            ->where('debt_clients.is_deleted', 0);
+
+        $this->db->group_start()
+            ->where('debt_clients.user_id', $selectedUserId)
+            ->or_where(
+                'EXISTS (
+            SELECT 1
+            FROM debt_transactions AS tx_owner
+            WHERE tx_owner.client_id = debt_clients.id
+              AND tx_owner.user_id = ' . (int)$selectedUserId . '
+        )',
+                null,
+                false
+            )
+            ->group_end();
 
         if ($search !== '') {
 
@@ -1719,42 +1801,47 @@ class Invoices extends CI_Controller
                   class="text-center">';
 
 
-            if ($canModify && $isAdmin) {
+            if (
+                $canModify &&
+                $isAdmin &&
+                (int)$client['user_id'] === (int)$this->session->userdata('id')
+            ) {
 
+                // BUTONI EDITO
                 echo '
-                <a href="' .
-                    htmlspecialchars(
-                        $editUrl,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) .
-                    '"
-                   class="btn btn-primary btn-sm"
-                   onclick="event.stopPropagation();">
+    <a href="' . htmlspecialchars($editUrl, ENT_QUOTES, 'UTF-8') . '"
+       class="btn btn-primary btn-sm"
+       onclick="event.stopPropagation();">
 
-                    <i class="fa fa-pencil"></i>
-                    Edito
+        <i class="fa fa-pencil"></i> Edito
+    </a>
+';
 
-                </a>
+                // BUTONI FSHI
+                echo '
+                        <form method="post"
+                            action="' . htmlspecialchars($deleteUrl, ENT_QUOTES, 'UTF-8') . '"
+                            style="display:inline;"
+                            onclick="event.stopPropagation();"
+                            onsubmit="event.stopPropagation(); return confirm(\'A jeni i sigurt që dëshironi ta largoni këtë klient?\');">
+                    ';
 
-                <a href="' .
-                    htmlspecialchars(
-                        $deleteUrl,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) .
-                    '"
-                   class="btn btn-danger btn-sm"
-                   onclick="
-                       event.stopPropagation();
-                       return confirm(\'A jeni i sigurt që dëshironi ta largoni këtë klient?\');
-                   ">
+                // CSRF - mbrojtja e formularit
+                if ($this->config->item('csrf_protection')) {
+                    echo '
+                            <input type="hidden"
+                                name="' . $this->security->get_csrf_token_name() . '"
+                                value="' . $this->security->get_csrf_hash() . '">
+                        ';
+                }
 
-                    <i class="fa fa-trash"></i>
-                    Fshi
-
-                </a>
-            ';
+                // BUTONI
+                echo '
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fa fa-trash"></i> Fshi
+                            </button>
+                        </form>
+                    ';
             } else {
 
                 echo '<span class="text-muted">-</span>';
@@ -1775,6 +1862,10 @@ class Invoices extends CI_Controller
         }
         $clientId = (int)$clientId;
         $selectedUserId = $this->debt_selected_user();
+        if (!$this->debt_client_visible_to_user($clientId, $selectedUserId)) {
+            show_404();
+            return;
+        }
         $client = $this->db->where('id', $clientId)->where('is_deleted', 0)->get('debt_clients')->row_array();
         if (!$client) {
             show_404();
@@ -1966,6 +2057,10 @@ class Invoices extends CI_Controller
         }
         $clientId = (int)$clientId;
         $selectedUserId = $this->debt_selected_user();
+        if (!$this->debt_client_visible_to_user($clientId, $selectedUserId)) {
+            show_404();
+            return;
+        }
         $page = max(1, (int)$this->input->get('page'));
         $perPage = 10;
         $offset = ($page - 1) * $perPage;
@@ -2247,6 +2342,15 @@ class Invoices extends CI_Controller
             );
         }
 
+        // Mos lejo kalimin e detyrimit te administratori tjeter
+        if ((int)($existing['user_id'] ?? 0) !== $ownerId) {
+            return $reply(
+                false,
+                'Ky detyrim i përket një administratori tjetër.',
+                409
+            );
+        }
+
         $clientId = (int)$existing['client_id'];
 
         // Merr emrin e klientit qe e ka detyrimin ekzistues
@@ -2269,8 +2373,7 @@ class Invoices extends CI_Controller
         $oldAmount = round((float)$existing['amount'], 2);
 
         $update = [
-            'amount' => number_format($newAmount, 2, '.', ''),
-            'user_id' => $ownerId
+            'amount' => number_format($newAmount, 2, '.', '')
         ];
 
         if ($hasInvoiceId && empty($existing['invoice_id'])) {
@@ -2394,6 +2497,7 @@ class Invoices extends CI_Controller
             ->select('id, name, address, phone, created_at')
             ->from('debt_clients')
             ->where('is_deleted', 1)
+            ->where('user_id', (int)$this->session->userdata('id'))
             ->order_by('name', 'ASC')
             ->get()
             ->result_array();
@@ -2412,6 +2516,11 @@ class Invoices extends CI_Controller
 
     public function restore_debt_client($clientId)
     {
+        if ($this->input->method(TRUE) !== 'POST') {
+            show_error('Veprim i palejuar.', 405);
+            return;
+        }
+
         if ($this->session->userdata('role') !== 'admin') {
             show_404();
             return;
@@ -2421,6 +2530,7 @@ class Invoices extends CI_Controller
 
         $client = $this->db
             ->where('id', $clientId)
+            ->where('user_id', (int)$this->session->userdata('id'))
             ->where('is_deleted', 1)
             ->get('debt_clients')
             ->row_array();
@@ -2446,11 +2556,39 @@ class Invoices extends CI_Controller
 
     private function debt_client_belongs_to_current_user($clientId)
     {
-        $userId = (int)$this->session->userdata('id');
+        return $this->db
+            ->where('id', (int)$clientId)
+            ->where('user_id', (int)$this->session->userdata('id'))
+            ->where('is_deleted', 0)
+            ->count_all_results('debt_clients') > 0;
+    }
+
+    private function debt_client_visible_to_user($clientId, $userId)
+    {
+        $clientId = (int)$clientId;
+        $userId = (int)$userId;
+
+        if ($clientId <= 0 || $userId <= 0) {
+            return false;
+        }
 
         return $this->db
-            ->where('client_id', (int)$clientId)
-            ->where('user_id', $userId)
-            ->count_all_results('debt_transactions') > 0;
+            ->from('debt_clients')
+            ->where('debt_clients.id', $clientId)
+            ->where('debt_clients.is_deleted', 0)
+            ->group_start()
+            ->where('debt_clients.user_id', $userId)
+            ->or_where(
+                'EXISTS (
+                    SELECT 1
+                    FROM debt_transactions AS dt
+                    WHERE dt.client_id = debt_clients.id
+                    AND dt.user_id = ' . $userId . '
+                )',
+                null,
+                false
+            )
+            ->group_end()
+            ->count_all_results() > 0;
     }
 }

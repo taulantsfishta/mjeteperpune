@@ -1223,7 +1223,17 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Jo</button>
-                <a id="deleteProductLink" href="#" class="btn btn-danger">Fshije</a>
+                <form id="deleteInvoiceForm" method="post" action="" style="display:inline;">
+                    <?php if ($this->config->item('csrf_protection')): ?>
+                        <input type="hidden"
+                            name="<?php echo $this->security->get_csrf_token_name(); ?>"
+                            value="<?php echo $this->security->get_csrf_hash(); ?>">
+                    <?php endif; ?>
+
+                    <button type="submit" id="deleteProductLink" class="btn btn-danger">
+                        Fshije
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -2181,13 +2191,13 @@
 
 
         $(document).ready(function() {
-            // Listen for the modal's "Delete" button click event
             $('#confirmDeleteModal').on('show.bs.modal', function(e) {
-                var invoiceID = $(e.relatedTarget).data('invoiceid'); // Get the product ID
-                var deleteButton = $(this).find('#deleteProductLink'); // Get the "Delete" button in the modal
+                var invoiceID = $(e.relatedTarget).data('invoiceid');
 
-                // Update the "Delete" button link with the appropriate product ID
-                deleteButton.attr('href', '<?php echo base_url("admin/invoices/delete_invoice/"); ?>' + invoiceID);
+                $('#deleteInvoiceForm').attr(
+                    'action',
+                    '<?php echo base_url("admin/invoices/delete_invoice/"); ?>' + invoiceID
+                );
             });
         });
         // Funksion që kontrollon nëse një rresht është valid

@@ -583,6 +583,487 @@
         opacity: 0.55 !important;
         filter: grayscale(25%);
     }
+
+    /* Kërkimi mobil nuk shfaqet në kompjuter */
+    .mobile-product-search {
+        display: none;
+    }
+
+    .mobile-delete-product {
+        display: none;
+    }
+
+    @media (max-width: 767px) {
+
+        #mainDiv {
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            padding: 6px !important;
+        }
+
+        #mainDiv .white-box {
+            padding: 8px !important;
+            overflow: visible !important;
+        }
+
+        #sales_form,
+        #sales_form>.content-grid {
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+        }
+
+        .content-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 14px;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .form-grid>div:first-child {
+            grid-column: 1 / -1;
+        }
+
+        .form-grid input {
+            font-size: 16px !important;
+            min-width: 0;
+            height: 44px;
+        }
+
+        /* Renditja: kërkimi, rezultatet, produktet */
+        .table-col {
+            display: flex !important;
+            flex-direction: column !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            gap: 10px;
+        }
+
+        .mobile-product-search {
+            display: block;
+            order: 0;
+            position: sticky;
+            top: 5px;
+            z-index: 20;
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #dfe4ea;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
+        }
+
+        .mobile-product-search label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .mobile-search-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        #mobile_product_search {
+            flex: 1;
+            min-width: 0;
+            height: 48px;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #mobile_product_search:focus {
+            border-color: #2563eb;
+        }
+
+        #mobile_add_product {
+            flex: 0 0 48px;
+            border: 0;
+            border-radius: 9px;
+            background: #168447;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        /* Rezultatet menjëherë poshtë kërkimit */
+        #search_results_container {
+            order: 1;
+            flex: 0 0 auto !important;
+            height: 0 !important;
+            max-height: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            overflow: hidden !important;
+        }
+
+        #search_results_container.results-expanded {
+            flex: 0 0 auto !important;
+            height: auto !important;
+            max-height: 45dvh !important;
+            margin: 0 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            border: 1px solid #dfe4ea;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        #search_results_table {
+            width: 100% !important;
+            table-layout: auto !important;
+        }
+
+        #search_results_table colgroup,
+        #search_results_table thead {
+            display: none !important;
+        }
+
+        #search_results_table tbody tr {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            position: relative;
+            height: auto !important;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        #search_results_table tbody td {
+            display: block;
+            width: auto !important;
+            border: 0 !important;
+            padding: 3px !important;
+            font-size: 14px !important;
+            overflow-wrap: anywhere;
+        }
+
+        #search_results_table tbody td:first-child {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px !important;
+            height: 28px;
+            border-radius: 6px !important;
+            background: #f1f5f9;
+            text-align: center;
+        }
+
+        #search_results_table tbody td:nth-child(2) {
+            grid-column: 1 / -1;
+            font-size: 12px !important;
+            color: #64748b;
+            padding-right: 38px !important;
+        }
+
+        #search_results_table tbody td:nth-child(3) {
+            grid-column: 1 / 2;
+            font-size: 15px !important;
+            font-weight: 700;
+            padding-right: 12px !important;
+        }
+
+        #search_results_table tbody td:nth-child(4) {
+            display: none !important;
+        }
+
+        #search_results_table tbody td:nth-child(5) {
+            grid-column: 2 / 3;
+            font-size: 16px !important;
+            font-weight: 700;
+            color: #168447;
+            text-align: right;
+        }
+
+        #search_results_table tbody td[hidden] {
+            display: none !important;
+        }
+
+        /* Produktet e zgjedhura si kartela */
+        .table-col>.table-wrap {
+            order: 2;
+            flex: 0 0 auto !important;
+            height: auto !important;
+            max-height: none !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            border: 0;
+            box-shadow: none;
+            background: transparent;
+        }
+
+        #sales_table {
+            display: block;
+            width: 100%;
+            table-layout: auto !important;
+            border: 0;
+        }
+
+        #sales_table colgroup,
+        #sales_table thead {
+            display: none !important;
+        }
+
+        #sales_table tbody {
+            display: block;
+        }
+
+        #sales_table tbody tr {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            position: relative;
+            gap: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #dfe4ea;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .04);
+        }
+
+        #sales_table tbody td {
+            display: flex;
+            flex-direction: column;
+            width: auto !important;
+            min-width: 0;
+            border: 0 !important;
+            padding: 0 !important;
+            text-align: left !important;
+        }
+
+        #sales_table tbody td[hidden] {
+            display: none !important;
+        }
+
+        #sales_table tbody td::before {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        #sales_table tbody td:nth-child(1) {
+            grid-column: 1 / -1;
+            font-size: 15px !important;
+            font-weight: 700;
+            padding-right: 45px !important;
+            cursor: pointer;
+        }
+
+        #sales_table tbody td:nth-child(1)::before {
+            content: "PRODUKTI NR.";
+        }
+
+        #sales_table tbody td:nth-child(2) {
+            grid-column: 1 / -1;
+        }
+
+        #sales_table tbody td:nth-child(2)::before {
+            content: "KODI";
+        }
+
+        #sales_table tbody td:nth-child(3) {
+            grid-column: 1 / -1;
+        }
+
+        #sales_table tbody td:nth-child(3)::before {
+            content: "EMRI I PRODUKTIT";
+        }
+
+        #sales_table tbody td:nth-child(4)::before {
+            content: "SASIA";
+        }
+
+        #sales_table tbody td:nth-child(5)::before {
+            content: "ÇMIMI (€)";
+        }
+
+        #sales_table tbody td:nth-child(6) {
+            grid-column: 1 / -1;
+        }
+
+        #sales_table tbody td:nth-child(6)::before {
+            content: "TOTALI (€)";
+        }
+
+        #sales_table tbody input {
+            display: block;
+            width: 100% !important;
+            height: 46px !important;
+            min-height: 46px !important;
+            min-width: 0;
+            padding: 10px !important;
+            font-size: 16px !important;
+            line-height: normal !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        #sales_table tbody .code,
+        #sales_table tbody .total_product_price {
+            background: #f8fafc;
+        }
+
+        #sales_table tbody .total_product_price {
+            font-weight: 700;
+            color: #168447;
+        }
+
+        .mobile-delete-product {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 38px;
+            height: 38px;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 0;
+            border-radius: 8px;
+            font-size: 17px;
+            z-index: 1;
+        }
+
+        .totals-card {
+            width: 100%;
+            max-height: none !important;
+            overflow: visible !important;
+            margin-top: 0 !important;
+            padding: 14px;
+        }
+
+        .totals-card input {
+            font-size: 16px !important;
+            height: 45px;
+        }
+
+        .invoice-actions .btn {
+            min-height: 48px;
+            font-size: 15px;
+        }
+
+        .debt-client-suggestions {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            left: 0;
+        }
+    }
+
+    /* Në telefon, produkti i fundit shfaqet i pari */
+    @media (max-width: 767px) {
+
+        #product_rows {
+            display: flex !important;
+            flex-direction: column-reverse !important;
+            gap: 12px;
+        }
+
+        #product_rows>tr {
+            flex: 0 0 auto;
+            margin-bottom: 0 !important;
+        }
+    }
+
+
+    @media (max-width: 767px) {
+
+        /* Kartela e mbyllur */
+        #sales_table tbody tr.mobile-collapsed {
+            grid-template-columns: 30px minmax(0, 1fr);
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            padding-right: 94px;
+            min-height: 62px;
+        }
+
+        #sales_table tbody tr.mobile-collapsed td {
+            display: none !important;
+        }
+
+        #sales_table tbody tr.mobile-collapsed td:first-child {
+            display: block !important;
+            grid-column: 1;
+            padding: 0 !important;
+            font-weight: bold;
+        }
+
+        #sales_table tbody tr.mobile-collapsed td:first-child::before {
+            display: none;
+        }
+
+        #sales_table tbody tr.mobile-collapsed td:nth-child(3) {
+            display: block !important;
+            grid-column: 2;
+            min-width: 0;
+        }
+
+        #sales_table tbody tr.mobile-collapsed td:nth-child(3)::before {
+            display: none;
+        }
+
+        #sales_table tbody tr.mobile-collapsed .product_name {
+            height: auto !important;
+            min-height: 0 !important;
+            padding: 3px !important;
+            border: 0 !important;
+            background: transparent !important;
+            font-size: 14px !important;
+            font-weight: 600;
+            text-overflow: ellipsis;
+        }
+
+        /* Shigjeta për hapje/mbyllje */
+        .mobile-toggle-product {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 8px;
+            background: #edf2f7;
+            color: #334155;
+            font-size: 17px;
+            z-index: 2;
+        }
+
+        /* Fshirja qëndron majtas shigjetës */
+        .mobile-delete-product {
+            right: 54px !important;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .mobile-toggle-product {
+            display: none !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+
+        /* Fsheh vetëm kartelat e produkteve boshe */
+        #sales_table tbody tr.mobile-empty-row {
+            display: none !important;
+        }
+    }
 </style>
 
 <div class="row" id="mainDiv">
@@ -640,6 +1121,26 @@
                 <div class="content-grid">
                     <!-- LEFT: selected products above search results -->
                     <div class="table-col">
+
+                        <!-- Kërkimi vetëm për telefon -->
+                        <div class="mobile-product-search">
+                            <label for="mobile_product_search">
+                                KËRKO PRODUKTIN
+                            </label>
+
+                            <div class="mobile-search-controls">
+                                <input
+                                    type="search"
+                                    id="mobile_product_search"
+                                    placeholder="Shkruaj emrin e produktit..."
+                                    autocomplete="off">
+
+                                <button type="button" id="mobile_add_product">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="table-wrap">
                             <table id="sales_table" class="table table-bordered">
                                 <colgroup>
@@ -1178,10 +1679,12 @@
             validateRowFields(row);
         });
 
-        $('.product_name').first().focus(); //fokusohet tek emri i produktit
+        if (!window.matchMedia('(max-width: 767px)').matches) {
+            $('.product_name').first().focus();
+        }
 
         // Function to add a new row to the main table (#sales_table)
-        function addRow() {
+        function addRow(silent = false) {
             if ($('.product_name').last().val() !== '') {
                 rowIdx++;
                 $('#product_rows').append(`
@@ -1195,11 +1698,17 @@
                         <td style="display:none;"><input class="image" name="image[]" hidden></td>
                     </tr>
                 `);
-                const invoiceScroll = document.querySelector('.table-col > .table-wrap');
-                if (invoiceScroll) invoiceScroll.scrollTop = invoiceScroll.scrollHeight;
-                $('#product_rows').find('.product_name').last()[0].focus({
-                    preventScroll: true
-                });
+                if (!silent) {
+                    const invoiceScroll = document.querySelector('.table-col > .table-wrap');
+
+                    if (invoiceScroll) {
+                        invoiceScroll.scrollTop = invoiceScroll.scrollHeight;
+                    }
+
+                    $('#product_rows').find('.product_name').last()[0].focus({
+                        preventScroll: true
+                    });
+                }
                 updateRowNumbers(); // Update row numbers
                 updateTotalSum(true); // Update total sum
                 // Rifresko shumën e mbetur nëse parapagesa ekziston
@@ -1321,6 +1830,11 @@
         });
 
         $(document).on('input', '.product_name', function() {
+
+            if (window.matchMedia('(max-width: 767px)').matches) {
+                return;
+            }
+
             var productName = $(this).val().trim();
             var encodedProductName = encodeURIComponent(productName);
             var row = $(this).closest('tr');
@@ -1380,7 +1894,17 @@
 
                 // Event listener for selecting a product from search results
                 $('#search_results_body tr').off('click').on('click', function() {
+                    if (window.matchMedia('(max-width: 767px)').matches) {
 
+                        row = $('#product_rows tr').last();
+
+                        if (row.find('.product_name').val().trim() !== '') {
+                            addRow(true);
+                            row = $('#product_rows tr').last();
+                        }
+
+                        $('#mobile_product_search').val('');
+                    }
                     var selectedProduct = $(this);
                     var productName = selectedProduct.data('product-name');
                     var code = selectedProduct.data('code');
@@ -1398,10 +1922,44 @@
                     row.find('.total_product_price').val(total_product_price);
                     row.find('.total_price_invoice').val(total_price_invoice);
                     row.find('.image').val(image);
-                    row.find('.quantity')[0].focus({
-                        preventScroll: true
-                    });
-                    row.find('.quantity').select();
+                    // Shfaq kartelën sapo zgjidhet produkti
+                    row.removeClass('mobile-empty-row');
+
+                    if (mobileMode.matches) {
+
+                        // Mbyll të gjitha kartelat e tjera
+                        closeMobileProducts();
+
+                        // Hap vetëm produktin e sapozgjedhur
+                        setMobileProductState(row, true);
+
+                        // Sigurohu që kartela të jetë e dukshme
+                        row[0].scrollIntoView({
+                            behavior: 'instant',
+                            block: 'nearest'
+                        });
+
+                        // Kalo menjëherë te Sasia
+                        const quantityInput = row.find('.quantity')[0];
+
+                        if (quantityInput) {
+                            quantityInput.setAttribute('inputmode', 'decimal');
+                            quantityInput.focus({
+                                preventScroll: true
+                            });
+                            quantityInput.select();
+                        }
+
+                    } else {
+
+                        // Në kompjuter ruaj sjelljen ekzistuese
+                        row.find('.quantity')[0].focus({
+                            preventScroll: true
+                        });
+
+                        row.find('.quantity').select();
+                    }
+
 
                     // Hide the search results table after selection
                     $('#search_results_table').hide();
@@ -1483,6 +2041,7 @@
                 $current.trigger('click');
             }
         });
+
 
         // Foto vetëm me klik në numrin e produktit (pa ndërprerë shigjetat).
         $(document).on('click', '#search_results_body tr td:first-child', function(e) {
@@ -1913,6 +2472,256 @@
                 $('#sales_form')[0].submit();
             });
         });
+
+
+        /* ===== FUNKSIONET PËR TELEFON ===== */
+
+        const mobileMode = window.matchMedia('(max-width: 767px)');
+        let mobileSearchTimer = null;
+        let mobileSearchRequest = null;
+
+        function hideMobileResults() {
+            $('#search_results_table').hide();
+            $('#search_results_container').removeClass('results-expanded');
+        }
+
+        function addMobileDeleteButtons() {
+
+            $('#product_rows tr').each(function() {
+
+                const row = $(this);
+
+                if (!row.find('.mobile-delete-product').length) {
+                    row.append(
+                        '<button type="button" class="mobile-delete-product" ' +
+                        'aria-label="Fshij produktin">' +
+                        '<i class="fa fa-trash"></i></button>'
+                    );
+                }
+
+                if (!row.find('.mobile-toggle-product').length) {
+                    row.append(
+                        '<button type="button" class="mobile-toggle-product" ' +
+                        'aria-label="Hap ose mbyll produktin">' +
+                        '<i class="fa ' +
+                        (row.hasClass('mobile-collapsed') ?
+                            'fa-chevron-down' :
+                            'fa-chevron-up') +
+                        '"></i></button>'
+                    );
+                }
+            });
+        }
+
+
+
+        function setMobileProductState(row, open) {
+
+            row.toggleClass('mobile-collapsed', !open);
+
+            row.find('.mobile-toggle-product i')
+                .toggleClass('fa-chevron-down', !open)
+                .toggleClass('fa-chevron-up', open);
+        }
+
+        function closeMobileProducts(exceptRow = null) {
+
+            if (!mobileMode.matches) return;
+
+            $('#product_rows tr').each(function() {
+
+                const row = $(this);
+
+                const keepOpen = exceptRow &&
+                    row.is(exceptRow);
+
+                setMobileProductState(row, !!keepOpen);
+            });
+        }
+
+        // Në hapjen fillestare, shfaq të hapur vetëm
+        // produktin e fundit, nëse ekziston.
+        if (mobileMode.matches) {
+
+            const lastRow = $('#product_rows tr').last();
+
+            if (lastRow.length) {
+                closeMobileProducts(lastRow);
+            }
+        }
+
+        // Kur fillon kërkimi i produktit tjetër,
+        // mbyllen kartelat e mëparshme.
+        $('#mobile_product_search').on('focus', function() {
+            closeMobileProducts();
+        });
+
+        // Hap/mbyll produktin me shigjetë.
+        $(document).on('click', '.mobile-toggle-product', function(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const row = $(this).closest('tr');
+            const isClosed = row.hasClass('mobile-collapsed');
+
+            closeMobileProducts();
+
+            if (isClosed) {
+                setMobileProductState(row, true);
+            }
+        });
+
+        // Butoni + hap kërkimin e produktit
+        $('#mobile_add_product').on('click', function() {
+            $('#mobile_product_search').focus();
+        });
+
+        // Kërkim automatik i produkteve
+        $('#mobile_product_search').on('input', function() {
+
+            if (!mobileMode.matches) return;
+
+            const query = $(this).val().trim();
+
+            clearTimeout(mobileSearchTimer);
+
+            if (mobileSearchRequest) {
+                mobileSearchRequest.abort();
+                mobileSearchRequest = null;
+            }
+
+            if (!query) {
+                hideMobileResults();
+                $('#search_results_body').empty();
+                return;
+            }
+
+            mobileSearchTimer = setTimeout(function() {
+
+                mobileSearchRequest = $.ajax({
+                    url: window.base_url + 'admin/invoices/',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        product_name: query
+                    },
+                    success: function(response) {
+
+                        if ($('#mobile_product_search').val().trim() !== query) {
+                            return;
+                        }
+
+                        const row = $('#product_rows tr').last();
+
+                        if (!row.length) return;
+
+                        const products = response && Array.isArray(response.products) ?
+                            response.products : [];
+
+                        if (products.length) {
+                            $('#search_results_container')
+                                .addClass('results-expanded');
+
+                            displaySearchResults(products, row);
+                        } else {
+                            hideMobileResults();
+                            $('#search_results_body').empty();
+                        }
+                    },
+                    error: function(xhr, status) {
+                        if (status !== 'abort') {
+                            hideMobileResults();
+                        }
+                    }
+                });
+
+            }, 250);
+        });
+
+        // Shto butonin e fshirjes në kartelat ekzistuese
+        addMobileDeleteButtons();
+
+        // Shto butonin edhe kur krijohen rreshta të rinj
+        const mobileRowsObserver = new MutationObserver(function() {
+            addMobileDeleteButtons();
+        });
+
+        const mobileRowsElement = document.getElementById('product_rows');
+
+        if (mobileRowsElement) {
+            mobileRowsObserver.observe(mobileRowsElement, {
+                childList: true
+            });
+        }
+
+        // Fshirja individuale e produktit
+        $(document).on('click', '.mobile-delete-product', function(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!confirm('A dëshironi ta fshini këtë produkt nga fatura?')) {
+                return;
+            }
+
+            const row = $(this).closest('tr');
+
+            if (lastClickedRow && lastClickedRow.is(row)) {
+                lastClickedRow = null;
+                $('#delete_row').hide();
+            }
+
+            if ($('#product_rows tr').length > 1) {
+                row.remove();
+            } else {
+                row.find('input').val('');
+                row.removeClass('price-zero-row selected-row');
+            }
+
+            updateRowNumbers();
+            updateTotalSum(true);
+        });
+
+        // Tastiera numerike për sasinë dhe çmimin në telefon
+        $(document).on('focus', '.quantity, .price', function() {
+            if (mobileMode.matches) {
+                $(this).attr('inputmode', 'decimal');
+            }
+        });
+
+        function updateMobileEmptyRows() {
+
+            $('#product_rows tr').each(function() {
+
+                const row = $(this);
+
+                const name = (row.find('.product_name').val() || '').trim();
+
+                row.toggleClass('mobile-empty-row', name === '');
+            });
+        }
+
+        // Kontrollo produktet kur hapet faqja
+        updateMobileEmptyRows();
+
+        // Kontrollo sa herë ndryshon emri i produktit
+        $(document).on('input change', '#product_rows .product_name', function() {
+            updateMobileEmptyRows();
+        });
+
+        // Kontrollo edhe kur shtohen produkte të reja
+        const mobileEmptyRowsObserver = new MutationObserver(function() {
+            updateMobileEmptyRows();
+        });
+
+        const mobileEmptyRowsElement = document.getElementById('product_rows');
+
+        if (mobileEmptyRowsElement) {
+            mobileEmptyRowsObserver.observe(mobileEmptyRowsElement, {
+                childList: true
+            });
+        }
 
     });
 </script>

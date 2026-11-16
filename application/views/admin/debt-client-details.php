@@ -43,6 +43,18 @@ $clientId = (int)$client['id'];
             margin-top: 10px;
         }
     }
+
+    /* Largo shigjetat nga inputet numerike */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
 </style>
 
 <a class="btn btn-default"
@@ -106,8 +118,7 @@ $clientId = (int)$client['id'];
 
                     <div class="form-group">
                         <label>Shuma</label>
-                        <input type="number" name="amount" step="0.01" min="0.01"
-                            class="form-control" required>
+                        <input type="number" name="amount" class="form-control" required>
                     </div>
 
                     <div class="form-group">
@@ -178,6 +189,15 @@ $clientId = (int)$client['id'];
                     alert('Ndodhi një gabim gjatë ngarkimit të transaksioneve.');
                 }
             });
+        });
+    });
+
+    // Ndal ndryshimin e numrit me scroll të mausit
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('wheel', function(e) {
+            this.blur();
+        }, {
+            passive: true
         });
     });
 </script>

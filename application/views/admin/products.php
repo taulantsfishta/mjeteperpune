@@ -2210,12 +2210,46 @@
         );
 
 
-        // ===== single image modal =====
-        function cacheBust(u) {
-            if (!u) return u;
-            const sep = u.includes("?") ? "&" : "?";
-            return u + sep + "cb=" + Date.now();
-        }
+        document.getElementById("productListing").addEventListener("click", function(event) {
+
+            const el = event.target.closest('img[id^="imageresource_"]');
+            if (!el) return;
+
+            const rawId = el.getAttribute("imgId");
+            const inferredId = el.id.replace("imageresource_", "");
+
+            let modalEl = rawId ?
+                document.getElementById("imagemodal_" + rawId) :
+                null;
+
+            if (!modalEl) {
+                modalEl = document.getElementById("imagemodal_" + inferredId);
+            }
+
+            if (!modalEl) return;
+
+            const modalImg = modalEl.querySelector(".modal-body img");
+            if (!modalImg) return;
+
+            const imageUrl = el.getAttribute("data-src") || el.getAttribute("src");
+
+            if (!imageUrl) return;
+
+            // Përdor fotografinë nga cache kur është e mundur
+            modalImg.removeAttribute("data-src");
+            modalImg.classList.remove("lazyload");
+
+            // Hap modalin menjëherë, pa pritur ngarkimin
+            modalImg.style.opacity = "1";
+
+            if (modalImg.getAttribute("src") !== imageUrl) {
+                modalImg.src = imageUrl;
+            }
+
+            $(modalEl).modal("show");
+
+        });
+
 
         // ===== move appended modals to body =====
         function moveModalsOutside() {

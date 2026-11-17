@@ -156,10 +156,19 @@
         }
     }
 
-    body.modal-open .background-blur:not(.modal):not(.modal *) {
-        filter: blur(5px);
-        pointer-events: none;
-        user-select: none;
+    @media (max-width: 767px) {
+        body.modal-open .background-blur:not(.modal):not(.modal *) {
+            filter: none !important;
+        }
+
+        .modal {
+            transition: none !important;
+        }
+
+        .modal-dialog {
+            transition: none !important;
+            transform: none !important;
+        }
     }
 
 
@@ -610,7 +619,10 @@
     <?php foreach ($products as $key => $value) { ?>
         <div class="col-md-12 col-lg-3 product-col">
             <div class="card" style="margin-bottom: 10px;">
-                <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="lazyload img-fluid" />
+                <img
+                    id="imagepreview_<?php echo $key; ?>"
+                    style="margin-left:auto;margin-right:auto;display:block;width:270px;height:220px;"
+                    alt="Fotografia e produktit">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
                         <h5 class="mb-0">Kodi:</h5>
@@ -3013,11 +3025,47 @@
         );
 
         // ===== image modal opener (works for initial $key IDs + appended product.id IDs) =====
-        function cacheBust(u) {
-            if (!u) return u;
-            const sep = u.includes('?') ? '&' : '?';
-            return u + sep + 'cb=' + Date.now();
-        }
+
+        document.getElementById("productListing").addEventListener("click", function(event) {
+
+            const el = event.target.closest('img[id^="imageresource_"]');
+            if (!el) return;
+
+            const rawId = el.getAttribute("imgId");
+            const inferredId = el.id.replace("imageresource_", "");
+
+            let modalEl = rawId ?
+                document.getElementById("imagemodal_" + rawId) :
+                null;
+
+            if (!modalEl) {
+                modalEl = document.getElementById("imagemodal_" + inferredId);
+            }
+
+            if (!modalEl) return;
+
+            const modalImg = modalEl.querySelector(".modal-body img");
+            if (!modalImg) return;
+
+            const imageUrl = el.getAttribute("data-src") || el.getAttribute("src");
+
+            if (!imageUrl) return;
+
+            // Përdor fotografinë nga cache kur është e mundur
+            modalImg.removeAttribute("data-src");
+            modalImg.classList.remove("lazyload");
+
+            // Hap modalin menjëherë, pa pritur ngarkimin
+            modalImg.style.opacity = "1";
+
+            if (modalImg.getAttribute("src") !== imageUrl) {
+                modalImg.src = imageUrl;
+            }
+
+            $(modalEl).modal("show");
+
+        });
+
 
         document.getElementById("productListing").addEventListener("click", function(event) {
             const el = event.target;

@@ -156,19 +156,10 @@
         }
     }
 
-    @media (max-width: 767px) {
-        body.modal-open .background-blur:not(.modal):not(.modal *) {
-            filter: none !important;
-        }
-
-        .modal {
-            transition: none !important;
-        }
-
-        .modal-dialog {
-            transition: none !important;
-            transform: none !important;
-        }
+    body.modal-open .background-blur:not(.modal):not(.modal *) {
+        filter: blur(5px);
+        pointer-events: none;
+        user-select: none;
     }
 
 
@@ -619,10 +610,7 @@
     <?php foreach ($products as $key => $value) { ?>
         <div class="col-md-12 col-lg-3 product-col">
             <div class="card" style="margin-bottom: 10px;">
-                <img
-                    id="imagepreview_<?php echo $key; ?>"
-                    style="margin-left:auto;margin-right:auto;display:block;width:270px;height:220px;"
-                    alt="Fotografia e produktit">
+                <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="lazyload img-fluid" />
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
                         <h5 class="mb-0">Kodi:</h5>
@@ -3024,7 +3012,6 @@
             }
         );
 
-        // ===== image modal opener (works for initial $key IDs + appended product.id IDs) =====
 
         document.getElementById("productListing").addEventListener("click", function(event) {
 

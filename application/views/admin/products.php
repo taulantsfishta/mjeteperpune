@@ -140,10 +140,10 @@
         }
     }
 
-    body.modal-open .background-blur:not(.modal):not(.modal *) {
-        filter: blur(5px);
-        pointer-events: none;
-        user-select: none;
+    @media (max-width: 767px) {
+        body.modal-open .background-blur:not(.modal):not(.modal *) {
+            filter: none !important;
+        }
     }
 
     .modal {
@@ -2597,48 +2597,40 @@
 
 
 
+        function cacheBust(u) {
+            if (!u) return u;
+            const sep = u.includes("?") ? "&" : "?";
+            return u + sep + "cb=" + Date.now();
+        }
+        // ===== print/select dropdown =====
+
+        // ===== FAST IMAGE MODAL =====
         productListing.addEventListener("click", function(e) {
 
-            const el = e.target;
+            const el = e.target.closest('img[id^="imageresource_"]');
+            if (!el) return;
 
-            if (!el.classList.contains("img-fluid")) return;
-
-            const id = el.getAttribute("imgId");
-
-            const listImg = document.getElementById("imageresource_" + id);
-
-            const src =
-                listImg.getAttribute("src") ||
-                listImg.getAttribute("data-src");
+            const src = el.getAttribute("data-src") || el.getAttribute("src");
+            if (!src) return;
 
             const modalImg = document.getElementById("imagemodal_img");
+            const modalTitle = document.getElementById("imagemodal_title");
 
-            const freshUrl = cacheBust(src);
+            const card = el.closest(".product-card");
 
-            // fshehe imazhin derisa te ngarkohet
-            modalImg.style.opacity = "0";
+            modalTitle.textContent =
+                card?.getAttribute("data-product-name") || "";
 
-            const preloadImg = new Image();
+            modalImg.style.opacity = "1";
 
-            preloadImg.onload = function() {
+            if (modalImg.getAttribute("src") !== src) {
+                modalImg.src = src;
+            }
 
-                modalImg.src = freshUrl;
+            // Hape modalin menjehere, pa pritur shkarkimin
+            $("#imagemodal").modal("show");
 
-                // shfaqe pasi u ngarkua
-                modalImg.style.opacity = "1";
-
-                const card = el.closest(".product-card");
-
-                document.getElementById("imagemodal_title").textContent =
-                    card?.getAttribute("data-product-name") || "";
-
-                $("#imagemodal").modal("show");
-            };
-
-            preloadImg.src = freshUrl;
         });
-
-        // ===== print/select dropdown =====
         updateButtonContainerWidth();
         window.addEventListener("resize", updateButtonContainerWidth);
 

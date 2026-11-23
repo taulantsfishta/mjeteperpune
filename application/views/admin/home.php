@@ -615,8 +615,8 @@
                     imgId="<?php echo $key; ?>"
                     style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
                     src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
-                    loading="eager"
-                    fetchpriority="low"
+                    loading="lazy"
+                    decoding="async"
                     decoding="async"
                     class="img-fluid" />
                 <div class="card-body">
@@ -1385,8 +1385,8 @@
     imgId="${product.id}"
     style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
     src="${url}optimum/products_images/${product.image}"
-    loading="eager"
-fetchpriority="low"
+loading="lazy"
+decoding="async"
     decoding="async"
     class="img-fluid"
 />

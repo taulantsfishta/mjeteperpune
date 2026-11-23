@@ -428,8 +428,8 @@
                     class="img-fluid mx-auto mt-3"
                     style="width:90px;height:70px;object-fit:contain;"
                     src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
-                    loading="eager"
-                    fetchpriority="low"
+                    loading="lazy"
+                    decoding="async"
                     decoding="async" />
 
                 <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
@@ -1188,8 +1188,8 @@
                     class="img-fluid mx-auto mt-3"
                     style="width:90px;height:70px;object-fit:contain;"
                     src="${url}optimum/products_images/${product.image}"
-                    loading="eager"
-                    fetchpriority="low"
+                    loading="lazy"
+                    decoding="async"
                     decoding="async"
                 />
 

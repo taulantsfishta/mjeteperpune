@@ -610,7 +610,15 @@
     <?php foreach ($products as $key => $value) { ?>
         <div class="col-md-12 col-lg-3 product-col">
             <div class="card" style="margin-bottom: 10px;">
-                <img id="imageresource_<?php echo $key; ?>" imgId="<?php echo $key; ?>" style="margin-left: auto;margin-right: auto;display: block;width:90px;height:70px;" data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" class="lazyload img-fluid" />
+                <img
+                    id="imageresource_<?php echo $key; ?>"
+                    imgId="<?php echo $key; ?>"
+                    style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
+                    src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
+                    loading="eager"
+                    fetchpriority="low"
+                    decoding="async"
+                    class="img-fluid" />
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
                         <h5 class="mb-0">Kodi:</h5>
@@ -1372,11 +1380,16 @@
             const html = products.map(product => `
             <div class="col-md-12 col-lg-3 product-col" >
                 <div class="card" style="margin-bottom: 10px;">
-                    <img id="imageresource_${product.id}"
-                         imgId="${product.id}"
-                         style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
-                         data-src="${url}optimum/products_images/${product.image}"
-                         class="lazyload img-fluid" />
+<img
+    id="imageresource_${product.id}"
+    imgId="${product.id}"
+    style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
+    src="${url}optimum/products_images/${product.image}"
+    loading="eager"
+fetchpriority="low"
+    decoding="async"
+    class="img-fluid"
+/>
 
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3">

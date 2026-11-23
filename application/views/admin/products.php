@@ -425,9 +425,12 @@
                 <img
                     id="imageresource_<?php echo $value['id']; ?>"
                     imgId="<?php echo $value['id']; ?>"
-                    class="lazyload img-fluid mx-auto mt-3"
-                    style="width:90px; height:70px; object-fit: contain;"
-                    data-src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>" />
+                    class="img-fluid mx-auto mt-3"
+                    style="width:90px;height:70px;object-fit:contain;"
+                    src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
+                    loading="eager"
+                    fetchpriority="low"
+                    decoding="async" />
 
                 <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
                     <div>
@@ -1182,13 +1185,12 @@
                 <img
                     id="imageresource_${product.id}"
                     imgId="${product.id}"
-                    class="lazyload img-fluid mx-auto mt-3"
-                    style="
-                        width:90px;
-                        height:70px;
-                        object-fit:contain;
-                    "
-                    data-src="${url}optimum/products_images/${product.image}"
+                    class="img-fluid mx-auto mt-3"
+                    style="width:90px;height:70px;object-fit:contain;"
+                    src="${url}optimum/products_images/${product.image}"
+                    loading="eager"
+                    fetchpriority="low"
+                    decoding="async"
                 />
 
 

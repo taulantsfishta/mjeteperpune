@@ -285,8 +285,107 @@ class Products extends CI_Controller
             $data = array('upload_data' => $this->upload->data());
             $data['status'] = 1;
             $data['image'] = $data['upload_data']['file_name'];
+            // ===== GENERATE PRODUCT THUMBNAIL =====
+
+            $uploadData = $data['upload_data'];
+
+            $thumbPath = FCPATH . 'optimum/products_images/thumbs/';
+
+            if (!is_dir($thumbPath)) {
+                mkdir($thumbPath, 0755, true);
+            }
+
+            if (is_dir($thumbPath) && is_writable($thumbPath)) {
+
+                $this->load->library('image_lib');
+
+                $thumbConfig = array(
+                    'image_library'  => 'gd2',
+                    'source_image'   => $uploadData['full_path'],
+                    'new_image'      => $thumbPath . $uploadData['file_name'],
+                    'maintain_ratio' => TRUE,
+                    'width'          => 180,
+                    'height'         => 140,
+                    'quality'        => '75%',
+                    'create_thumb'   => FALSE
+                );
+
+                $this->image_lib->clear();
+                $this->image_lib->initialize($thumbConfig);
+
+                if (!$this->image_lib->resize()) {
+                    log_message('error', 'Thumbnail error: ' .
+                        $this->image_lib->display_errors('', ''));
+                }
+            } else {
+                log_message('error', 'Thumbnail directory is not writable: ' . $thumbPath);
+            }
         }
         return $data;
+    }
+
+    public function generate_existing_thumbnails()
+    {
+        if ($this->session->userdata('role') !== 'admin') {
+            show_error('Access denied', 403);
+            return;
+        }
+
+        $sourcePath = FCPATH . 'optimum/products_images/';
+        $thumbPath  = $sourcePath . 'thumbs/';
+
+        if (!is_dir($thumbPath) && !mkdir($thumbPath, 0755, true)) {
+            show_error('Cannot create thumbnail directory');
+            return;
+        }
+
+        $this->load->library('image_lib');
+
+        $files = glob($sourcePath . '*.{jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF}', GLOB_BRACE);
+
+        $created = 0;
+        $skipped = 0;
+        $failed = 0;
+
+        foreach ($files as $file) {
+
+            $fileName = basename($file);
+            $destination = $thumbPath . $fileName;
+
+            if (file_exists($destination)) {
+                $skipped++;
+                continue;
+            }
+
+            $config = [
+                'image_library'  => 'gd2',
+                'source_image'   => $file,
+                'new_image'      => $destination,
+                'maintain_ratio' => TRUE,
+                'width'          => 180,
+                'height'         => 140,
+                'quality'        => '75%',
+                'create_thumb'   => FALSE
+            ];
+
+            $this->image_lib->clear();
+            $this->image_lib->initialize($config);
+
+            if ($this->image_lib->resize()) {
+                $created++;
+            } else {
+                $failed++;
+                log_message(
+                    'error',
+                    'Thumbnail failed: ' . $fileName . ' - ' .
+                        $this->image_lib->display_errors('', '')
+                );
+            }
+        }
+
+        echo 'Created: ' . $created .
+            ' | Skipped: ' . $skipped .
+            ' | Failed: ' . $failed;
     }
 
     private function uploadImageOfEditedProduct($product)

@@ -614,9 +614,10 @@
                     id="imageresource_<?php echo $key; ?>"
                     imgId="<?php echo $key; ?>"
                     style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
-                    src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
+                    src="<?php echo base_url(); ?>optimum/products_images/thumbs/<?php echo $value['image']; ?>"
+                    data-original="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
+                    onerror="this.onerror=null;this.src=this.dataset.original;"
                     loading="lazy"
-                    decoding="async"
                     decoding="async"
                     class="img-fluid" />
                 <div class="card-body">
@@ -1384,9 +1385,10 @@
     id="imageresource_${product.id}"
     imgId="${product.id}"
     style="margin-left:auto;margin-right:auto;display:block;width:90px;height:70px;"
-    src="${url}optimum/products_images/${product.image}"
+    src="${url}optimum/products_images/thumbs/${product.image}"
+data-original="${url}optimum/products_images/${product.image}"
+onerror="this.onerror=null;this.src=this.dataset.original;"
 loading="lazy"
-decoding="async"
     decoding="async"
     class="img-fluid"
 />
@@ -3047,7 +3049,10 @@ decoding="async"
             const modalImg = modalEl.querySelector(".modal-body img");
             if (!modalImg) return;
 
-            const imageUrl = el.getAttribute("data-src") || el.getAttribute("src");
+            const imageUrl =
+                el.getAttribute("data-original") ||
+                el.getAttribute("src") ||
+                el.getAttribute("data-src");
 
             if (!imageUrl) return;
 

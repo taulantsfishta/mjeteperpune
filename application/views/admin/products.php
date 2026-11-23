@@ -427,7 +427,9 @@
                     imgId="<?php echo $value['id']; ?>"
                     class="img-fluid mx-auto mt-3"
                     style="width:90px;height:70px;object-fit:contain;"
-                    src="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
+                    src="<?php echo base_url(); ?>optimum/products_images/thumbs/<?php echo $value['image']; ?>"
+                    data-original="<?php echo base_url(); ?>optimum/products_images/<?php echo $value['image']; ?>"
+                    onerror="this.onerror=null;this.src=this.dataset.original;"
                     loading="lazy"
                     decoding="async"
                     decoding="async" />
@@ -1187,7 +1189,9 @@
                     imgId="${product.id}"
                     class="img-fluid mx-auto mt-3"
                     style="width:90px;height:70px;object-fit:contain;"
-                    src="${url}optimum/products_images/${product.image}"
+src="${url}optimum/products_images/thumbs/${product.image}"
+data-original="${url}optimum/products_images/${product.image}"
+onerror="this.onerror=null;this.src=this.dataset.original;"
                     loading="lazy"
                     decoding="async"
                     decoding="async"
@@ -2233,7 +2237,10 @@
             const modalImg = modalEl.querySelector(".modal-body img");
             if (!modalImg) return;
 
-            const imageUrl = el.getAttribute("data-src") || el.getAttribute("src");
+            const imageUrl =
+                el.getAttribute("data-original") ||
+                el.getAttribute("src") ||
+                el.getAttribute("data-src");
 
             if (!imageUrl) return;
 
@@ -2612,7 +2619,10 @@
             const el = e.target.closest('img[id^="imageresource_"]');
             if (!el) return;
 
-            const src = el.getAttribute("data-src") || el.getAttribute("src");
+            const src =
+                el.getAttribute("data-original") ||
+                el.getAttribute("src") ||
+                el.getAttribute("data-src");
             if (!src) return;
 
             const modalImg = document.getElementById("imagemodal_img");

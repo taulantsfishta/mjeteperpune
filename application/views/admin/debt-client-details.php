@@ -118,7 +118,13 @@ $clientId = (int)$client['id'];
 
                     <div class="form-group">
                         <label>Shuma</label>
-                        <input type="number" name="amount" class="form-control" required>
+                        <input
+                            type="number"
+                            name="amount"
+                            class="form-control"
+                            min="0.01"
+                            step="0.01"
+                            required>
                     </div>
 
                     <div class="form-group">
@@ -192,12 +198,12 @@ $clientId = (int)$client['id'];
         });
     });
 
-    // Ndal ndryshimin e numrit me scroll të mausit
-    document.querySelectorAll('input[type="number"]').forEach(input => {
+    // Ndal ndryshimin e shumes me rroten e mausit
+    document.querySelectorAll('input[name="amount"]').forEach(input => {
         input.addEventListener('wheel', function(e) {
-            this.blur();
+            e.preventDefault();
         }, {
-            passive: true
+            passive: false
         });
     });
 </script>
